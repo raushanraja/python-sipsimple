@@ -1497,7 +1497,7 @@ cdef class TTYDemodulator:
             sample_rate = self.mixer.sample_rate
 
             if self._was_started:
-                raise SIPCoreError("This TTYDetector was already started once")
+                raise SIPCoreError("This TTYDemodulator was already started once")
             pool = ua.create_memory_pool(pool_name, 4096, 4096)
             self._pool = pool
             try:
