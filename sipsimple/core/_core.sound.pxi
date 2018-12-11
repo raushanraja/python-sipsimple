@@ -1486,9 +1486,9 @@ cdef class TTYDemodulator:
         cdef void * user_data = <void *>self
         ua = _get_ua()
 
-        '''
         with nogil:
             status = pj_mutex_lock(lock)
+        '''
         if status != 0:
             raise PJSIPError("failed to acquire lock", status)
         try:
@@ -1529,6 +1529,8 @@ cdef class TTYDemodulator:
             with nogil:
                 pj_mutex_unlock(lock)
         '''
+        with nogil:
+            pj_mutex_unlock(lock)
 
     def get_data_from_mem(self):
         cdef size_t num_bytes
