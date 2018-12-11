@@ -1484,9 +1484,9 @@ cdef class TTYDemodulator:
         cdef char* c_pool_name
         cdef PJSIPUA ua
         cdef void * user_data = <void *>self
-        '''
         ua = _get_ua()
 
+        '''
         with nogil:
             status = pj_mutex_lock(lock)
         if status != 0:
