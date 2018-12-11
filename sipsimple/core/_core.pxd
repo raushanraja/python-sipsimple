@@ -2086,6 +2086,7 @@ cdef class TTYDemodulator(object):
     cdef OBL obl
     cdef readonly AudioMixer mixer
     cdef char buffer[1024]
+    cdef object callback_func
 
     # private methods
     cdef PJSIPUA _check_ua(self)
