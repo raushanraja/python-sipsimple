@@ -577,7 +577,7 @@ class TTYToneDemodulator(object):
             # There is still a race condition here in that the directory can be removed
             # before the PJSIP opens the file. There's nothing that can be done about
             # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
-            self._tty_demodulator = TTYDemodulator(self.mixer, self.room_number, self.on_received_char)
+            self._tty_demodulator = TTYDemodulator(self.mixer, self.room_number, self.on_received_char, self.trace)
             self.trace("TTYToneDemodulator start 1")
             self._tty_demodulator.start()
             self.trace("TTYToneDemodulator start done")

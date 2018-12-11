@@ -1433,7 +1433,7 @@ cdef class TTYDemodulator:
         oblObj = <object>&self.obl
         #tty_demod_dict[oblObj] = self
 
-    def __init__(self, AudioMixer mixer, room_number, callback_func, trace_fun):
+    def __init__(self, AudioMixer mixer, room_number, callback_func, trace_func):
         if mixer is None:
             raise ValueError("mixer argument may not be None")
         if callback_func is None:
