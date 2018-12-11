@@ -568,19 +568,20 @@ class TTYToneDemodulator(object):
         # before the PJSIP opens the file. There's nothing that can be done about
         # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
         self._tty_demodulator = TTYDemodulator(self.mixer, self.room_number, self.on_received_char)
-        self._tty_demodulator.start()
-        notification_center = NotificationCenter()
-        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
-                                                                                                            old_consumer_slot=None, new_consumer_slot=self._tty_demodulator.slot))
+        #self._tty_demodulator.start()
+        #notification_center = NotificationCenter()
+        #notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+        #                                                                                                    old_consumer_slot=None, new_consumer_slot=self._tty_demodulator.slot))
 
     def stop(self):
-        old_slot = self.consumer_slot
-        self._tty_demodulator.stop()
+        #old_slot = self.consumer_slot
+        #self._tty_demodulator.stop()
         self._tty_demodulator = None
-        notification_center = NotificationCenter()
-        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
-                                                                                                            old_consumer_slot=old_slot,
-                                                                                                            new_consumer_slot=None))
+        #notification_center = NotificationCenter()
+        #notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+        #                                                                                                    old_consumer_slot=old_slot,
+        #                                                                                           new_consumer_slot=None))
+
     def on_received_char(self, char_data):
         notification_center = NotificationCenter()
         notification_center.post_notification('TTYReceivedChar', sender=self, data=NotificationData(room_number=self.room_number,
