@@ -1482,7 +1482,8 @@ cdef class TTYDemodulator:
             self.callback_func(c_data)
 
     def say_hello(self):
-        self.trace("say_hello")
+        self.trace("say_hello 1")
+        self.trace("say_hello 2")
 
 
     def start(self):
