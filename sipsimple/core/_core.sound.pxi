@@ -1479,10 +1479,11 @@ cdef class TTYDemodulator:
     def say_hello(self):
         cdef int num_bytes
         cdef object pyBuf
-        cdef object n = <object>num_bytes
-        self.trace("{} num  bytes".format(n))
+        cdef object n
         num_bytes = pjmedia_mem_capture_get_size(self._port)
         if num_bytes > 0:
+            n = <object>num_bytes
+            self.trace("{} num  bytes".format(n))
             pyBuf = MemBuf_init(self.buffer, num_bytes)
             self.output_file.write(pyBuf)
 
