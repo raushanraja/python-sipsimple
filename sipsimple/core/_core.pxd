@@ -2094,6 +2094,7 @@ cdef class TTYDemodulator(object):
     cdef PJSIPUA _check_ua(self)
     cdef int _stop(self, PJSIPUA ua) except -1
     cdef on_callback(self, int event, int data)
+    cdef int get_data_from_mem(self)
 
 cdef class TTYModulator(object):
     # attributes
