@@ -1419,7 +1419,8 @@ cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     cdef object myObj = <object>usr_data
     if myObj is not None:
         #myObj.get_data_from_mem()
-        myObj.say_hello()
+        with gil:
+            myObj.say_hello()
         return 0
 
 cdef class TTYDemodulator:
