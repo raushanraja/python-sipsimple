@@ -1475,8 +1475,6 @@ cdef class TTYDemodulator:
             self.callback_func(c_data)
 
     def start(self):
-        pass
-        '''
         cdef int sample_rate
         cdef int status
         cdef pj_mutex_t *lock = self._lock
@@ -1486,7 +1484,7 @@ cdef class TTYDemodulator:
         cdef char* c_pool_name
         cdef PJSIPUA ua
         #cdef void * user_data = <void *>self
-
+        '''
         ua = _get_ua()
 
         with nogil:
