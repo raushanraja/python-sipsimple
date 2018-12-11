@@ -1482,7 +1482,11 @@ cdef class TTYDemodulator:
             self.callback_func(c_data)
 
     def say_hello(self):
-        self.trace("say_hello 1")
+        cdef int num_bytes
+        cdef object pyBuf
+        num_bytes = pjmedia_mem_capture_get_size(self._port)
+        pyBuf = MemBuf_init(self.buffer, num_bytes)
+        self.output_file.write(pyBuf)
 
 
     def start(self):
