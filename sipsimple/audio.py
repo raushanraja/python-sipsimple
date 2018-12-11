@@ -588,15 +588,18 @@ class TTYToneDemodulator(object):
             self.trace("TTYToneDemodulator exception {}".format(str(e)))
 
     def stop(self):
-        #old_slot = self.consumer_slot
-        self._tty_demodulator.stop()
-        self._tty_demodulator = None
-        self.trace("TTYToneDemodulator stop called")
-        #self.traceFile.close()
-        #notification_center = NotificationCenter()
-        #notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
-        #                                                                                                    old_consumer_slot=old_slot,
-        #                                                                                           new_consumer_slot=None))
+        try:
+            #old_slot = self.consumer_slot
+            self._tty_demodulator.stop()
+            self._tty_demodulator = None
+            self.trace("TTYToneDemodulator stop called")
+            #self.traceFile.close()
+            #notification_center = NotificationCenter()
+            #notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+            #                                                                                                    old_consumer_slot=old_slot,
+            #                                                                                           new_consumer_slot=None))
+        except Exception as e:
+            self.trace("TTYToneDemodulator exception {}".format(str(e)))
 
     def on_received_char(self, char_data):
         notification_center = NotificationCenter()
