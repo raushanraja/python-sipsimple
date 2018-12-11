@@ -1480,8 +1480,7 @@ cdef class TTYDemodulator:
             self.callback_func(c_data)
 
     def say_hello(self):
-        #self.trace("say_hello")
-        pass
+        self.trace("say_hello")
 
 
     def start(self):
@@ -1496,7 +1495,7 @@ cdef class TTYDemodulator:
 
         cdef void * user_data = <void *>self
         cdef object myObj = <object>user_data
-        myObj.say_hello()
+        #myObj.say_hello()
         #myObj.get_data_from_mem()
         ua = _get_ua()
 
