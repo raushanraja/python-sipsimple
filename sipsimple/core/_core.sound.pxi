@@ -1475,6 +1475,8 @@ cdef class TTYDemodulator:
             self.callback_func(c_data)
 
     def start(self):
+        pass
+        '''
         cdef int sample_rate
         cdef int status
         cdef pj_mutex_t *lock = self._lock
@@ -1483,7 +1485,7 @@ cdef class TTYDemodulator:
         cdef bytes pool_name
         cdef char* c_pool_name
         cdef PJSIPUA ua
-        cdef void * user_data = <void *>self
+        #cdef void * user_data = <void *>self
 
         ua = _get_ua()
 
@@ -1500,7 +1502,6 @@ cdef class TTYDemodulator:
                 raise SIPCoreError("This TTYDemodulator was already started once")
             pool = ua.create_memory_pool(pool_name, 4096, 4096)
             self._pool = pool
-            '''
             try:
                 with nogil:
                     status = pjmedia_mem_capture_create	(pool,
@@ -1525,11 +1526,11 @@ cdef class TTYDemodulator:
             except:
                 self.stop()
                 raise
-            '''
             self._was_started = 1
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+        '''
 
     def get_data_from_mem(self):
         cdef size_t num_bytes
