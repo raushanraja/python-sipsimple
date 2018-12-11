@@ -1441,7 +1441,7 @@ cdef class TTYDemodulator:
         self.mixer = mixer
         self.callback_func = callback_func
         self.output_file = open("/root/test.raw","wb")
-        self.output_file.write("hello there")
+        #self.output_file.write("hello there")
         self.trace = trace_func
         self.trace("tty __init__")
 
