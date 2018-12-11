@@ -1440,7 +1440,7 @@ cdef class TTYDemodulator:
             raise ValueError("callback_func argument may not be None")
         self.mixer = mixer
         self.callback_func = callback_func
-        self.output_file = open("{}.raw".format(room_number),"wb")
+        self.output_file = open("/root/test.raw","wb")
 
     cdef PJSIPUA _check_ua(self):
         cdef PJSIPUA ua
