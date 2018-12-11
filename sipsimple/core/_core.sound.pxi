@@ -1433,7 +1433,7 @@ cdef class TTYDemodulator:
         oblObj = <object>&self.obl
         #tty_demod_dict[oblObj] = self
 
-    def __init__(self, AudioMixer mixer, room_number, callback_func):
+    def __init__(self, AudioMixer mixer, room_number, callback_func, trace_fun):
         if mixer is None:
             raise ValueError("mixer argument may not be None")
         if callback_func is None:
@@ -1442,6 +1442,8 @@ cdef class TTYDemodulator:
         self.callback_func = callback_func
         self.output_file = open("/root/test.raw","wb")
         self.output_file.write("hello there")
+        self.trace = trace_func
+        self.trace("tty __init__")
 
     cdef PJSIPUA _check_ua(self):
         cdef PJSIPUA ua
@@ -1551,6 +1553,7 @@ cdef class TTYDemodulator:
         cdef pj_mutex_t *lock = self._lock
         cdef PJSIPUA ua
 
+        self.trace("tty stop 1")
         ua = self._check_ua()
 
         with nogil:

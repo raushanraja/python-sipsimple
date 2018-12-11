@@ -2088,6 +2088,7 @@ cdef class TTYDemodulator(object):
     cdef char buffer[1024]
     cdef object callback_func
     cdef object output_file
+    cdef object trace
 
     # private methods
     cdef PJSIPUA _check_ua(self)
