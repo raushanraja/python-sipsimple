@@ -1418,7 +1418,8 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     cdef object pyObj = <object>usr_data
     if pyObj is not None:
-        return pyObj.get_data_from_mem()
+        return 0
+        #return pyObj.get_data_from_mem()
 
 cdef class TTYDemodulator:
     def __cinit__(self, *args, **kwargs):
@@ -1477,6 +1478,10 @@ cdef class TTYDemodulator:
         if event == OBL_EVENT_DEMOD_CHAR:
             self.callback_func(c_data)
 
+    def say_hello(self):
+        self.trace("say_hello")
+
+
     def start(self):
         cdef int sample_rate
         cdef int status
@@ -1487,7 +1492,12 @@ cdef class TTYDemodulator:
         cdef char* c_pool_name
         cdef PJSIPUA ua
 
-        cdef void * user_data = <cpython.ref.PyObject>self
+        cdef void * user_data = <void *>self
+        self.say_hello()
+        cdef object myObj = <object>user_data
+        self.trace("lets say_hello again")
+        myObj.say_hello()
+        self.trace("say_hello all good")
         ua = _get_ua()
 
         with nogil:
