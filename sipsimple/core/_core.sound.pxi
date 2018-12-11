@@ -1408,7 +1408,7 @@ cdef MemBuf MemBuf_init(const void *p, size_t l) with gil:
 
 cdef int TTYDemodulatorCallback(void* p_obl, int event, int data) with gil:
     cdef OBL * obl = p_obl
-    cdef void * user_data = obl->user_data
+    cdef void * user_data = obl.user_data
     cdef object ttyDemodObj = <object>user_data
     ttyDemodObj.on_callback(event, data)
 
