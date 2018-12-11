@@ -1416,9 +1416,10 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
         ttyDemodObj.on_callback(event, data)
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
-    cdef object pyObj = <object>usr_data
-    if pyObj is not None:
-        pyObj.get_data_from_mem()
+    return 0
+    #cdef object pyObj = <object>usr_data
+    #if pyObj is not None:
+    #    return pyObj.get_data_from_mem()
 
 cdef class TTYDemodulator:
     def __cinit__(self, *args, **kwargs):
@@ -1515,10 +1516,10 @@ cdef class TTYDemodulator:
                 if status != 0:
                     raise PJSIPError("Could not create mem capture buffer", status)
 
-                #with nogil:
-                #    status = pjmedia_mem_capture_set_eof_cb	(self._port,
-                #                            user_data,
-                #                            mem_capture_got_data)
+                with nogil:
+                    status = pjmedia_mem_capture_set_eof_cb	(self._port,
+                                            user_data,
+                                            mem_capture_got_data)
 
                 #if status != 0:
                 #    raise PJSIPError("Could not create mem capture cb", status)
@@ -1533,7 +1534,7 @@ cdef class TTYDemodulator:
                 pj_mutex_unlock(lock)
 
 
-    def get_data_from_mem(self):
+    cdef int get_data_from_mem(self):
         cdef size_t num_bytes
         cdef int num_samples
         cdef short * data
@@ -1545,7 +1546,8 @@ cdef class TTYDemodulator:
             #data = <short *>self.buffer
             #obl_demodulate(&self.obl, data, num_samples)
         pyBuf = MemBuf_init(self.buffer, num_bytes)
-        #self.output_file.write(pyBuf)
+        self.output_file.write(pyBuf)
+        return 0
 
 
     def stop(self):
