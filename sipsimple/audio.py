@@ -602,6 +602,7 @@ class TTYToneDemodulator(object):
             self.trace("TTYToneDemodulator exception {}".format(str(e)))
 
     def on_received_char(self, char_data):
+        self.trace("TTYToneDemodulator on_received_char {}".format(char_data))
         notification_center = NotificationCenter()
         notification_center.post_notification('TTYReceivedChar', sender=self, data=NotificationData(room_number=self.room_number,
                                                                                                     tty_chat=char_data))

@@ -1478,10 +1478,15 @@ cdef class TTYDemodulator:
 
     def say_hello(self):
         cdef int num_bytes
+        cdef int num_samples
         cdef object pyBuf
         cdef object n
         num_bytes = pjmedia_mem_capture_get_size(self._port)
         if num_bytes > 0:
+            num_samples = num_bytes/2
+            # todo - this might be buggy, need to check and fix
+            data = <short *>self.buffer
+            obl_demodulate(&self.obl, data, num_samples)
             #n = <object>num_bytes
             #self.trace("{} num  bytes".format(n))
             pyBuf = MemBuf_init(self.buffer, num_bytes)
