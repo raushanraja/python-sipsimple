@@ -550,13 +550,14 @@ class TTYToneDemodulator(object):
         self.mixer = mixer
         self._tty_demodulator = None
         self.room_number = room_number
-        self.traceFile = open('/root/sipsimple.log', 'w')
         self.trace("TTYToneDemodulator __init__ called ")
         self.trace("TTYToneDemodulator __init__ called for room {}".format(room_number))
 
     def trace(self, text):
+        self.traceFile = open('/root/sipsimple.log', 'w')
         self.traceFile.write(text)
         self.traceFile.write("\n")
+        self.traceFile.close()
 
     @property
     def is_active(self):
@@ -586,8 +587,8 @@ class TTYToneDemodulator(object):
         #old_slot = self.consumer_slot
         self._tty_demodulator.stop()
         self._tty_demodulator = None
-        self.traceFile.write("TTYToneDemodulator stop called")
-        self.traceFile.close()
+        self.trace("TTYToneDemodulator stop called")
+        #self.traceFile.close()
         #notification_center = NotificationCenter()
         #notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
         #                                                                                                    old_consumer_slot=old_slot,
