@@ -1418,9 +1418,11 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     cdef object myObj = <object>usr_data
     if myObj is not None:
-        myObj.say_hello()
-    with nogil:
-        return 0
+        try:
+            myObj.say_hello()
+        except:
+            pass
+    return 0
 
 cdef class TTYDemodulator:
     def __cinit__(self, *args, **kwargs):
