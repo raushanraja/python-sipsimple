@@ -2114,7 +2114,7 @@ cdef class TTYModulator(object):
     cdef pjmedia_port *_port
     cdef OBL obl
     cdef readonly AudioMixer mixer
-    cdef char buffer[1024]
+    cdef char buffer[4096]
 
     # private methods
     cdef PJSIPUA _check_ua(self)

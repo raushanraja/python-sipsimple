@@ -1703,7 +1703,7 @@ cdef class TTYModulator:
             try:
                 with nogil:
                     status = pjmedia_mem_player_create(pool,
-                                                        self.buffer, 1024,
+                                                        self.buffer, 4096,
                                                         sample_rate, 1,
                                                         sample_rate / 50, 16,
                                                         0,
