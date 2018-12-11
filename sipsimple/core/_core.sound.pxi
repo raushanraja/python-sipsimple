@@ -1429,7 +1429,7 @@ cdef class TTYDemodulator:
             raise PJSIPError("failed to create lock", status)
 
         self._slot = -1
-        #obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
+        obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
         #oblObj = <object>&self.obl
         #tty_demod_dict[oblObj] = self
 
