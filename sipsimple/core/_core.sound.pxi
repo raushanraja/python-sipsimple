@@ -1574,16 +1574,23 @@ cdef class TTYDemodulator:
         self.trace("tty stop 7")
 
     cdef int _stop(self, PJSIPUA ua) except -1:
+        self.trace("tty _stop 1")
         cdef pjmedia_port *port = self._port
+        self.trace("tty _stop 2")
 
         if self._slot != -1:
+            self.trace("tty _stop 3")
             self.mixer._remove_port(ua, self._slot)
+            self.trace("tty _stop 4")
             self._slot = -1
         if self._port != NULL:
+            self.trace("tty _stop 5")
             with nogil:
                 pjmedia_port_destroy(port)
             self._port = NULL
+        self.trace("tty _stop 6")
         ua.release_memory_pool(self._pool)
+        self.trace("tty _stop 7")
         self._pool = NULL
         return 0
 
