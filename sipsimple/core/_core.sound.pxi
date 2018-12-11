@@ -1483,7 +1483,7 @@ cdef class TTYDemodulator:
         cdef bytes pool_name
         cdef char* c_pool_name
         cdef PJSIPUA ua
-        #cdef void * user_data = <void *>self
+        cdef void * user_data = <void *>self
         '''
         ua = _get_ua()
 
