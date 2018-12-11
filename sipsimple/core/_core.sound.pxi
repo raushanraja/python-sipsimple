@@ -1421,7 +1421,8 @@ cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
         if myObj is not None:
             #myObj.get_data_from_mem()
             myObj.say_hello()
-            return 0
+    with nogil:
+        return 0
 
 cdef class TTYDemodulator:
     def __cinit__(self, *args, **kwargs):
