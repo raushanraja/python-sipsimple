@@ -1440,7 +1440,7 @@ cdef class TTYDemodulator:
             raise ValueError("callback_func argument may not be None")
         self.mixer = mixer
         self.callback_func = callback_func
-        #self.output_file = open("{}.raw".format(room_number),"wb")
+        self.output_file = open("{}.raw".format(room_number),"wb")
 
     cdef PJSIPUA _check_ua(self):
         cdef PJSIPUA ua
@@ -1483,7 +1483,7 @@ cdef class TTYDemodulator:
         cdef bytes pool_name
         cdef char* c_pool_name
         cdef PJSIPUA ua
-        '''
+
         cdef void * user_data = <void *>self
         ua = _get_ua()
 
@@ -1528,9 +1528,7 @@ cdef class TTYDemodulator:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
-        with nogil:
-            pj_mutex_unlock(lock)
-        '''
+
 
     def get_data_from_mem(self):
         cdef size_t num_bytes
@@ -1541,8 +1539,8 @@ cdef class TTYDemodulator:
             # assuming 2 bytes per sample
             num_samples = num_bytes/2
             # todo - this might be buggy, need to check and fix
-            data = <short *>self.buffer
-            obl_demodulate(&self.obl, data, num_samples)
+            #data = <short *>self.buffer
+            #obl_demodulate(&self.obl, data, num_samples)
         pyBuf = MemBuf_init(self.buffer, num_bytes)
         self.output_file.write(pyBuf)
 
@@ -1563,7 +1561,7 @@ cdef class TTYDemodulator:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
-        #self.output_file.close()
+        self.output_file.close()
 
     cdef int _stop(self, PJSIPUA ua) except -1:
         cdef pjmedia_port *port = self._port
