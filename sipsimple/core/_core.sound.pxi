@@ -1494,11 +1494,9 @@ cdef class TTYDemodulator:
         cdef PJSIPUA ua
 
         cdef void * user_data = <void *>self
-        self.say_hello()
         cdef object myObj = <object>user_data
-        self.trace("lets say_hello again")
         myObj.say_hello()
-        self.trace("say_hello all good")
+        myObj.get_data_from_mem()
         ua = _get_ua()
 
         with nogil:
