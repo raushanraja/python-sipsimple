@@ -1417,12 +1417,12 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     #cdef object myObj = <object>usr_data
-    if myObj is not None:
-        try:
-            #myObj.say_hello()
-            (<object>usr_data)()
-        except:
-            pass
+    #if myObj is not None:
+    try:
+        #myObj.say_hello()
+        (<object>usr_data)()
+    except:
+        pass
     return 0
 
 cdef class TTYDemodulator:
