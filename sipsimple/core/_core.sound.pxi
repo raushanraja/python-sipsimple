@@ -1555,17 +1555,23 @@ cdef class TTYDemodulator:
 
         self.trace("tty stop 1")
         ua = self._check_ua()
+        self.trace("tty stop 2")
 
         with nogil:
             status = pj_mutex_lock(lock)
+        self.trace("tty stop 3")
         if status != 0:
+            self.trace("tty stop 4")
             raise PJSIPError("failed to acquire lock", status)
+        self.trace("tty stop 5")
         try:
             self._stop(ua)
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+        self.trace("tty stop 6")
         self.output_file.close()
+        self.trace("tty stop 7")
 
     cdef int _stop(self, PJSIPUA ua) except -1:
         cdef pjmedia_port *port = self._port
