@@ -17,7 +17,7 @@ from eventlib import coros
 from twisted.internet import reactor
 from zope.interface import Attribute, Interface, implements
 
-from sipsimple.core import MixerPort, RecordingWaveFile, SIPCoreError, WaveFile
+from sipsimple.core import MixerPort, RecordingWaveFile, SIPCoreError, WaveFile, TTYDemodulator, TTYModulator
 from sipsimple.threading import run_in_twisted_thread
 from sipsimple.threading.green import Command, run_in_waitable_green_thread
 
@@ -538,3 +538,98 @@ class WaveRecorder(object):
                                                                                                             old_consumer_slot=old_slot, new_consumer_slot=None))
 
 
+class TTYToneDemodulator(object):
+    """
+    An object capable of recording to a WAV file. It can be used as part of an
+    AudioBridge as it implements the IAudioPort interface.
+    """
+
+    implements(IAudioPort)
+
+    def __init__(self, mixer, room_number):
+        self.mixer = mixer
+        self._tty_demodulator = None
+        self.room_number = room_number
+
+    @property
+    def is_active(self):
+        return bool(self._tty_demodulator and self._tty_demodulator.is_active)
+
+    @property
+    def consumer_slot(self):
+        return self._tty_demodulator.slot if self._tty_demodulator else None
+
+    @property
+    def producer_slot(self):
+        return None
+
+    def start(self):
+        # There is still a race condition here in that the directory can be removed
+        # before the PJSIP opens the file. There's nothing that can be done about
+        # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
+        self._tty_demodulator = TTYDemodulator(self.mixer, self.room_number, self.on_received_char)
+        self._tty_demodulator.start()
+        notification_center = NotificationCenter()
+        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                            old_consumer_slot=None, new_consumer_slot=self._tty_demodulator.slot))
+
+    def stop(self):
+        old_slot = self.consumer_slot
+        self._tty_demodulator.stop()
+        self._tty_demodulator = None
+        notification_center = NotificationCenter()
+        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                            old_consumer_slot=old_slot,
+                                                                                                            new_consumer_slot=None))
+    def on_received_char(self, char_data):
+        notification_center = NotificationCenter()
+        notification_center.post_notification('TTYReceivedChar', sender=self, data=NotificationData(room_number=self.room_number,
+                                                                                                    tty_chat=char_data))
+
+
+class TTYToneModulator(object):
+    """
+    An object capable of recording to a WAV file. It can be used as part of an
+    AudioBridge as it implements the IAudioPort interface.
+    """
+
+    implements(IAudioPort)
+
+    def __init__(self, mixer, room_number):
+        self.mixer = mixer
+        self._tty_modulator = None
+        self.room_number = room_number
+
+    @property
+    def is_active(self):
+        return bool(self._tty_modulator and self._tty_modulator.is_active)
+
+    @property
+    def consumer_slot(self):
+        return self._tty_modulator.slot if self._tty_modulator else None
+
+    @property
+    def producer_slot(self):
+        return None
+
+    def start(self):
+        # There is still a race condition here in that the directory can be removed
+        # before the PJSIP opens the file. There's nothing that can be done about
+        # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
+        self._tty_modulator = TTYModulator(self.mixer)
+        self._tty_modulator.start()
+        notification_center = NotificationCenter()
+        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                            old_consumer_slot=None, new_consumer_slot=self._tty_modulator.slot))
+
+    def stop(self):
+        old_slot = self.consumer_slot
+        self._tty_modulator.stop()
+        self._tty_modulator = None
+        notification_center = NotificationCenter()
+        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                            old_consumer_slot=old_slot,
+                                                                                                            new_consumer_slot=None))
+
+    def send_text(self, text):
+        self._tty_modulator.send_text(text)

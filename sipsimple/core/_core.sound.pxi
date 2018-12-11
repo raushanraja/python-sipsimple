@@ -1,6 +1,7 @@
 
 import sys
-
+from libc.string cimport memset
+from cpython.buffer cimport PyBuffer_FillInfo
 
 cdef class AudioMixer:
 
@@ -1380,3 +1381,393 @@ cdef int cb_play_wav_eof(pjmedia_port *port, void *user_data) with gil:
     # do not return PJ_SUCCESS because if you do pjsip will access the just deallocated port
     return 1
 
+# from https://stackoverflow.com/questions/28160359/how-to-wrap-a-c-pointer-and-length-in-a-new-style-buffer-object-in-cython
+cdef class MemBuf:
+    cdef const void *p
+    cdef size_t l
+
+    def __getbuffer__(self, Py_buffer *view, int flags):
+        PyBuffer_FillInfo(view, self, <void *>self.p, self.l, 1, flags)
+
+    def __releasebuffer__(self, Py_buffer *view):
+        pass
+
+    def __dealloc__(self):
+        pass
+
+# Call this instead of constructing a MemBuf directly.  The __cinit__
+# and __init__ methods can only take Python objects, so the real
+# constructor is here.  See:
+# https://mail.python.org/pipermail/cython-devel/2012-June/002734.html
+cdef MemBuf MemBuf_init(const void *p, size_t l):
+    cdef MemBuf ret = MemBuf()
+    ret.p = p
+    ret.l = l
+    return ret
+
+
+# in case the below has problems follow this
+# https://groups.google.com/forum/#!topic/cython-users/bP-2SxAwuNk
+
+cdef int TTYDemodulatorCallback(void* obl, int event, int data):
+    oblObj = <object>obl
+    if oblObj in tty_demod_dict:
+        ttyDemodObj = tty_demod_dict[oblObj]
+        ttyDemodObj.on_callback(event, data)
+
+cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
+    pyObj = <object>usr_data
+    if pyObj is not None:
+        pyObj.get_data_from_mem()
+
+cdef class TTYDemodulator:
+    def __cinit__(self, *args, **kwargs):
+        cdef int status
+
+        status = pj_mutex_create_recursive(_get_ua()._pjsip_endpoint._pool, "tty_demod_lock", &self._lock)
+        if status != 0:
+            raise PJSIPError("failed to create lock", status)
+
+        self._slot = -1
+        obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
+        oblObj = <object>&self.obl
+        tty_demod_dict[oblObj] = self
+
+    def __init__(self, AudioMixer mixer, room_number, callback_func):
+        if mixer is None:
+            raise ValueError("mixer argument may not be None")
+        if callback_func is None:
+            raise ValueError("callback_func argument may not be None")
+        self.mixer = mixer
+        self.callback_func = callback_func
+        self.output_file = open("{}.raw".format(room_number),"wb")
+
+    cdef PJSIPUA _check_ua(self):
+        cdef PJSIPUA ua
+        try:
+            ua = _get_ua()
+            return ua
+        except:
+            self._pool = NULL
+            self._port = NULL
+            self._slot = -1
+            return None
+
+    property is_active:
+
+        def __get__(self):
+            self._check_ua()
+            return self._slot != -1
+
+    property slot:
+
+        def __get__(self):
+            self._check_ua()
+            if self._slot == -1:
+                return None
+            else:
+                return self._slot
+
+    cdef on_callback(self, int event, int data):
+        cdef char c_data
+        c_data = data
+        if event == OBL_EVENT_DEMOD_CHAR:
+            self.callback_func(c_data)
+
+    def start(self):
+        cdef int sample_rate
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef pj_pool_t *pool
+        cdef pjmedia_port **port_address
+        cdef bytes pool_name
+        cdef char* c_pool_name
+        cdef PJSIPUA ua
+        cdef void * user_data = <void *>self
+
+        ua = _get_ua()
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            pool_name = b"TTYDemod_%d" % id(self)
+            port_address = &self._port
+            sample_rate = self.mixer.sample_rate
+
+            if self._was_started:
+                raise SIPCoreError("This TTYDetector was already started once")
+            pool = ua.create_memory_pool(pool_name, 4096, 4096)
+            self._pool = pool
+            try:
+                with nogil:
+                    status = pjmedia_mem_capture_create	(pool,
+                                        self.buffer, 1024,
+                                        sample_rate, 1,
+                                        sample_rate / 50, 16,
+                                        0,
+                                        port_address )
+
+                if status != 0:
+                    raise PJSIPError("Could not create mem capture buffer", status)
+
+                with nogil:
+                    status = pjmedia_mem_capture_set_eof_cb	(self._port,
+                                            user_data,
+                                            mem_capture_got_data)
+
+                if status != 0:
+                    raise PJSIPError("Could not create mem capture cb", status)
+
+                self._slot = self.mixer._add_port(ua, self._pool, self._port)
+            except:
+                self.stop()
+                raise
+            self._was_started = 1
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    def get_data_from_mem(self):
+        cdef size_t num_bytes
+        cdef int num_samples
+        cdef short * data
+        with nogil:
+            num_bytes = pjmedia_mem_capture_get_size(self._port)
+            # assuming 2 bytes per sample
+            num_samples = num_bytes/2
+            # todo - this might be buggy, need to check and fix
+            data = <short *>self.buffer
+            obl_demodulate(&self.obl, data, num_samples)
+        pyBuf = MemBuf_init(self.buffer, num_bytes)
+        self.output_file.write(pyBuf)
+
+
+    def stop(self):
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef PJSIPUA ua
+
+        ua = self._check_ua()
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            self._stop(ua)
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+        self.output_file.close()
+
+    cdef int _stop(self, PJSIPUA ua) except -1:
+        cdef pjmedia_port *port = self._port
+
+        if self._slot != -1:
+            self.mixer._remove_port(ua, self._slot)
+            self._slot = -1
+        if self._port != NULL:
+            with nogil:
+                pjmedia_port_destroy(port)
+            self._port = NULL
+        ua.release_memory_pool(self._pool)
+        self._pool = NULL
+        return 0
+
+    def __dealloc__(self):
+        cdef PJSIPUA ua
+        try:
+            ua = _get_ua()
+        except:
+            return
+        self._stop(ua)
+        oblObj = <object>&self.obl
+        if oblObj in tty_demod_dict:
+            del tty_demod_dict[oblObj]
+
+        if self._lock != NULL:
+            pj_mutex_destroy(self._lock)
+
+cdef int TTYMmodulatorPlayerCallback(pjmedia_port *port, void *usr_data):
+    modulatorObj = <object>usr_data
+    if modulatorObj is not None:
+        modulatorObj.player_needs_more_data()
+
+cdef class TTYModulator:
+    def __cinit__(self, *args, **kwargs):
+        cdef int status
+
+        status = pj_mutex_create_recursive(_get_ua()._pjsip_endpoint._pool, "tty_mod_lock", &self._lock)
+        if status != 0:
+            raise PJSIPError("failed to create lock", status)
+
+        self._slot = -1
+        # the callback here should never be called as we are modulating
+        obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
+        obl_set_tx_freq(&self.obl, 1358, 1728)
+
+    def __init__(self, AudioMixer mixer):
+        if mixer is None:
+            raise ValueError("mixer argument may not be None")
+        self.mixer = mixer
+        self.bytesToSend = []
+
+    cdef PJSIPUA _check_ua(self):
+        cdef PJSIPUA ua
+        try:
+            ua = _get_ua()
+            return ua
+        except:
+            self._pool = NULL
+            self._port = NULL
+            self._slot = -1
+            return None
+
+    property is_active:
+
+        def __get__(self):
+            self._check_ua()
+            return self._slot != -1
+
+    property slot:
+
+        def __get__(self):
+            self._check_ua()
+            if self._slot == -1:
+                return None
+            else:
+                return self._slot
+
+    def start(self):
+        cdef int sample_rate
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef pj_pool_t *pool
+        cdef pjmedia_port **port_address
+        cdef bytes pool_name
+        cdef char* c_pool_name
+        cdef PJSIPUA ua
+
+        ua = _get_ua()
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            pool_name = b"TTYMod_%d" % id(self)
+            port_address = &self._port
+            sample_rate = self.mixer.sample_rate
+
+            if self._was_started:
+                raise SIPCoreError("This TTYModulator was already started once")
+            pool = ua.create_memory_pool(pool_name, 4096, 4096)
+            self._pool = pool
+            try:
+                with nogil:
+                    status = pjmedia_mem_player_create(pool,
+                                                        self.buffer, 1024,
+                                                        sample_rate, 1,
+                                                        sample_rate / 50, 16,
+                                                        0,
+                                                        port_address)
+                if status != 0:
+                    raise PJSIPError("Could not create mem player", status)
+
+                with nogil:
+                    status = pjmedia_mem_player_set_eof_cb(self._port,
+                                                            <void *>self,
+                                                            TTYMmodulatorPlayerCallback)
+                if status != 0:
+                    raise PJSIPError("Could not create mem player", status)
+                self._slot = self.mixer._add_port(ua, self._pool, self._port)
+            except:
+                self.stop()
+                raise
+            self._was_started = 1
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    def player_needs_more_data(self):
+        memset(self.buffer, 1024, 0)
+        if len(self.bytesToSend) > 0:
+            i = 0
+            while i<1024 and len(self.bytesToSend) > 0:
+                ch = <char>self.bytesToSend.pop()
+                self.buffer[i] = ch
+                i = i + 1
+
+    def send_text(self, char * text):
+        cdef short buffer[1024]
+        cdef int n = 1
+        cdef short packet
+        cdef char * cData
+        cdef char byte1, byte2
+
+        obl_tx_queue(&self.obl, text)
+
+        data = ''
+        while n != -1:
+            memset(buffer, sizeof(buffer), 0)
+            n = obl_modulate(&self.obl, buffer, 1024)
+            for i in range(n):
+                packet = buffer[i]
+                cData = <char *>&packet
+                byte1 = cData[0]
+                byte2 = cData[1]
+                self.bytesToSend.append(byte1)
+                self.bytesToSend.append(byte2)
+                #this->sampleGenerated(byte1, byte2)
+            # this->samplesGenerated(buffer, n)
+        self.finished_modulation(data)
+
+    def finished_modulation(self, data):
+        pass
+
+    def stop(self):
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef PJSIPUA ua
+
+        ua = self._check_ua()
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            self._stop(ua)
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    cdef int _stop(self, PJSIPUA ua) except -1:
+        cdef pjmedia_port *port = self._port
+
+        if self._slot != -1:
+            self.mixer._remove_port(ua, self._slot)
+            self._slot = -1
+        if self._port != NULL:
+            with nogil:
+                pjmedia_port_destroy(port)
+            self._port = NULL
+        ua.release_memory_pool(self._pool)
+        self._pool = NULL
+        return 0
+
+    def __dealloc__(self):
+        cdef PJSIPUA ua
+        try:
+            ua = _get_ua()
+        except:
+            return
+        self._stop(ua)
+        oblObj = <object>&self.obl
+        if oblObj in tty_demod_dict:
+            del tty_demod_dict[oblObj]
+
+        if self._lock != NULL:
+            pj_mutex_destroy(self._lock)

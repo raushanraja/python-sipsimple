@@ -19,6 +19,83 @@ from cpython.string cimport PyString_FromString, PyString_FromStringAndSize, PyS
 cdef extern from "Python.h":
     object PyUnicode_FromString(const char *u)
 
+cdef extern from "../openbaudot/include/obl.h":
+
+    # constants
+    enum:
+        OBL_TEXT_BUF
+        OBL_LPF
+        OBL_BAUD_45
+        OBL_EVENT_DEMOD_CHAR
+
+    ctypedef struct OBL:
+        int  (*callback)(void* obl, int event, int data)
+        char   mod_buffer[OBL_TEXT_BUF]
+        char  *pmod_buffer_in
+        char  *pmod_buffer_out
+        int    mod_buffer_count
+        int    mod_qstate
+        int    mod_case
+        int    mod_chars_without_crlf
+        int	   mod_chars_without_case
+        int    mod_return_state
+        int    mod_baud
+        int    mod_samples_per_bit
+        int    mod_state
+        int    mod_baudot
+        int    mod_nbit
+        int    mod_bit
+        int    mod_sample
+        float  mod_phase
+        unsigned short mod_phase_q16
+        int    mod_one_amp
+        int    mod_zero_amp
+        float  w_one
+        float  w_zero
+        unsigned short w_one_q16
+        short w_zero_q16
+        int    mod_num_stop_bits
+        int    mod_num_stop_samples
+        int    mod_crlf
+        float  dem_one[2]
+        short  dem_one_q0[2]
+        float  dem_zero[2]
+        short  dem_zero_q0[2]
+        short  dem_lpf_in[OBL_LPF]
+        short *pdem_lpf_in
+        int    dem_lpf
+        short  dem_total_in[OBL_LPF]
+        short *pdem_total_in
+        int    dem_total
+        float  dem_ratio
+        int    dem_state
+        int    dem_min_sig_timeout
+        int    dem_baud
+        int    dem_baudot
+        int    dem_bit
+        int    dem_sample
+        int    dem_letters_figures
+        int	   autobaud_enabled
+        int    autobaud_state
+        int    autobaud_zerox
+        int    dem_dist_50[2]
+        int    dem_dist_47[2]
+        int    dem_dist_45[2]
+        int    dem_baud_est
+        int    top_state
+        int    top_timer
+        void*  user_data
+
+    void obl_init(OBL *obl, int baud, int (*callback)(void* obl, int event, int data)) nogil
+    void obl_reset(OBL *obl, int baud) nogil
+    void obl_set_speed(OBL *obl, int baud) nogil
+    int obl_modulate(OBL *obl, short *buffer, int samples) nogil
+    void obl_demodulate(OBL *obl, short *buffer, int samples) nogil
+    int obl_tx_queue(OBL *obl, const char* text) nogil
+    void obl_set_tx_freq(OBL *obl, float one_freq, float zero_freq) nogil
+
+
+
 
 # PJSIP imports
 
@@ -856,6 +933,38 @@ cdef extern from "pjmedia.h":
                                        unsigned int channel_count, unsigned int samples_per_frame,
                                        unsigned int bits_per_sample, unsigned int flags, int buff_size,
                                        pjmedia_port **p_port) nogil
+
+    # mem player
+    int pjmedia_mem_player_create( pj_pool_t *pool,
+					       const void *buffer,
+					       size_t size,
+					       unsigned clock_rate,
+					       unsigned channel_count,
+					       unsigned samples_per_frame,
+					       unsigned bits_per_sample,
+					       unsigned options,
+					       pjmedia_port **p_port ) nogil
+
+    int pjmedia_mem_player_set_eof_cb( pjmedia_port *port,
+ 			       void *user_data,
+ 			       int (*cb)(pjmedia_port *port, void *usr_data)) nogil
+
+    # mem capture
+    int pjmedia_mem_capture_create	(   pj_pool_t * 	pool,
+                                        void * 	buffer,
+                                        size_t 	size,
+                                        unsigned 	clock_rate,
+                                        unsigned 	channel_count,
+                                        unsigned 	samples_per_frame,
+                                        unsigned 	bits_per_sample,
+                                        unsigned 	options,
+                                        pjmedia_port ** 	p_port ) nogil
+
+    int pjmedia_mem_capture_set_eof_cb	(	pjmedia_port * 	port,
+                                            void * 	user_data,
+                                            int(*cb)(pjmedia_port *port, void *usr_data)) nogil
+
+    size_t pjmedia_mem_capture_get_size	(	pjmedia_port * 	port	) nogil
 
     # tone generator
     enum:
@@ -1966,6 +2075,37 @@ cdef class MixerPort(object):
 
 cdef int _AudioMixer_dealloc_handler(object obj) except -1
 cdef int cb_play_wav_eof(pjmedia_port *port, void *user_data) with gil
+
+cdef class TTYDemodulator(object):
+    # attributes
+    cdef int _slot
+    cdef int _was_started
+    cdef pj_mutex_t *_lock
+    cdef pj_pool_t *_pool
+    cdef pjmedia_port *_port
+    cdef OBL obl
+    cdef readonly AudioMixer mixer
+    cdef char buffer[1024]
+
+    # private methods
+    cdef PJSIPUA _check_ua(self)
+    cdef int _stop(self, PJSIPUA ua) except -1
+    cdef on_callback(self, int event, int data)
+
+cdef class TTYModulator(object):
+    # attributes
+    cdef int _slot
+    cdef int _was_started
+    cdef pj_mutex_t *_lock
+    cdef pj_pool_t *_pool
+    cdef pjmedia_port *_port
+    cdef OBL obl
+    cdef readonly AudioMixer mixer
+    cdef char buffer[1024]
+
+    # private methods
+    cdef PJSIPUA _check_ua(self)
+    cdef int _stop(self, PJSIPUA ua) except -1
 
 # core.video
 

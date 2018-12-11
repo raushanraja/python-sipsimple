@@ -1,6 +1,8 @@
 
 include "_core.error.pxi"
 include "_core.lib.pxi"
+
+cdef tty_demod_dict = {}
 include "_core.sound.pxi"
 include "_core.video.pxi"
 include "_core.util.pxi"
@@ -17,6 +19,16 @@ include "_core.referral.pxi"
 include "_core.sdp.pxi"
 include "_core.mediatransport.pxi"
 
+cdef extern from "../openbaudot/src/obl.c":
+    void obl_init(OBL *obl, int baud, int (*callback)(void* obl, int event, int data)) nogil
+    void obl_reset(OBL *obl, int baud) nogil
+    void obl_set_speed(OBL *obl, int baud) nogil
+    int obl_modulate(OBL *obl, short *buffer, int samples) nogil
+    void obl_demodulate(OBL *obl, short *buffer, int samples) nogil
+    int obl_tx_queue(OBL *obl, const char* text) nogil
+    void obl_set_tx_freq(OBL *obl, float one_freq, float zero_freq) nogil
+
+
 # constants
 
 PJ_VERSION = pj_get_version()
@@ -27,7 +39,7 @@ CORE_REVISION = 181
 
 __all__ = ["PJ_VERSION", "PJ_SVN_REVISION", "CORE_REVISION",
            "SIPCoreError", "PJSIPError", "PJSIPTLSError", "SIPCoreInvalidStateError",
-           "AudioMixer", "ToneGenerator", "RecordingWaveFile", "WaveFile", "MixerPort",
+           "AudioMixer", "ToneGenerator", "RecordingWaveFile", "WaveFile", "MixerPort", "TTYDetector", "TTYDemodulator",
            "VideoCamera", "FrameBufferVideoRenderer",
            "sip_status_messages",
            "BaseCredentials", "Credentials", "FrozenCredentials", "BaseSIPURI", "SIPURI", "FrozenSIPURI",
