@@ -1418,8 +1418,7 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     cdef object myObj = <object>usr_data
     if myObj is not None:
-        #myObj.get_data_from_mem()
-        myObj.say_hello()
+        myObj.get_data_from_mem()
     with nogil:
         return 0
 
@@ -1546,6 +1545,8 @@ cdef class TTYDemodulator:
 
 
     cdef int get_data_from_mem(self):
+        self.trace("inside get_data_from_mem")
+        self.trace("inside get_data_from_mem 1")
         return 0
         '''
         cdef size_t num_bytes
