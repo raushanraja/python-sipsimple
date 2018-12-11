@@ -1440,7 +1440,7 @@ cdef class TTYDemodulator:
             raise ValueError("callback_func argument may not be None")
         self.mixer = mixer
         self.callback_func = callback_func
-        self.output_file = open("{}.raw".format(room_number),"wb")
+        #self.output_file = open("{}.raw".format(room_number),"wb")
 
     cdef PJSIPUA _check_ua(self):
         cdef PJSIPUA ua
@@ -1500,6 +1500,7 @@ cdef class TTYDemodulator:
                 raise SIPCoreError("This TTYDemodulator was already started once")
             pool = ua.create_memory_pool(pool_name, 4096, 4096)
             self._pool = pool
+            '''
             try:
                 with nogil:
                     status = pjmedia_mem_capture_create	(pool,
@@ -1524,6 +1525,7 @@ cdef class TTYDemodulator:
             except:
                 self.stop()
                 raise
+            '''
             self._was_started = 1
         finally:
             with nogil:
@@ -1560,7 +1562,7 @@ cdef class TTYDemodulator:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
-        self.output_file.close()
+        #self.output_file.close()
 
     cdef int _stop(self, PJSIPUA ua) except -1:
         cdef pjmedia_port *port = self._port
