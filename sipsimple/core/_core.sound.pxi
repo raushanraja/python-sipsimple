@@ -1399,7 +1399,7 @@ cdef class MemBuf:
 # and __init__ methods can only take Python objects, so the real
 # constructor is here.  See:
 # https://mail.python.org/pipermail/cython-devel/2012-June/002734.html
-cdef MemBuf MemBuf_init(const void *p, size_t l):
+cdef MemBuf MemBuf_init(const void *p, size_t l) with gil:
     cdef MemBuf ret = MemBuf()
     ret.p = p
     ret.l = l
@@ -1482,11 +1482,16 @@ cdef class TTYDemodulator:
             self.callback_func(c_data)
 
     def say_hello(self):
+        self.trace("say_hello")
         cdef int num_bytes
         cdef object pyBuf
+        self.trace("say_hello 1")
         num_bytes = pjmedia_mem_capture_get_size(self._port)
+        self.trace("say_hello 2")
         pyBuf = MemBuf_init(self.buffer, num_bytes)
+        self.trace("say_hello 3")
         self.output_file.write(pyBuf)
+        self.trace("say_hello 4")
 
 
     def start(self):
@@ -1498,10 +1503,8 @@ cdef class TTYDemodulator:
         cdef bytes pool_name
         cdef char* c_pool_name
         cdef PJSIPUA ua
-        self.trace("test say hello")
         cdef void * user_data = <void *>self
         cdef myObj = <object>user_data
-        myObj.say_hello()
         ua = _get_ua()
 
         with nogil:
