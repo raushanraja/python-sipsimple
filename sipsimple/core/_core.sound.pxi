@@ -1415,7 +1415,7 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
         ttyDemodObj = tty_demod_dict[oblObj]
         ttyDemodObj.on_callback(event, data)
 
-cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
+cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
     cdef object myObj = <object>usr_data
     if myObj is not None:
         try:
