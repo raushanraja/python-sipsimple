@@ -1418,7 +1418,7 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     cdef object myObj = <object>usr_data
     if myObj is not None:
-        myObj.get_data_from_mem()
+        myObj.say_hello()
     with nogil:
         return 0
 
@@ -1480,7 +1480,8 @@ cdef class TTYDemodulator:
             self.callback_func(c_data)
 
     def say_hello(self):
-        self.trace("say_hello")
+        #self.trace("say_hello")
+        pass
 
 
     def start(self):
@@ -1496,7 +1497,7 @@ cdef class TTYDemodulator:
         cdef void * user_data = <void *>self
         cdef object myObj = <object>user_data
         myObj.say_hello()
-        myObj.get_data_from_mem()
+        #myObj.get_data_from_mem()
         ua = _get_ua()
 
         with nogil:
