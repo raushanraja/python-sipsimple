@@ -1482,8 +1482,8 @@ cdef class TTYDemodulator:
         cdef object n
         num_bytes = pjmedia_mem_capture_get_size(self._port)
         if num_bytes > 0:
-            n = <object>num_bytes
-            self.trace("{} num  bytes".format(n))
+            #n = <object>num_bytes
+            #self.trace("{} num  bytes".format(n))
             pyBuf = MemBuf_init(self.buffer, num_bytes)
             self.output_file.write(pyBuf)
 
@@ -1517,7 +1517,7 @@ cdef class TTYDemodulator:
             try:
                 with nogil:
                     status = pjmedia_mem_capture_create	(pool,
-                                        self.buffer, 1024,
+                                        self.buffer, 4096,
                                         sample_rate, 1,
                                         sample_rate / 50, 16,
                                         0,
