@@ -551,8 +551,12 @@ class TTYToneDemodulator(object):
         self._tty_demodulator = None
         self.room_number = room_number
         self.traceFile = open('/root/sipsimple.log', 'w')
-        self.traceFile.write("TTYToneDemodulator __init__ called ")
-        self.traceFile.write("TTYToneDemodulator __init__ called for room {}".format(room_number))
+        self.trace("TTYToneDemodulator __init__ called ")
+        self.trace("TTYToneDemodulator __init__ called for room {}".format(room_number))
+
+    def trace(self, text):
+        self.traceFile.write(text)
+        self.traceFile.write("\n")
 
     @property
     def is_active(self):
@@ -567,11 +571,13 @@ class TTYToneDemodulator(object):
         return None
 
     def start(self):
+        self.trace("TTYToneDemodulator start")
         # There is still a race condition here in that the directory can be removed
         # before the PJSIP opens the file. There's nothing that can be done about
         # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
         self._tty_demodulator = TTYDemodulator(self.mixer, self.room_number, self.on_received_char)
         self._tty_demodulator.start()
+        self.trace("TTYToneDemodulator start done")
         #notification_center = NotificationCenter()
         #notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
         #                                                                                                    old_consumer_slot=None, new_consumer_slot=self._tty_demodulator.slot))
