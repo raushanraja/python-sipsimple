@@ -1383,9 +1383,6 @@ cdef int cb_play_wav_eof(pjmedia_port *port, void *user_data) with gil:
 
 # from https://stackoverflow.com/questions/28160359/how-to-wrap-a-c-pointer-and-length-in-a-new-style-buffer-object-in-cython
 cdef class MemBuf:
-    cdef const void *p
-    cdef size_t l
-
     def __getbuffer__(self, Py_buffer *view, int flags):
         PyBuffer_FillInfo(view, self, <void *>self.p, self.l, 1, flags)
 

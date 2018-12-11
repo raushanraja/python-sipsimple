@@ -2077,6 +2077,7 @@ cdef int _AudioMixer_dealloc_handler(object obj) except -1
 cdef int cb_play_wav_eof(pjmedia_port *port, void *user_data) with gil
 
 cdef class MemBuf:
+    # attributes
     cdef const void *p
     cdef size_t l
 
