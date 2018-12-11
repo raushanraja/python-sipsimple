@@ -1416,10 +1416,11 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
         ttyDemodObj.on_callback(event, data)
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
-    cdef object myObj = <object>usr_data
+    #cdef object myObj = <object>usr_data
     if myObj is not None:
         try:
-            myObj.say_hello()
+            #myObj.say_hello()
+            (<object>usr_data)()
         except:
             pass
     return 0
@@ -1483,7 +1484,6 @@ cdef class TTYDemodulator:
 
     def say_hello(self):
         self.trace("say_hello 1")
-        self.trace("say_hello 2")
 
 
     def start(self):
@@ -1496,10 +1496,13 @@ cdef class TTYDemodulator:
         cdef char* c_pool_name
         cdef PJSIPUA ua
 
-        cdef void * user_data = <void *>self
-        cdef object myObj = <object>user_data
+        cdef void * user_data = <void *>self.get_data_from_mem
+        cdef void * user_data1 = <void *>self.say_hello
+        (<object>user_data1)()
+        (<object>user_data)()
         #myObj.say_hello()
         #myObj.get_data_from_mem()
+        #myObj()
         ua = _get_ua()
 
         with nogil:
