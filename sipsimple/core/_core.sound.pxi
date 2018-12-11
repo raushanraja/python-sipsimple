@@ -1416,8 +1416,8 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
         ttyDemodObj.on_callback(event, data)
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
+    cdef object myObj = <object>usr_data
     with gil:
-        cdef object myObj = <object>usr_data
         if myObj is not None:
             #myObj.get_data_from_mem()
             myObj.say_hello()
