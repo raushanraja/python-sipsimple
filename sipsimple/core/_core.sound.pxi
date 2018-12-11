@@ -1406,11 +1406,10 @@ cdef MemBuf MemBuf_init(const void *p, size_t l) with gil:
 # in case the below has problems follow this
 # https://groups.google.com/forum/#!topic/cython-users/bP-2SxAwuNk
 
-cdef int TTYDemodulatorCallback(void* obl, int event, int data):
-    oblObj = <object>obl
-    if oblObj in tty_demod_dict:
-        ttyDemodObj = tty_demod_dict[oblObj]
-        ttyDemodObj.on_callback(event, data)
+cdef int TTYDemodulatorCallback(void* p_obl, int event, int data) with gil:
+    cdef OBL * obl = (OBL *)p_obl
+    cdef object ttyDemodObj = <object>obl->user_data
+    ttyDemodObj.on_callback(event, data)
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
     cdef object myObj = <object>usr_data
@@ -1431,8 +1430,7 @@ cdef class TTYDemodulator:
 
         self._slot = -1
         obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
-        oblObj = <object>&self.obl
-        #tty_demod_dict[oblObj] = self
+        self.obl.user_data = <void *>self
 
     def __init__(self, AudioMixer mixer, room_number, callback_func, trace_func):
         if mixer is None:
@@ -1471,7 +1469,7 @@ cdef class TTYDemodulator:
             else:
                 return self._slot
 
-    cdef on_callback(self, int event, int data):
+    cdef void on_callback(self, int event, int data):
         cdef char c_data
         c_data = data
         if event == OBL_EVENT_DEMOD_CHAR:
@@ -1480,6 +1478,8 @@ cdef class TTYDemodulator:
     def say_hello(self):
         cdef int num_bytes
         cdef object pyBuf
+        cdef object n = <object>num_bytes
+        self.trace("{} num  bytes".format(n))
         num_bytes = pjmedia_mem_capture_get_size(self._port)
         pyBuf = MemBuf_init(self.buffer, num_bytes)
         self.output_file.write(pyBuf)

@@ -2083,6 +2083,7 @@ cdef class MemBuf:
 
 cdef MemBuf MemBuf_init(const void *p, size_t l) with gil
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil
+cdef int TTYDemodulatorCallback(void* p_obl, int event, int data) with gil
 
 cdef class TTYDemodulator(object):
     # attributes
@@ -2101,7 +2102,7 @@ cdef class TTYDemodulator(object):
     # private methods
     cdef PJSIPUA _check_ua(self)
     cdef int _stop(self, PJSIPUA ua) except -1
-    cdef on_callback(self, int event, int data)
+    cdef void on_callback(self, int event, int data)
     cdef int get_data_from_mem(self)
 
 cdef class TTYModulator(object):
