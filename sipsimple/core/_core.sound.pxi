@@ -1418,8 +1418,7 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     cdef object pyObj = <object>usr_data
     if pyObj is not None:
-        return 0
-    #    return pyObj.get_data_from_mem()
+        return pyObj.get_data_from_mem()
 
 cdef class TTYDemodulator:
     def __cinit__(self, *args, **kwargs):
@@ -1535,6 +1534,8 @@ cdef class TTYDemodulator:
 
 
     cdef int get_data_from_mem(self):
+        return 0
+        '''
         cdef size_t num_bytes
         cdef int num_samples
         cdef short * data
@@ -1548,6 +1549,7 @@ cdef class TTYDemodulator:
         pyBuf = MemBuf_init(self.buffer, num_bytes)
         self.output_file.write(pyBuf)
         return 0
+        '''
 
 
     def stop(self):
