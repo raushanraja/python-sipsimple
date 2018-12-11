@@ -1495,11 +1495,15 @@ cdef class TTYDemodulator:
         cdef bytes pool_name
         cdef char* c_pool_name
         cdef PJSIPUA ua
-
-        cdef void * user_data = <void *>self.get_data_from_mem
+        self.trace("test say hello")
         cdef void * user_data1 = <void *>self.say_hello
+        self.trace("test say hello 1")
         (<object>user_data1)()
+        self.trace("test get data")
+        cdef void * user_data = <void *>self.get_data_from_mem
+        self.trace("test get data 1")
         (<object>user_data)()
+        self.trace("test get data done")
         #myObj.say_hello()
         #myObj.get_data_from_mem()
         #myObj()
