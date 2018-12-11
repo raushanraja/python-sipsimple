@@ -1416,8 +1416,8 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
         ttyDemodObj.on_callback(event, data)
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
+    cdef object pyObj = <object>usr_data
     return 0
-    #cdef object pyObj = <object>usr_data
     #if pyObj is not None:
     #    return pyObj.get_data_from_mem()
 
@@ -1521,8 +1521,8 @@ cdef class TTYDemodulator:
                                             user_data,
                                             mem_capture_got_data)
 
-                #if status != 0:
-                #    raise PJSIPError("Could not create mem capture cb", status)
+                if status != 0:
+                    raise PJSIPError("Could not create mem capture cb", status)
 
                 self._slot = self.mixer._add_port(ua, self._pool, self._port)
             except:
