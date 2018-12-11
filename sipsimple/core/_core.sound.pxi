@@ -1429,9 +1429,9 @@ cdef class TTYDemodulator:
             raise PJSIPError("failed to create lock", status)
 
         self._slot = -1
-        obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
-        oblObj = <object>&self.obl
-        tty_demod_dict[oblObj] = self
+        #obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
+        #oblObj = <object>&self.obl
+        #tty_demod_dict[oblObj] = self
 
     def __init__(self, AudioMixer mixer, room_number, callback_func):
         if mixer is None:
@@ -1586,9 +1586,9 @@ cdef class TTYDemodulator:
         except:
             return
         self._stop(ua)
-        oblObj = <object>&self.obl
-        if oblObj in tty_demod_dict:
-            del tty_demod_dict[oblObj]
+        #oblObj = <object>&self.obl
+        #if oblObj in tty_demod_dict:
+        #    del tty_demod_dict[oblObj]
 
         if self._lock != NULL:
             pj_mutex_destroy(self._lock)
