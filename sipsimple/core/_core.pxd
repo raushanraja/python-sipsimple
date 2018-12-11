@@ -2075,6 +2075,7 @@ cdef class MixerPort(object):
 
 cdef int _AudioMixer_dealloc_handler(object obj) except -1
 cdef int cb_play_wav_eof(pjmedia_port *port, void *user_data) with gil
+cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil
 
 cdef class TTYDemodulator(object):
     # attributes

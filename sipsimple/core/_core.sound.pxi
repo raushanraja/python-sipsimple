@@ -1416,13 +1416,12 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
         ttyDemodObj.on_callback(event, data)
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
-    #cdef object myObj = <object>usr_data
-    #if myObj is not None:
-    try:
-        #myObj.say_hello()
-        (<object>usr_data)()
-    except:
-        pass
+    cdef object myObj = <object>usr_data
+    if myObj is not None:
+        try:
+            myObj.say_hello()
+        except:
+            pass
     return 0
 
 cdef class TTYDemodulator:
@@ -1496,18 +1495,9 @@ cdef class TTYDemodulator:
         cdef char* c_pool_name
         cdef PJSIPUA ua
         self.trace("test say hello")
-        cdef void * user_data1 = <void *>self.say_hello
-        cdef myObj = <object>user_data1
-        self.trace("test say hello 1")
-        (myObj)()
-        self.trace("test get data")
-        cdef void * user_data = <void *>self.get_data_from_mem
-        self.trace("test get data 1")
-        (<object>user_data)()
-        self.trace("test get data done")
-        #myObj.say_hello()
-        #myObj.get_data_from_mem()
-        #myObj()
+        cdef void * user_data = <void *>self
+        cdef myObj = <object>user_data
+        myObj.say_hello()
         ua = _get_ua()
 
         with nogil:
@@ -1535,10 +1525,10 @@ cdef class TTYDemodulator:
                 if status != 0:
                     raise PJSIPError("Could not create mem capture buffer", status)
 
-                with nogil:
-                    status = pjmedia_mem_capture_set_eof_cb	(self._port,
-                                            user_data,
-                                            mem_capture_got_data)
+                #with nogil:
+                status = pjmedia_mem_capture_set_eof_cb	(self._port,
+                                        user_data,
+                                        mem_capture_got_data)
 
                 if status != 0:
                     raise PJSIPError("Could not create mem capture cb", status)
