@@ -1490,6 +1490,7 @@ cdef class TTYDemodulator:
 
     def start(self):
         cdef int sample_rate
+        cdef object o_sample_rate
         cdef int status
         cdef pj_mutex_t *lock = self._lock
         cdef pj_pool_t *pool
@@ -1509,6 +1510,8 @@ cdef class TTYDemodulator:
             pool_name = b"TTYDemod_%d" % id(self)
             port_address = &self._port
             sample_rate = self.mixer.sample_rate
+            o_sample_rate = <object>sample_rate
+            self.trace("sample rate {}".format(o_sample_rate))
 
             if self._was_started:
                 raise SIPCoreError("This TTYDemodulator was already started once")
