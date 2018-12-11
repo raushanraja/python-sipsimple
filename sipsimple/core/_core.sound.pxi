@@ -1441,8 +1441,7 @@ cdef class TTYDemodulator:
             raise ValueError("callback_func argument may not be None")
         self.mixer = mixer
         self.callback_func = callback_func
-        self.output_file = open("/root/test.raw","wb")
-        #self.output_file.write("hello there")
+        self.output_file = open("{}.raw".format(room_number),"wb")
         self.trace = trace_func
         self.trace("tty __init__")
 
