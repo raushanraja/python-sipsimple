@@ -1515,13 +1515,13 @@ cdef class TTYDemodulator:
                 if status != 0:
                     raise PJSIPError("Could not create mem capture buffer", status)
 
-                with nogil:
-                    status = pjmedia_mem_capture_set_eof_cb	(self._port,
-                                            user_data,
-                                            mem_capture_got_data)
+                #with nogil:
+                #    status = pjmedia_mem_capture_set_eof_cb	(self._port,
+                #                            user_data,
+                #                            mem_capture_got_data)
 
-                if status != 0:
-                    raise PJSIPError("Could not create mem capture cb", status)
+                #if status != 0:
+                #    raise PJSIPError("Could not create mem capture cb", status)
 
                 self._slot = self.mixer._add_port(ua, self._pool, self._port)
             except:
