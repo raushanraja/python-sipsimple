@@ -1417,8 +1417,8 @@ cdef int TTYDemodulatorCallback(void* obl, int event, int data):
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data):
     cdef object pyObj = <object>usr_data
-    return 0
-    #if pyObj is not None:
+    if pyObj is not None:
+        return 0
     #    return pyObj.get_data_from_mem()
 
 cdef class TTYDemodulator:
