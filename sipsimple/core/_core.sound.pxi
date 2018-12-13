@@ -1493,8 +1493,8 @@ cdef class TTYDemodulator:
             #self.trace("{} num  bytes".format(n))
             pyBuf = MemBuf_init(self.buffer, num_bytes)
             self.output_file.write(pyBuf)
-            data = <short *>self.buffer
-            obl_demodulate(&self.obl, data, num_samples)
+            #data = <short *>self.buffer
+            #obl_demodulate(&self.obl, data, num_samples)
 
 
     def start(self):
