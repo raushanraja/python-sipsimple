@@ -1476,7 +1476,7 @@ cdef class TTYDemodulator:
             else:
                 return self._slot
 
-    def on_callback(c_data):
+    def on_callback(self, c_data):
         self.trace("inside on_callback for {}".format(c_data))
         self.callback_func(c_data)
 
