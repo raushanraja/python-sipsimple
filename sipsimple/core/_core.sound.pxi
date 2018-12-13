@@ -1762,8 +1762,9 @@ cdef class TTYModulator:
         self.trace("_core TTYModulator send_text 2")
         while n != -1:
             memset(buffer, sizeof(buffer), 0)
-            n = obl_modulate(&self.obl, buffer, 1024)
             self.trace("_core TTYModulator send_text 3")
+            n = obl_modulate(&self.obl, buffer, 1024)
+            self.trace("_core TTYModulator send_text 31")
             if n > 0:
                 for i in range(n):
                     packet = buffer[i]
