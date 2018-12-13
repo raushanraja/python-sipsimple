@@ -1,8 +1,6 @@
 
 include "_core.error.pxi"
 include "_core.lib.pxi"
-
-cdef tty_demod_dict = {}
 include "_core.sound.pxi"
 include "_core.video.pxi"
 include "_core.util.pxi"

@@ -1472,9 +1472,9 @@ cdef class TTYDemodulator:
 
     cdef void on_callback(self, int event, int data):
         cdef char c_data
-        c_data = data
+        c_data = <char>data
         if event == OBL_EVENT_DEMOD_CHAR:
-            self.callback_func(c_data)
+            self.callback_func(<object>c_data)
 
     def say_hello(self):
         cdef int num_bytes
@@ -1626,17 +1626,15 @@ cdef class TTYDemodulator:
         except:
             return
         self._stop(ua)
-        #oblObj = <object>&self.obl
-        #if oblObj in tty_demod_dict:
-        #    del tty_demod_dict[oblObj]
 
         if self._lock != NULL:
             pj_mutex_destroy(self._lock)
 
-cdef int TTYMmodulatorPlayerCallback(pjmedia_port *port, void *usr_data):
+cdef int TTYMmodulatorPlayerCallback(pjmedia_port *port, void *usr_data) with gil:
     modulatorObj = <object>usr_data
     if modulatorObj is not None:
         modulatorObj.player_needs_more_data()
+    return 0
 
 cdef class TTYModulator:
     def __cinit__(self, *args, **kwargs):
@@ -1735,11 +1733,13 @@ cdef class TTYModulator:
                 pj_mutex_unlock(lock)
 
     def player_needs_more_data(self):
+        cdef char ch
+        cdef int i
         memset(self.buffer, 1024, 0)
         if len(self.bytesToSend) > 0:
             i = 0
             while i<1024 and len(self.bytesToSend) > 0:
-                ch = <char>self.bytesToSend.pop()
+                ch = <char>self.bytesToSend.pop(0)
                 self.buffer[i] = ch
                 i = i + 1
 
@@ -1756,18 +1756,21 @@ cdef class TTYModulator:
         while n != -1:
             memset(buffer, sizeof(buffer), 0)
             n = obl_modulate(&self.obl, buffer, 1024)
-            for i in range(n):
-                packet = buffer[i]
-                cData = <char *>&packet
-                byte1 = cData[0]
-                byte2 = cData[1]
-                self.bytesToSend.append(byte1)
-                self.bytesToSend.append(byte2)
+            if n > 0:
+                for i in range(n):
+                    packet = buffer[i]
+                    cData = <char *>&packet
+                    byte1 = cData[0]
+                    byte2 = cData[1]
+                    self.bytesToSend.append(<object>byte1)
+                    self.bytesToSend.append(<object>byte2)
                 #this->sampleGenerated(byte1, byte2)
             # this->samplesGenerated(buffer, n)
         self.finished_modulation(data)
 
     def finished_modulation(self, data):
+        # we send the data in our mem buffer playback
+        # nothing to do here
         pass
 
     def stop(self):
@@ -1809,8 +1812,6 @@ cdef class TTYModulator:
             return
         self._stop(ua)
         oblObj = <object>&self.obl
-        if oblObj in tty_demod_dict:
-            del tty_demod_dict[oblObj]
 
         if self._lock != NULL:
             pj_mutex_destroy(self._lock)

@@ -2105,6 +2105,8 @@ cdef class TTYDemodulator(object):
     cdef void on_callback(self, int event, int data)
     cdef int get_data_from_mem(self)
 
+cdef int TTYMmodulatorPlayerCallback(pjmedia_port *port, void *usr_data) with gil
+
 cdef class TTYModulator(object):
     # attributes
     cdef int _slot
