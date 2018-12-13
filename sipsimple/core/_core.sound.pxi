@@ -1655,6 +1655,7 @@ cdef class TTYModulator:
         self.mixer = mixer
         self.trace = trace_func
         self.bytesToSend = []
+        self.trace("TTYModulator __init__")
 
     cdef PJSIPUA _check_ua(self):
         cdef PJSIPUA ua
