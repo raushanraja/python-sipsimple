@@ -1649,10 +1649,11 @@ cdef class TTYModulator:
         obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
         obl_set_tx_freq(&self.obl, 1358, 1728)
 
-    def __init__(self, AudioMixer mixer):
+    def __init__(self, AudioMixer mixer, trace_func):
         if mixer is None:
             raise ValueError("mixer argument may not be None")
         self.mixer = mixer
+        self.trace = trace_func
         self.bytesToSend = []
 
     cdef PJSIPUA _check_ua(self):
@@ -1691,6 +1692,7 @@ cdef class TTYModulator:
         cdef char* c_pool_name
         cdef PJSIPUA ua
 
+        self.trace("_core TTYModulator start")
         ua = _get_ua()
 
         with nogil:
@@ -1731,6 +1733,7 @@ cdef class TTYModulator:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+        self.trace("_core TTYModulator start done")
 
     def player_needs_more_data(self):
         cdef char ch
@@ -1744,6 +1747,7 @@ cdef class TTYModulator:
                 i = i + 1
 
     def send_text(self, char * text):
+        self.trace("_core TTYModulator send_text {}".format(text))
         cdef short buffer[1024]
         cdef int n = 1
         cdef short packet
@@ -1767,6 +1771,7 @@ cdef class TTYModulator:
                 #this->sampleGenerated(byte1, byte2)
             # this->samplesGenerated(buffer, n)
         self.finished_modulation(data)
+        self.trace("_core TTYModulator send_text {} done".format(text))
 
     def finished_modulation(self, data):
         # we send the data in our mem buffer playback
@@ -1778,6 +1783,7 @@ cdef class TTYModulator:
         cdef pj_mutex_t *lock = self._lock
         cdef PJSIPUA ua
 
+        self.trace("_core TTYModulator stop")
         ua = self._check_ua()
 
         with nogil:
@@ -1789,8 +1795,10 @@ cdef class TTYModulator:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+        self.trace("_core TTYModulator stop done")
 
     cdef int _stop(self, PJSIPUA ua) except -1:
+        self.trace("_core TTYModulator _stop")
         cdef pjmedia_port *port = self._port
 
         if self._slot != -1:
@@ -1802,6 +1810,7 @@ cdef class TTYModulator:
             self._port = NULL
         ua.release_memory_pool(self._pool)
         self._pool = NULL
+        self.trace("_core TTYModulator _stop done")
         return 0
 
     def __dealloc__(self):

@@ -620,6 +620,13 @@ class TTYToneModulator(object):
         self.mixer = mixer
         self._tty_modulator = None
         self.room_number = room_number
+        self.trace("TTYToneModulator __init__")
+
+    def trace(self, text):
+        self.traceFile = open('/root/sipsimple.log', 'a+')
+        self.traceFile.write(text)
+        self.traceFile.write("\n")
+        self.traceFile.close()
 
     @property
     def is_active(self):
@@ -637,20 +644,35 @@ class TTYToneModulator(object):
         # There is still a race condition here in that the directory can be removed
         # before the PJSIP opens the file. There's nothing that can be done about
         # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
-        self._tty_modulator = TTYModulator(self.mixer)
-        self._tty_modulator.start()
-        notification_center = NotificationCenter()
-        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
-                                                                                                            old_consumer_slot=None, new_consumer_slot=self._tty_modulator.slot))
+        try:
+            self.trace("TTYToneModulator start")
+            self._tty_modulator = TTYModulator(self.mixer, self.trace)
+            self._tty_modulator.start()
+            notification_center = NotificationCenter()
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                                old_consumer_slot=None, new_consumer_slot=self._tty_modulator.slot))
+            self.trace("TTYToneModulator start done")
+        except Exception as e:
+            self.trace("TTYToneModulator exception {}".format(str(e)))
 
     def stop(self):
-        old_slot = self.consumer_slot
-        self._tty_modulator.stop()
-        self._tty_modulator = None
-        notification_center = NotificationCenter()
-        notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
-                                                                                                            old_consumer_slot=old_slot,
-                                                                                                            new_consumer_slot=None))
+        try:
+            self.trace("TTYToneModulator stop")
+            old_slot = self.consumer_slot
+            self._tty_modulator.stop()
+            self._tty_modulator = None
+            notification_center = NotificationCenter()
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                                old_consumer_slot=old_slot,
+                                                                                                                new_consumer_slot=None))
+            self.trace("TTYToneModulator stop done")
+        except Exception as e:
+            self.trace("TTYToneModulator exception {}".format(str(e)))
 
     def send_text(self, text):
-        self._tty_modulator.send_text(text)
+        try:
+            self.trace("TTYToneModulator send text {}".format(text))
+            self._tty_modulator.send_text(text)
+            self.trace("TTYToneModulator send text {} done".format(text))
+        except Exception as e:
+            self.trace("TTYToneModulator exception {}".format(str(e)))
