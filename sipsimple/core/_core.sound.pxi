@@ -1485,12 +1485,12 @@ cdef class TTYDemodulator:
         if num_bytes > 0:
             num_samples = num_bytes/2
             # todo - this might be buggy, need to check and fix
-            data = <short *>self.buffer
-            obl_demodulate(&self.obl, data, num_samples)
             #n = <object>num_bytes
             #self.trace("{} num  bytes".format(n))
             pyBuf = MemBuf_init(self.buffer, num_bytes)
             self.output_file.write(pyBuf)
+            data = <short *>self.buffer
+            obl_demodulate(&self.obl, data, num_samples)
 
 
     def start(self):
@@ -1748,19 +1748,22 @@ cdef class TTYModulator:
                 i = i + 1
 
     def send_text(self, char * text):
-        self.trace("_core TTYModulator send_text {}".format(text))
         cdef short buffer[1024]
         cdef int n = 1
         cdef short packet
         cdef char * cData
         cdef char byte1, byte2
 
+        self.trace("_core TTYModulator send_text {}".format(text))
         obl_tx_queue(&self.obl, text)
+        self.trace("_core TTYModulator send_text 1")
 
         data = ''
+        self.trace("_core TTYModulator send_text 2")
         while n != -1:
             memset(buffer, sizeof(buffer), 0)
             n = obl_modulate(&self.obl, buffer, 1024)
+            self.trace("_core TTYModulator send_text 3")
             if n > 0:
                 for i in range(n):
                     packet = buffer[i]
@@ -1771,6 +1774,8 @@ cdef class TTYModulator:
                     self.bytesToSend.append(<object>byte2)
                 #this->sampleGenerated(byte1, byte2)
             # this->samplesGenerated(buffer, n)
+            self.trace("_core TTYModulator send_text 4")
+        self.trace("_core TTYModulator send_text 5")
         self.finished_modulation(data)
         self.trace("_core TTYModulator send_text {} done".format(text))
 
