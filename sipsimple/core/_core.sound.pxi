@@ -1751,7 +1751,7 @@ cdef class TTYModulator:
                 i = i + 1
 
     def send_text(self, char * text):
-        cdef short buffer[1024]
+        cdef short buffer[2050]
         cdef int n = 1
         cdef short packet
         cdef char * cData
