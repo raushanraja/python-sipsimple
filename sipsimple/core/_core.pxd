@@ -2118,6 +2118,7 @@ cdef class TTYModulator(object):
     cdef readonly AudioMixer mixer
     cdef char buffer[4096]
     cdef object trace
+    cdef object bytesToSend
 
     # private methods
     cdef PJSIPUA _check_ua(self)
