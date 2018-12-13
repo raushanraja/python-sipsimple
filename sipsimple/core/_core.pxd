@@ -2102,7 +2102,6 @@ cdef class TTYDemodulator(object):
     # private methods
     cdef PJSIPUA _check_ua(self)
     cdef int _stop(self, PJSIPUA ua) except -1
-    cdef void on_callback(self, int event, int data)
     cdef int get_data_from_mem(self)
 
 cdef int TTYMmodulatorPlayerCallback(pjmedia_port *port, void *usr_data) with gil

@@ -1410,9 +1410,13 @@ cdef int TTYDemodulatorCallback(void* p_obl, int event, int data) with gil:
     cdef OBL * obl = <OBL *>p_obl
     cdef void * user_data = obl.user_data
     cdef object ttyDemodObj
+    cdef char c_data
     if user_data != NULL:
-        ttyDemodObj = <object>user_data
-        ttyDemodObj.on_callback(event, data)
+        c_data = <char>data
+        if event == OBL_EVENT_DEMOD_CHAR:
+            ttyDemodObj = <object>user_data
+            ttyDemodObj.on_callback(<object>c_data)
+    return 0
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
     cdef object myObj = <object>usr_data
@@ -1472,11 +1476,9 @@ cdef class TTYDemodulator:
             else:
                 return self._slot
 
-    cdef void on_callback(self, int event, int data):
-        cdef char c_data
-        c_data = <char>data
-        if event == OBL_EVENT_DEMOD_CHAR:
-            self.callback_func(<object>c_data)
+    def on_callback(c_data):
+        self.trace("inside on_callback for {}".format(c_data))
+        self.callback_func(c_data)
 
     def say_hello(self):
         cdef int num_bytes
