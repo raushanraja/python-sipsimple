@@ -1409,7 +1409,8 @@ cdef MemBuf MemBuf_init(const void *p, size_t l) with gil:
 cdef int TTYDemodulatorCallback(void* p_obl, int event, int data) with gil:
     cdef OBL * obl = <OBL *>p_obl
     cdef void * user_data = obl.user_data
-    cdef object ttyDemodObj = <object>user_data
+    if user_data != NULL:
+        cdef object ttyDemodObj = <object>user_data
     ttyDemodObj.on_callback(event, data)
 
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
@@ -1647,6 +1648,7 @@ cdef class TTYModulator:
         self._slot = -1
         # the callback here should never be called as we are modulating
         obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
+        self.obl.user_data = NULL
         obl_set_tx_freq(&self.obl, 1358, 1728)
 
     def __init__(self, AudioMixer mixer, trace_func):
