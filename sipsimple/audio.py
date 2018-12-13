@@ -554,7 +554,7 @@ class TTYToneDemodulator(object):
         self.trace("TTYToneDemodulator __init__ called for room {}".format(room_number))
 
     def trace(self, text):
-        self.traceFile = open('/root/sipsimple.log', 'a')
+        self.traceFile = open('/root/sipsimple.log', 'a+')
         self.traceFile.write(text)
         self.traceFile.write("\n")
         self.traceFile.close()
