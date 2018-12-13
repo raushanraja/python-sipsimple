@@ -1763,7 +1763,7 @@ cdef class TTYModulator:
 
         data = ''
         self.trace("_core TTYModulator send_text 2")
-        while n != -1:
+        while n > 0:
             memset(buffer, sizeof(buffer), 0)
             n = obl_modulate(&self.obl, buffer, 1024)
             if n > 0:
