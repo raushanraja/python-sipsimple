@@ -1428,10 +1428,12 @@ cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
     return 0
 
 cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil:
+    cdef f
+    cdef p_data
     if event == OBL_EVENT_DEMOD_CHAR:
-        data = <object>data
+        p_data = <object>data
         f = open("/root/sipsimple.log", "a+")
-        f.write(data)
+        f.write(p_data)
         f.write("\n")
         f.close()
 
@@ -1439,6 +1441,10 @@ cdef void wave_tty_test():
     cdef OBL obl
     cdef char c_byte1
     cdef char c_byte2
+    cdef f
+    cdef byte1
+    cdef byte2
+
     obl_init(&obl, OBL_BAUD_45, wave_tty_test_callback)
     f = open("/usr/local/py-psap/psap-webrtc/22db937277674dfeb208c04adfc6f01b.raw", "rb")
     try:
