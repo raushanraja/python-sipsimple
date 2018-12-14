@@ -1431,7 +1431,7 @@ cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil:
     if event == OBL_EVENT_DEMOD_CHAR:
         data = <object>data
         f = open("/root/sipsimple.log", "a+")
-        f.write(text)
+        f.write(data)
         f.write("\n")
         f.close()
 
