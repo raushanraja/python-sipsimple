@@ -1438,7 +1438,7 @@ cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil:
         data = <object>data
         my_trace("data is {}".format(data))
 
-cdef wave_tty_test():
+cdef void wave_tty_test():
     cdef OBL obl
     cdef char c_byte1
     cdef char c_byte2
