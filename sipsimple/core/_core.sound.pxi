@@ -1511,6 +1511,7 @@ cdef class TTYDemodulator:
                 return self._slot
 
     def on_callback(self, c_data):
+        self.trace("inside on_callback for"))
         self.trace("inside on_callback for {}".format(c_data))
         self.callback_func(c_data)
 
@@ -1519,16 +1520,24 @@ cdef class TTYDemodulator:
         cdef int num_samples
         cdef object pyBuf
         cdef object n
+        cdef int count
+        cdef char byte1
+        cdef char byte2
+        count = 0
         num_bytes = pjmedia_mem_capture_get_size(self._port)
         if num_bytes > 0:
-            num_samples = num_bytes/2
+            #num_samples = num_bytes/2
             # todo - this might be buggy, need to check and fix
-            #n = <object>num_bytes
+            n = <object>num_bytes
             #self.trace("{} num  bytes".format(n))
+            while count < num_bytes:
+                obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1]
+                count = count + 2
+            #data = <short *>self.buffer
+            #obl_demodulate(&self.obl, data, num_samples)
             pyBuf = MemBuf_init(self.buffer, num_bytes)
             self.output_file.write(pyBuf)
-            data = <short *>self.buffer
-            obl_demodulate(&self.obl, data, num_samples)
+            #self.trace("num_bytes {}".format(n))
 
     def test(self):
         wave_tty_test()
@@ -1565,7 +1574,7 @@ cdef class TTYDemodulator:
             try:
                 with nogil:
                     status = pjmedia_mem_capture_create	(pool,
-                                        self.buffer, 4096,
+                                        self.buffer, 2048,
                                         sample_rate, 1,
                                         sample_rate / 50, 16,
                                         0,
