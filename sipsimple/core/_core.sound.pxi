@@ -1450,7 +1450,7 @@ def wave_tty_test(wave_file="/usr/local/py-psap/psap-webrtc/22db937277674dfeb208
             while byte1:
                 c_byte1 = <char>byte1
                 c_byte2 = <char>byte2
-                obl_demodulate_packet(c_byte1, c_byte2)
+                obl_demodulate_packet(&obl, c_byte1, c_byte2)
                 byte1 = f.read(1)
                 if byte1:
                         byte2 = f.read(1)
