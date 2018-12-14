@@ -43,7 +43,7 @@
 #include <math.h>
 #include "../include/obl.h"
 
-#define FS      48000      /* sampling rate                 */
+#define FS      8000      /* sampling rate                 */
 #define NB      32        /* number of Baudot codes        */
 #define NBITS   5         /* num of bits in Baudot codes   */
 #define LETFLAG (1<<6)    /* flag in ascii_to_baudot[]     */
