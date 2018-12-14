@@ -1435,7 +1435,7 @@ def my_trace(text):
 
 cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil:
     if event == OBL_EVENT_DEMOD_CHAR:
-        data = <object>user_data
+        data = <object>data
         my_trace("data is {}".format(data))
 
 def wave_tty_test(wave_file="/usr/local/py-psap/psap-webrtc/22db937277674dfeb208c04adfc6f01b.raw"):
