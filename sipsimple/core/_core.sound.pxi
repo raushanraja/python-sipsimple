@@ -1455,8 +1455,6 @@ cdef void wave_tty_test():
             f.close()
 
 
-
-
 cdef class TTYDemodulator:
     def __cinit__(self, *args, **kwargs):
         cdef int status
@@ -1526,6 +1524,8 @@ cdef class TTYDemodulator:
             #data = <short *>self.buffer
             #obl_demodulate(&self.obl, data, num_samples)
 
+    def test(self):
+        wave_tty_test()
 
     def start(self):
         cdef int sample_rate
