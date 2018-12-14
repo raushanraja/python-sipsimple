@@ -1531,7 +1531,7 @@ cdef class TTYDemodulator:
             n = <object>num_bytes
             #self.trace("{} num  bytes".format(n))
             while count < num_bytes:
-                obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1]
+                obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1])
                 count = count + 2
             #data = <short *>self.buffer
             #obl_demodulate(&self.obl, data, num_samples)
