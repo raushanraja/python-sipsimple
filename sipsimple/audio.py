@@ -571,6 +571,16 @@ class TTYToneDemodulator(object):
     def producer_slot(self):
         return None
 
+    def test(self):
+        try:
+            self.trace("TTYToneDemodulator test")
+            # There is still a race condition here in that the directory can be removed
+            # before the PJSIP opens the file. There's nothing that can be done about
+            # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
+            self._tty_demodulator.test()
+        except Exception as e:
+            self.trace("TTYToneDemodulator test exception {}".format(str(e)))
+
     def start(self):
         try:
             self.trace("TTYToneDemodulator start")
