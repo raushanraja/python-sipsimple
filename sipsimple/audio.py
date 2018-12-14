@@ -686,7 +686,7 @@ def trace(self, text):
 def wave_tty_tone_test():
     try:
         trace("started wave_tty_tone_test")
-        wave_tty_test()
+        #wave_tty_test()
         trace("finished wave_tty_tone_test")
     except Exception as e:
         trace("wave_tty_tone_test exception {}".format(str(e)))
