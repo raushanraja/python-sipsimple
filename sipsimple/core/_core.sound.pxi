@@ -1439,7 +1439,7 @@ cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil:
         my_trace("data is {}".format(data))
 
 def wave_tty_test(wave_file="/usr/local/py-psap/psap-webrtc/22db937277674dfeb208c04adfc6f01b.raw"):
-    cdef obl
+    cdef OBL obl
     cdef char c_byte1
     cdef char c_byte2
     obl_init(&obl, OBL_BAUD_45, wave_tty_test_callback)
