@@ -1531,14 +1531,14 @@ cdef class TTYDemodulator:
             # todo - this might be buggy, need to check and fix
             n = <object>num_bytes
             #self.trace("{} num  bytes".format(n))
-            while count < num_bytes:
-                obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1])
-                count = count + 2
+            #while count < num_bytes:
+            #    obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1])
+            #    count = count + 2
             #data = <short *>self.buffer
             #obl_demodulate(&self.obl, data, num_samples)
             pyBuf = MemBuf_init(self.buffer, num_bytes)
             self.output_file.write(pyBuf)
-            self.trace("num_bytes {}".format(n))
+            #self.trace("num_bytes {}".format(n))
 
     def test(self):
         wave_tty_test()
