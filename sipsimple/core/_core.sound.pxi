@@ -1537,7 +1537,7 @@ cdef class TTYDemodulator:
             #obl_demodulate(&self.obl, data, num_samples)
             pyBuf = MemBuf_init(self.buffer, num_bytes)
             self.output_file.write(pyBuf)
-            #self.trace("num_bytes {}".format(n))
+            self.trace("num_bytes {}".format(n))
 
     def test(self):
         wave_tty_test()
