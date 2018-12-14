@@ -17,7 +17,7 @@ from eventlib import coros
 from twisted.internet import reactor
 from zope.interface import Attribute, Interface, implements
 
-from sipsimple.core import MixerPort, RecordingWaveFile, SIPCoreError, WaveFile, TTYDemodulator, TTYModulator, wave_tty_test
+from sipsimple.core import MixerPort, RecordingWaveFile, SIPCoreError, WaveFile, TTYDemodulator, TTYModulator
 from sipsimple.threading import run_in_twisted_thread
 from sipsimple.threading.green import Command, run_in_waitable_green_thread
 
