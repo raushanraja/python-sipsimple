@@ -1427,16 +1427,13 @@ cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
             pass
     return 0
 
-def my_trace(text):
-    f = open("/root/sipsimple.log", "a+")
-    f.write(text)
-    f.write("\n")
-    f.close()
-
 cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil:
     if event == OBL_EVENT_DEMOD_CHAR:
         data = <object>data
-        my_trace("data is {}".format(data))
+        f = open("/root/sipsimple.log", "a+")
+        f.write(text)
+        f.write("\n")
+        f.close()
 
 cdef void wave_tty_test():
     cdef OBL obl
