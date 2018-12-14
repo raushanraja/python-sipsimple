@@ -1427,6 +1427,39 @@ cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
             pass
     return 0
 
+def my_trace(text):
+    f = open("/root/sipsimple.log", "a+")
+    f.write(text)
+    f.write("\n")
+    f.close()
+
+cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil:
+    if event == OBL_EVENT_DEMOD_CHAR:
+        data = <object>user_data
+        my_trace("data is {}".format(data))
+
+def wave_tty_test(wave_file="/usr/local/py-psap/psap-webrtc/22db937277674dfeb208c04adfc6f01b.raw"):
+    cdef obl
+    cdef char c_byte1
+    cdef char c_byte2
+    obl_init(&obl, OBL_BAUD_45, wave_tty_test_callback)
+    f = open(wave_file, "rb")
+    try:
+            byte1 = f.read(1)
+            byte2 = f.read(1)
+            while byte1:
+                c_byte1 = <char>byte1
+                c_byte2 = <char>byte2
+                obl_demodulate_packet(c_byte1, c_byte2)
+                byte1 = f.read(1)
+                if byte1:
+                        byte2 = f.read(1)
+    finally:
+            f.close()
+
+
+
+
 cdef class TTYDemodulator:
     def __cinit__(self, *args, **kwargs):
         cdef int status

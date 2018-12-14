@@ -43,7 +43,7 @@
 #include <math.h>
 #include "../include/obl.h"
 
-#define FS      8000      /* sampling rate                 */
+#define FS      48000      /* sampling rate                 */
 #define NB      32        /* number of Baudot codes        */
 #define NBITS   5         /* num of bits in Baudot codes   */
 #define LETFLAG (1<<6)    /* flag in ascii_to_baudot[]     */
@@ -845,6 +845,20 @@ void demod_dsp(OBL *obl, short sam)
   TODO: work out a way to remove divides in demod processing (expensive in
         CPU cycles). 
 */
+
+
+void obl_demodulate_packet(OBL *obl, char byte1, char byte2)
+{
+	short packet;
+	char data[2];
+
+	data[0] = byte1;
+	data[1] = byte2;
+
+	packet = (*(short *)data);
+
+	obl_demodulate(obl, &packet, 1);
+}
 
 void obl_demodulate(OBL *obl, short *buffer, int samples)
 {

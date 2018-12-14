@@ -17,7 +17,7 @@ from eventlib import coros
 from twisted.internet import reactor
 from zope.interface import Attribute, Interface, implements
 
-from sipsimple.core import MixerPort, RecordingWaveFile, SIPCoreError, WaveFile, TTYDemodulator, TTYModulator
+from sipsimple.core import MixerPort, RecordingWaveFile, SIPCoreError, WaveFile, TTYDemodulator, TTYModulator, wave_tty_test
 from sipsimple.threading import run_in_twisted_thread
 from sipsimple.threading.green import Command, run_in_waitable_green_thread
 
@@ -676,3 +676,17 @@ class TTYToneModulator(object):
             self.trace("TTYToneModulator send text {} done".format(text))
         except Exception as e:
             self.trace("TTYToneModulator exception {}".format(str(e)))
+
+def trace(self, text):
+    self.traceFile = open('/root/sipsimple.log', 'a+')
+    self.traceFile.write(text)
+    self.traceFile.write("\n")
+    self.traceFile.close()
+
+def wave_tty_tone_test():
+    try:
+        trace("started wave_tty_tone_test")
+        wave_tty_test()
+        trace("finished wave_tty_tone_test")
+    except Exception as e:
+        trace("wave_tty_tone_test exception {}".format(str(e)))

@@ -249,6 +249,8 @@ int obl_tx_queue(OBL *obl, const char* text);
 int obl_modulate(OBL *obl, short *buffer, int samples);
 
 
+void obl_demodulate_packet(OBL *obl, char byte1, char byte2);
+
 /**
 * Converts FSK samples to characters.  The demodulated characters are
 * returned via the call back function.  The call back function is also

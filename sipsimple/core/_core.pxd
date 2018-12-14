@@ -90,6 +90,7 @@ cdef extern from "../openbaudot/include/obl.h":
     void obl_reset(OBL *obl, int baud) nogil
     void obl_set_speed(OBL *obl, int baud) nogil
     int obl_modulate(OBL *obl, short *buffer, int samples) nogil
+    void obl_demodulate_packet(OBL *obl, char byte1, char byte2) nogil
     void obl_demodulate(OBL *obl, short *buffer, int samples) nogil
     int obl_tx_queue(OBL *obl, const char* text) nogil
     void obl_set_tx_freq(OBL *obl, float one_freq, float zero_freq) nogil
@@ -2084,6 +2085,7 @@ cdef class MemBuf:
 cdef MemBuf MemBuf_init(const void *p, size_t l) with gil
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil
 cdef int TTYDemodulatorCallback(void* p_obl, int event, int data) with gil
+cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil
 
 cdef class TTYDemodulator(object):
     # attributes
