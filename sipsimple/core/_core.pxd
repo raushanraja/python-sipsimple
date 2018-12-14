@@ -2086,6 +2086,8 @@ cdef MemBuf MemBuf_init(const void *p, size_t l) with gil
 cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil
 cdef int TTYDemodulatorCallback(void* p_obl, int event, int data) with gil
 cdef int wave_tty_test_callback(void* p_obl, int event, int data) with gil
+def my_trace(text)
+def wave_tty_test(wave_file="/usr/local/py-psap/psap-webrtc/22db937277674dfeb208c04adfc6f01b.raw")
 
 cdef class TTYDemodulator(object):
     # attributes
