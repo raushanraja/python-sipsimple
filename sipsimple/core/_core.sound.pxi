@@ -1793,6 +1793,7 @@ cdef class TTYModulator:
         memset(self.buffer, 1024, 0)
         if len(self.bytesToSend) > 0:
             i = 0
+            self.trace("player_needs_more_data bytes is {}".format(len(self.bytesToSend)))
             while i<1024 and len(self.bytesToSend) > 0:
                 ch = <char>self.bytesToSend.pop(0)
                 self.buffer[i] = ch
@@ -1807,13 +1808,12 @@ cdef class TTYModulator:
 
         self.trace("_core TTYModulator send_text {}".format(text))
         obl_tx_queue(&self.obl, text)
-        self.trace("_core TTYModulator send_text 1")
 
         data = ''
-        self.trace("_core TTYModulator send_text 2")
         while n > 0:
             memset(buffer, sizeof(buffer), 0)
             n = obl_modulate(&self.obl, buffer, 1024)
+            self.trace("obl_modulate returned {}".format(n))
             if n > 0:
                 for i in range(n):
                     packet = buffer[i]
@@ -1824,7 +1824,6 @@ cdef class TTYModulator:
                     self.bytesToSend.append(<object>byte2)
                 #this->sampleGenerated(byte1, byte2)
             # this->samplesGenerated(buffer, n)
-        self.trace("_core TTYModulator send_text 5")
         self.finished_modulation(data)
         self.trace("_core TTYModulator send_text {} done".format(text))
 
