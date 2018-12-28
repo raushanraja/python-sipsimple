@@ -1526,7 +1526,7 @@ cdef class TTYDemodulator:
         count = 0
         num_bytes = pjmedia_mem_capture_get_size(self._port)
         if num_bytes > 0:
-            self.trace("num_bytes - start")
+            #self.trace("num_bytes - start")
             #num_samples = num_bytes/2
             # todo - this might be buggy, need to check and fix
             n = <object>num_bytes
