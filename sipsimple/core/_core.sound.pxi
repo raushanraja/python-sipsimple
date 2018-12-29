@@ -1,6 +1,7 @@
 
 import sys
-from libc.string cimport memset, malloc
+from libc.stdlib cimport malloc, free
+from libc.string cimport memset
 from cpython.buffer cimport PyBuffer_FillInfo
 
 cdef class AudioMixer:
