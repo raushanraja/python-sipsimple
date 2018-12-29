@@ -2097,7 +2097,7 @@ cdef class TTYDemodulator(object):
     cdef pjmedia_port *_port
     cdef OBL obl
     cdef readonly AudioMixer mixer
-    cdef char buffer[4096]
+    cdef void * buffer
     cdef object callback_func
     cdef object output_file
     cdef object trace

@@ -1,6 +1,6 @@
 
 import sys
-from libc.string cimport memset
+from libc.string cimport memset, malloc
 from cpython.buffer cimport PyBuffer_FillInfo
 
 cdef class AudioMixer:
@@ -1704,6 +1704,8 @@ cdef class TTYModulator:
         self._slot = -1
         # the callback here should never be called as we are modulating
         obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
+        self.buffer = malloc(2*8000*5)
+        memset(self.buffer, 2*8000*5, 0)
         self.obl.user_data = NULL
         obl_set_tx_freq(&self.obl, 1358, 1728)
 
@@ -1770,7 +1772,7 @@ cdef class TTYModulator:
             try:
                 with nogil:
                     status = pjmedia_mem_player_create(pool,
-                                                        self.buffer, 2048,
+                                                        self.buffer, 2*8000*5,
                                                         sample_rate, 1,
                                                         sample_rate / 50, 16,
                                                         0,
@@ -1800,11 +1802,11 @@ cdef class TTYModulator:
         cdef char ch
         cdef int i
         self.trace("player_needs_more_data ")
-        memset(self.buffer, 2048, 0)
+        memset(self.buffer, 2*8000*5, 0)
         if len(self.bytesToSend) > 0:
             i = 0
             self.trace("player_needs_more_data bytes is {}".format(len(self.bytesToSend)))
-            while i<2048 and len(self.bytesToSend) > 0:
+            while i<2*8000*5 and len(self.bytesToSend) > 0:
                 ch = <char>self.bytesToSend.pop(0)
                 self.buffer[i] = ch
                 i = i + 1
@@ -1885,6 +1887,7 @@ cdef class TTYModulator:
             return
         self._stop(ua)
         oblObj = <object>&self.obl
+        free(self.buffer)
 
         if self._lock != NULL:
             pj_mutex_destroy(self._lock)
