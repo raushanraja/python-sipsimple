@@ -644,11 +644,11 @@ class TTYToneModulator(object):
 
     @property
     def consumer_slot(self):
-        return self._tty_modulator.slot if self._tty_modulator else None
+        return None
 
     @property
     def producer_slot(self):
-        return None
+        return self._tty_modulator.slot if self._tty_modulator else None
 
     def start(self):
         # There is still a race condition here in that the directory can be removed
