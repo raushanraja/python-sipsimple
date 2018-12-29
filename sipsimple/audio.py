@@ -538,6 +538,110 @@ class WaveRecorder(object):
                                                                                                             old_consumer_slot=old_slot, new_consumer_slot=None))
 
 
+
+class TTYTones(object):
+    """
+    An object capable of recording to a WAV file. It can be used as part of an
+    AudioBridge as it implements the IAudioPort interface.
+    """
+
+    implements(IAudioPort)
+
+    def __init__(self, mixer, room_number):
+        self.mixer = mixer
+        self._tty_demodulator = None
+        self._tty_modulator = None
+        self.room_number = room_number
+        self.trace("TTYTones __init__ called ")
+        self.trace("TTYTones __init__ called for room {}".format(room_number))
+
+    def trace(self, text):
+        self.traceFile = open('/root/sipsimple.log', 'a+')
+        self.traceFile.write(text)
+        self.traceFile.write("\n")
+        self.traceFile.close()
+
+    @property
+    def is_active(self):
+        return bool(self._tty_demodulator and self._tty_demodulator.is_active)
+
+    @property
+    def consumer_slot(self):
+        return self._tty_demodulator.slot if self._tty_demodulator else None
+
+    @property
+    def producer_slot(self):
+        return self._tty_modulator.slot if self._tty_modulator else None
+
+    def test(self):
+        try:
+            self.trace("TTYTones test")
+            # There is still a race condition here in that the directory can be removed
+            # before the PJSIP opens the file. There's nothing that can be done about
+            # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
+            self._tty_demodulator.test()
+        except Exception as e:
+            self.trace("TTYToneDemodulator test exception {}".format(str(e)))
+
+    def start(self):
+        try:
+            self.trace("TTYTones start")
+            # There is still a race condition here in that the directory can be removed
+            # before the PJSIP opens the file. There's nothing that can be done about
+            # it as long as PJSIP doesn't accept an already open file descriptor. -Luci
+            self._tty_demodulator = TTYDemodulator(self.mixer, self.room_number, self.on_received_char, self.trace)
+            self.trace("TTYTones start 1")
+            self._tty_demodulator.start()
+            self.trace("TTYToneDemodulator start done")
+            notification_center = NotificationCenter()
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                                old_consumer_slot=None, new_consumer_slot=self._tty_demodulator.slot))
+            self._tty_modulator = TTYModulator(self.mixer, self.trace)
+            self._tty_modulator.start()
+            notification_center = NotificationCenter()
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=False, producer_slot_changed=True,
+                                                                                                                old_producer_slot=None, new_producer_slot=self._tty_modulator.slot))
+        except Exception as e:
+            self.trace("TTYTones exception {}".format(str(e)))
+
+    def stop(self):
+        try:
+            old_slot = self.consumer_slot
+            self._tty_demodulator.stop()
+            self._tty_demodulator = None
+            self.trace("TTYToneDemodulator stop called")
+            #self.traceFile.close()
+            notification_center = NotificationCenter()
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
+                                                                                                                old_consumer_slot=old_slot,
+                                                                                                                new_consumer_slot=None))
+            old_slot = self.producer_slot
+            self._tty_modulator.stop()
+            self._tty_modulator = None
+            notification_center = NotificationCenter()
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self,
+                                                  data=NotificationData(consumer_slot_changed=False,
+                                                                        producer_slot_changed=True,
+                                                                        old_producer_slot=old_slot,
+                                                                        new_producer_slot=None))
+        except Exception as e:
+            self.trace("TTYTones exception {}".format(str(e)))
+
+    def on_received_char(self, char_data):
+        self.trace("TTYTones on_received_char {}".format(char_data))
+        notification_center = NotificationCenter()
+        notification_center.post_notification('TTYReceivedChar', sender=self, data=NotificationData(room_number=self.room_number,
+                                                                                                    tty_char=char_data))
+
+    def send_text(self, text):
+        try:
+            self.trace("TTYTones send text {}".format(text))
+            self._tty_modulator.send_text(text)
+            self.trace("TTYTones send text {} done".format(text))
+        except Exception as e:
+            self.trace("TTYTones exception {}".format(str(e)))
+
+
 class TTYToneDemodulator(object):
     """
     An object capable of recording to a WAV file. It can be used as part of an
@@ -668,7 +772,7 @@ class TTYToneModulator(object):
     def stop(self):
         try:
             self.trace("TTYToneModulator stop")
-            old_slot = self.consumer_slot
+            old_slot = self.producer_slot
             self._tty_modulator.stop()
             self._tty_modulator = None
             notification_center = NotificationCenter()
