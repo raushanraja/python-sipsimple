@@ -1681,7 +1681,7 @@ cdef class TTYDemodulator:
             pj_mutex_destroy(self._lock)
 
 cdef int TTYMmodulatorPlayerCallback(pjmedia_port *port, void *usr_data) with gil:
-    cdef modulatorObj = <object>usr_data
+    cdef object modulatorObj = <object>usr_data
     if modulatorObj is not None:
         modulatorObj.player_needs_more_data()
     return 0
