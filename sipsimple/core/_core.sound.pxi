@@ -1790,7 +1790,12 @@ cdef class TTYModulator:
                     raise PJSIPError("Could not create mem player", status)
                 self.trace("_core TTYModulator pjmedia_mem_player_set_eof_cb success")
                 self._slot = self.mixer._add_port(ua, self._pool, self._port)
+                if self._slot == -1:
+                    self.trace("bad ttymodulator slot")
+                else:
+                    self.trace("good ttymodulator slot")
             except:
+                self.trace("ttymodulator start got exception")
                 self.stop()
                 raise
             self._was_started = 1
