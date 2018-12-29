@@ -659,8 +659,8 @@ class TTYToneModulator(object):
             self._tty_modulator = TTYModulator(self.mixer, self.trace)
             self._tty_modulator.start()
             notification_center = NotificationCenter()
-            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
-                                                                                                                old_consumer_slot=None, new_consumer_slot=self._tty_modulator.slot))
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=False, producer_slot_changed=True,
+                                                                                                                old_producer_slot=None, new_producer_slot=self._tty_modulator.slot))
             self.trace("TTYToneModulator start done")
         except Exception as e:
             self.trace("TTYToneModulator exception {}".format(str(e)))
@@ -672,9 +672,9 @@ class TTYToneModulator(object):
             self._tty_modulator.stop()
             self._tty_modulator = None
             notification_center = NotificationCenter()
-            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=True, producer_slot_changed=False,
-                                                                                                                old_consumer_slot=old_slot,
-                                                                                                                new_consumer_slot=None))
+            notification_center.post_notification('AudioPortDidChangeSlots', sender=self, data=NotificationData(consumer_slot_changed=False, producer_slot_changed=True,
+                                                                                                                old_producer_slot=old_slot,
+                                                                                                                new_producer_slot=None))
             self.trace("TTYToneModulator stop done")
         except Exception as e:
             self.trace("TTYToneModulator exception {}".format(str(e)))

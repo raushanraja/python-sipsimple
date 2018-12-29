@@ -1682,13 +1682,13 @@ cdef class TTYDemodulator:
             pj_mutex_destroy(self._lock)
 
 cdef int TTYMmodulatorPlayerCallback(pjmedia_port *port, void *usr_data) with gil:
-    cdef object traceFile
+    #cdef object traceFile
     cdef object modulatorObj = <object>usr_data
 
-    traceFile = open('/root/sipsimple.log', 'a+')
-    traceFile.write('inside TTYMmodulatorPlayerCallback')
-    traceFile.write("\n")
-    traceFile.close()
+    #traceFile = open('/root/sipsimple.log', 'a+')
+    #traceFile.write('inside TTYMmodulatorPlayerCallback')
+    #traceFile.write("\n")
+    #traceFile.close()
 
     if modulatorObj is not None:
         modulatorObj.player_needs_more_data()
@@ -1808,7 +1808,7 @@ cdef class TTYModulator:
         cdef char ch
         cdef int i
         cdef char *cbuffer
-        self.trace("player_needs_more_data ")
+        #self.trace("player_needs_more_data ")
         memset(self.buffer, 2*8000*5, 0)
         if len(self.bytesToSend) > 0:
             i = 0
