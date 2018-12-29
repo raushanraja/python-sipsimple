@@ -1818,6 +1818,7 @@ cdef class TTYModulator:
                 ch = <char>self.bytesToSend.pop(0)
                 cbuffer[i] = ch
                 i = i + 1
+            self.trace("player_needs_more_data done left is {}".format(len(self.bytesToSend)))
 
     def send_text(self, char * text):
         cdef short buffer[2050]
