@@ -1770,6 +1770,7 @@ cdef class TTYModulator:
                                                         port_address)
                 if status != 0:
                     raise PJSIPError("Could not create mem player", status)
+                self.trace("_core TTYModulator pjmedia_mem_player_create success")
 
                 with nogil:
                     status = pjmedia_mem_player_set_eof_cb(self._port,
@@ -1777,6 +1778,7 @@ cdef class TTYModulator:
                                                             TTYMmodulatorPlayerCallback)
                 if status != 0:
                     raise PJSIPError("Could not create mem player", status)
+                self.trace("_core TTYModulator pjmedia_mem_player_set_eof_cb success")
                 self._slot = self.mixer._add_port(ua, self._pool, self._port)
             except:
                 self.stop()
