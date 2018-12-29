@@ -1802,14 +1802,16 @@ cdef class TTYModulator:
     def player_needs_more_data(self):
         cdef char ch
         cdef int i
+        cdef char *cbuffer
         self.trace("player_needs_more_data ")
         memset(self.buffer, 2*8000*5, 0)
         if len(self.bytesToSend) > 0:
             i = 0
+            cbuffer = <char *>self.buffer
             self.trace("player_needs_more_data bytes is {}".format(len(self.bytesToSend)))
             while i<2*8000*5 and len(self.bytesToSend) > 0:
                 ch = <char>self.bytesToSend.pop(0)
-                *(<char *>self.buffer[i]) = ch
+                cbuffer[i] = ch
                 i = i + 1
 
     def send_text(self, char * text):
