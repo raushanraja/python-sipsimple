@@ -1809,7 +1809,7 @@ cdef class TTYModulator:
             self.trace("player_needs_more_data bytes is {}".format(len(self.bytesToSend)))
             while i<2*8000*5 and len(self.bytesToSend) > 0:
                 ch = <char>self.bytesToSend.pop(0)
-                self.buffer[i] = ch
+                *(<char *>self.buffer[i]) = ch
                 i = i + 1
 
     def send_text(self, char * text):
