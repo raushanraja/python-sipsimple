@@ -1538,10 +1538,10 @@ cdef class TTYDemodulator:
             while count < num_bytes:
                 if self.tty_enabled:
                     obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1])
-                 else:
+                else:
                     tty_detect = check_for_tty(&self.obl_tty_detect, self.buffer[count], self.buffer[count+1])
                     if tty_detect == 1:
-                         self.tty_enabled = True
+                        self.tty_enabled = True
                 count = count + 2
             #data = <short *>self.buffer
             #obl_demodulate(&self.obl, data, num_samples)
