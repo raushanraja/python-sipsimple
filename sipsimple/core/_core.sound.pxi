@@ -1472,7 +1472,7 @@ cdef class TTYDemodulator:
 
         self._slot = -1
         obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
-        init_check_for_tty(&self.obl.tty_detect)
+        init_check_for_tty(&self.obl_tty_detect)
         self.obl.user_data = <void *>self
 
     def __init__(self, AudioMixer mixer, room_number, callback_func, trace_func):
