@@ -1182,6 +1182,8 @@ void obl_set_tx_amplitude_imbalance(OBL *obl, short one_amp, short zero_amp)
 	obl->mod_zero_amp = one_amp;
 }
 
+#define N 160
+#define SAMPLEFREQUENCY 8000
 
 double goertzelFilter(short * samples, double freq, int noOfSamples) {
     double s_prev = 0.0;
@@ -1208,9 +1210,6 @@ void init_check_for_tty(OBL_TTY_DETECT * obl_tty_detect)
 
 	memset(obl_tty_detect,0,sizeof(OBL_TTY_DETECT));
 }
-
-#define N 160
-#define SAMPLEFREQUENCY 8000
 
 int check_for_tty(OBL_TTY_DETECT * obl_tty_detect, char byte1, char byte2)
 {
