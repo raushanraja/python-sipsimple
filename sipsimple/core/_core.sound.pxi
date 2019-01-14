@@ -1423,7 +1423,7 @@ cdef int mem_capture_got_data(pjmedia_port *port, void *usr_data) with gil:
     cdef object myObj = <object>usr_data
     if myObj is not None:
         try:
-            myObj.say_hello()
+            myObj.process_data()
         except:
             pass
     return 0
@@ -1472,6 +1472,7 @@ cdef class TTYDemodulator:
 
         self._slot = -1
         obl_init(&self.obl, OBL_BAUD_45, TTYDemodulatorCallback)
+        init_check_for_tty(&self.obl.tty_detect)
         self.obl.user_data = <void *>self
 
     def __init__(self, AudioMixer mixer, room_number, callback_func, trace_func):
@@ -1484,6 +1485,7 @@ cdef class TTYDemodulator:
         self.output_file = open("{}.raw".format(room_number),"wb")
         self.trace = trace_func
         self.trace("tty __init__")
+        self.tty_enabled = False
 
     cdef PJSIPUA _check_ua(self):
         cdef PJSIPUA ua
@@ -1516,7 +1518,7 @@ cdef class TTYDemodulator:
         self.trace("inside on_callback for {}".format(c_data))
         self.callback_func(c_data)
 
-    def say_hello(self):
+    def process_data(self):
         cdef int num_bytes
         cdef int num_samples
         cdef object pyBuf
@@ -1524,6 +1526,7 @@ cdef class TTYDemodulator:
         cdef int count
         cdef char byte1
         cdef char byte2
+        cdef int tty_detect
         count = 0
         num_bytes = pjmedia_mem_capture_get_size(self._port)
         if num_bytes > 0:
@@ -1533,12 +1536,17 @@ cdef class TTYDemodulator:
             n = <object>num_bytes
             #self.trace("{} num  bytes".format(n))
             while count < num_bytes:
-                obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1])
+                if self.tty_enabled:
+                    obl_demodulate_packet(&self.obl, self.buffer[count], self.buffer[count+1])
+                 else:
+                    tty_detect = check_for_tty(&self.obl_tty_detect, self.buffer[count], self.buffer[count+1])
+                    if tty_detect == 1:
+                         self.tty_enabled = True
                 count = count + 2
             #data = <short *>self.buffer
             #obl_demodulate(&self.obl, data, num_samples)
-            pyBuf = MemBuf_init(self.buffer, num_bytes)
-            self.output_file.write(pyBuf)
+            #pyBuf = MemBuf_init(self.buffer, num_bytes)
+            #self.output_file.write(pyBuf)
             #self.trace("num_bytes {}".format(n))
 
     def test(self):

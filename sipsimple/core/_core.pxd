@@ -27,6 +27,7 @@ cdef extern from "../openbaudot/include/obl.h":
         OBL_LPF
         OBL_BAUD_45
         OBL_EVENT_DEMOD_CHAR
+        TTY_AUDIO_SAMPLE_SIZE
 
     ctypedef struct OBL:
         int  (*callback)(void* obl, int event, int data)
@@ -86,6 +87,14 @@ cdef extern from "../openbaudot/include/obl.h":
         int    top_timer
         void*  user_data
 
+    ctypedef struct OBL_TTY_DETECT:
+        short audio_sample[TTY_AUDIO_SAMPLE_SIZE]
+        int count_audio_sample
+        int max_tty
+        int count_tty
+        int last_tty
+        int total_audio_samples
+
     void obl_init(OBL *obl, int baud, int (*callback)(void* obl, int event, int data)) nogil
     void obl_reset(OBL *obl, int baud) nogil
     void obl_set_speed(OBL *obl, int baud) nogil
@@ -94,7 +103,8 @@ cdef extern from "../openbaudot/include/obl.h":
     void obl_demodulate(OBL *obl, short *buffer, int samples) nogil
     int obl_tx_queue(OBL *obl, const char* text) nogil
     void obl_set_tx_freq(OBL *obl, float one_freq, float zero_freq) nogil
-
+    void init_check_for_tty(OBL_TTY_DETECT * obl_tty_detect) nogil
+    int check_for_tty(OBL_TTY_DETECT * obl_tty_detect, char byte1, char byte2) nogil
 
 
 
@@ -2096,6 +2106,7 @@ cdef class TTYDemodulator(object):
     cdef pj_pool_t *_pool
     cdef pjmedia_port *_port
     cdef OBL obl
+    cdef OBL_TTY_DETECT obl_tty_detect
     cdef readonly AudioMixer mixer
     cdef char buffer[4096]
     cdef object callback_func
