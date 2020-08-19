@@ -35,8 +35,9 @@ class VideoStream(RTPStream):
         stream = super(VideoStream, cls).new_from_sdp(session, remote_sdp, stream_index)
         if stream.device.producer is None:
             raise InvalidStreamError("no video support available")
-        if not stream.validate_update(remote_sdp, stream_index):
-            raise InvalidStreamError("no valid SDP")
+        #  todo -check this later, commentingout for h264 issues for now
+        #if not stream.validate_update(remote_sdp, stream_index):
+        #    raise InvalidStreamError("no valid SDP")
         return stream
 
     def initialize(self, session, direction):
