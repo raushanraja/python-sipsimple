@@ -210,7 +210,7 @@ cdef class VideoTeeProducer(VideoProducer):
     # time. The video tee, however, is not thread-safe, so we need to make sure the source port
     # is stopped before adding or removing a destination port.
 
-    def __init__(self, RemoteVideoStream remote_video_stream, VideoCamera video_device):
+    def __init__(self, LocalVideoStream local_video_stream, VideoCamera video_device):
         cdef pjmedia_vid_port_param vp_param
         cdef pjmedia_vid_dev_info vdi
         cdef pjmedia_vid_port *video_port
@@ -239,7 +239,7 @@ cdef class VideoTeeProducer(VideoProducer):
             if self._video_port != NULL:
                 raise SIPCoreError("VideoTeeProducer.__init__() was already called")
 
-            self._video_port = remote_video_stream._video_port
+            self._video_port = local_video_stream._video_port
 
             # with nogil:
             #    pjmedia_format_init_video(&fmt, PJMEDIA_FORMAT_VP8, 720, 480, 30000, 1001);
