@@ -242,13 +242,8 @@ cdef class VideoTeeProducer(VideoProducer):
 
             self._video_port = remote_video_stream._video_port
 
-            fmt = self._video_port.info.fmt
-
-            fmt.det.vid.size.w = resolution.width
-            fmt.det.vid.size.h = resolution.height
-            # Set maximum fps
-            fmt.det.vid.fps.num = fps
-            fmt.det.vid.fps.denum = 1
+            with nogil:
+                pjmedia_format_init_video(&fmt, PJMEDIA_FORMAT_VP8, 720, 480, 30000, 1001);
 
             # Create video tee
             with nogil:

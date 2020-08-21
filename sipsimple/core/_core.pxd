@@ -695,6 +695,9 @@ cdef extern from "pjmedia.h":
     void pjmedia_vid_port_destroy(pjmedia_vid_port *vid_port) nogil
     pjmedia_vid_dev_stream *pjmedia_vid_port_get_stream(pjmedia_vid_port *vid_port) nogil
 
+    void pjmedia_format_init_video(pjmedia_format *fmt, unsigned int  fmt_id, unsigned width, unsigned height,
+                        unsigned fps_num, unsigned fps_denum) nogil
+
     # video tee
     int pjmedia_vid_tee_create(pj_pool_t *pool, pjmedia_format_ptr_const fmt, unsigned int max_dst_cnt, pjmedia_port **p_vid_tee) nogil
     int pjmedia_vid_tee_add_dst_port2(pjmedia_port *vid_tee, unsigned int option, pjmedia_port *port) nogil
