@@ -211,7 +211,7 @@ cdef class VideoTeeProducer(VideoProducer):
     # time. The video tee, however, is not thread-safe, so we need to make sure the source port
     # is stopped before adding or removing a destination port.
 
-    def __init__(self, RemoteVideoStream * remote_video_stream, object resolution, int fps):
+    def __init__(self, RemoteVideoStream remote_video_stream, object resolution, int fps):
         cdef pjmedia_vid_port_param vp_param
         cdef pjmedia_vid_dev_info vdi
         cdef pjmedia_vid_port *video_port
