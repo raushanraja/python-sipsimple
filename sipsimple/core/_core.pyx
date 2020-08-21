@@ -40,7 +40,7 @@ CORE_REVISION = 181
 __all__ = ["PJ_VERSION", "PJ_SVN_REVISION", "CORE_REVISION",
            "SIPCoreError", "PJSIPError", "PJSIPTLSError", "SIPCoreInvalidStateError",
            "AudioMixer", "ToneGenerator", "RecordingWaveFile", "WaveFile", "MixerPort", "TTYModulator", "TTYDemodulator",
-           "VideoTeeProducer", VideoCamera", "FrameBufferVideoRenderer",
+           "VideoTeeProducer", "VideoCamera", "FrameBufferVideoRenderer",
            "sip_status_messages",
            "BaseCredentials", "Credentials", "FrozenCredentials", "BaseSIPURI", "SIPURI", "FrozenSIPURI",
            "BaseHeader", "Header", "FrozenHeader",
