@@ -205,6 +205,9 @@ cdef class VideoConsumer:
     def close(self):
         raise NotImplementedError
 
+#define PJMEDIA_FOURCC(C1, C2, C3, C4) ( C4<<24 | C3<<16 | C2<<8 | C1 )
+#define PJMEDIA_FORMAT_PACK(C1, C2, C3, C4) PJMEDIA_FOURCC(C1, C2, C3, C4)
+#define PJMEDIA_FORMAT_VP8 PJMEDIA_FORMAT_PACK('L', 'V', 'P', '8'),
 
 cdef class VideoTeeProducer(VideoProducer):
     # NOTE: we use a video tee to be able to send the video to multiple consumers at the same
@@ -254,7 +257,7 @@ cdef class VideoTeeProducer(VideoProducer):
 
             # Connect capture and video tee ports
             with nogil:
-                status = pjmedia_vid_port_connect(video_port, video_tee, 0)
+                status = pjmedia_vid_port_connect(self._video_port, video_tee, 0)
             if status != 0:
                 raise PJSIPError("Could not connect video capture and tee ports", status)
             self.producer_port = self._video_tee
