@@ -262,6 +262,30 @@ cdef class VideoTeeProducer(VideoProducer):
             with nogil:
                 pj_mutex_unlock(lock)
 
+
+    cdef void add_dest(self, pjmedia_port *dest_port):
+        cdef int status
+        cdef pj_mutex_t *lock
+
+        lock = self._lock
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            if self._closed:
+                raise SIPCoreError("video device is closed")
+            producer_port = self.producer_port
+            with nogil:
+                status = pjmedia_vid_tee_add_dst_port2(producer_port, 0, dest_port)
+            if status != 0:
+                raise PJSIPError("Could not connect video consumer with producer", status)
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+
     property framerate:
 
         def __get__(self):

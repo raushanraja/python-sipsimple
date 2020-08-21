@@ -2180,6 +2180,7 @@ cdef class VideoTeeProducer(VideoProducer):
 
     cdef void _start(self)
     cdef void _stop(self)
+    cdef void add_dest(self, pjmedia_port *dest_port)
 
 cdef class VideoCamera(VideoProducer):
     cdef pjmedia_port *_video_tee
