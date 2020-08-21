@@ -205,16 +205,12 @@ cdef class VideoConsumer:
     def close(self):
         raise NotImplementedError
 
-#define PJMEDIA_FOURCC(C1, C2, C3, C4) ( C4<<24 | C3<<16 | C2<<8 | C1 )
-#define PJMEDIA_FORMAT_PACK(C1, C2, C3, C4) PJMEDIA_FOURCC(C1, C2, C3, C4)
-#define PJMEDIA_FORMAT_VP8 PJMEDIA_FORMAT_PACK('L', 'V', 'P', '8'),
-
 cdef class VideoTeeProducer(VideoProducer):
     # NOTE: we use a video tee to be able to send the video to multiple consumers at the same
     # time. The video tee, however, is not thread-safe, so we need to make sure the source port
     # is stopped before adding or removing a destination port.
 
-    def __init__(self, RemoteVideoStream remote_video_stream, object resolution, int fps):
+    def __init__(self, RemoteVideoStream remote_video_stream, VideoCamera video_device):
         cdef pjmedia_vid_port_param vp_param
         cdef pjmedia_vid_dev_info vdi
         cdef pjmedia_vid_port *video_port
@@ -245,8 +241,9 @@ cdef class VideoTeeProducer(VideoProducer):
 
             self._video_port = remote_video_stream._video_port
 
-            with nogil:
-                pjmedia_format_init_video(&fmt, PJMEDIA_FORMAT_VP8, 720, 480, 30000, 1001);
+            # with nogil:
+            #    pjmedia_format_init_video(&fmt, PJMEDIA_FORMAT_VP8, 720, 480, 30000, 1001);
+            fmt = video_device.fmt
 
             # Create video tee
             with nogil:
@@ -583,7 +580,7 @@ cdef class VideoCamera(VideoProducer):
 
             # Get format info
             fmt = vp_param.vidparam.fmt
-
+            self.fmt = fmt
             # Create video tee
             with nogil:
                 status = pjmedia_vid_tee_create(pool, &fmt, 255, &video_tee)

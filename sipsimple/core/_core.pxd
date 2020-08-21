@@ -695,8 +695,8 @@ cdef extern from "pjmedia.h":
     void pjmedia_vid_port_destroy(pjmedia_vid_port *vid_port) nogil
     pjmedia_vid_dev_stream *pjmedia_vid_port_get_stream(pjmedia_vid_port *vid_port) nogil
 
-    void pjmedia_format_init_video(pjmedia_format *fmt, unsigned int  fmt_id, unsigned width, unsigned height,
-                        unsigned fps_num, unsigned fps_denum) nogil
+    # void pjmedia_format_init_video(pjmedia_format *fmt, unsigned int  fmt_id, unsigned width, unsigned height,
+    #                    unsigned fps_num, unsigned fps_denum) nogil
 
     # video tee
     int pjmedia_vid_tee_create(pj_pool_t *pool, pjmedia_format_ptr_const fmt, unsigned int max_dst_cnt, pjmedia_port **p_vid_tee) nogil
@@ -2185,6 +2185,7 @@ cdef class VideoCamera(VideoProducer):
     cdef pjmedia_port *_video_tee
     cdef readonly unicode name
     cdef readonly unicode real_name
+    cdef pjmedia_format fmt
 
     cdef void _start(self)
     cdef void _stop(self)
