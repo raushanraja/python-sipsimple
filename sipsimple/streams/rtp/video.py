@@ -50,7 +50,7 @@ class VideoStream(RTPStream):
                 raise RuntimeError("VideoStream.start() may only be called in the INITIALIZED state")
             settings = SIPSimpleSettings()
             self._transport.start(local_sdp, remote_sdp, stream_index, timeout=settings.rtp.timeout)
-            #self._transport.local_video.producer = self.device.producer
+            self._transport.local_video.producer = self.device.producer
             self._save_remote_sdp_rtp_info(remote_sdp, stream_index)
             self._check_hold(self._transport.direction, True)
             if self._try_ice and self._ice_state == "NULL":

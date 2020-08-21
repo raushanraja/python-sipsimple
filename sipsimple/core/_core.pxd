@@ -2170,6 +2170,14 @@ cdef class VideoProducer(object):
     cdef void _add_consumer(self, VideoConsumer consumer)
     cdef void _remove_consumer(self, VideoConsumer consumer)
 
+cdef class VideoTeeProducer(VideoProducer):
+    cdef pjmedia_port *_video_tee
+    cdef readonly unicode name
+    cdef readonly unicode real_name
+
+    cdef void _start(self)
+    cdef void _stop(self)
+
 cdef class VideoCamera(VideoProducer):
     cdef pjmedia_port *_video_tee
     cdef readonly unicode name

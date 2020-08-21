@@ -206,6 +206,292 @@ cdef class VideoConsumer:
         raise NotImplementedError
 
 
+cdef class VideoTeeProducer(VideoProducer):
+    # NOTE: we use a video tee to be able to send the video to multiple consumers at the same
+    # time. The video tee, however, is not thread-safe, so we need to make sure the source port
+    # is stopped before adding or removing a destination port.
+
+    def __init__(self, object remote_video_stream, object resolution, int fps):
+        cdef pjmedia_vid_port_param vp_param
+        cdef pjmedia_vid_dev_info vdi
+        cdef pjmedia_vid_port *video_port
+        cdef pjmedia_port *video_tee
+        cdef pjmedia_format fmt
+        cdef pj_mutex_t *lock
+        cdef pj_pool_t *pool
+        cdef int status
+        cdef int device_id
+        cdef int dev_count
+        cdef int width
+        cdef int height
+        cdef PJSIPUA ua
+
+        super(VideoTeeProducer, self).__init__()
+
+        ua = _get_ua()
+        lock = self._lock
+        pool = self._pool
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            if self._video_port != NULL:
+                raise SIPCoreError("VideoTeeProducer.__init__() was already called")
+
+            self._video_port = remote_video_stream._video_port
+
+            fmt = self._video_port.info.fmt
+
+            fmt.det.vid.size.w = resolution.width
+            fmt.det.vid.size.h = resolution.height
+            # Set maximum fps
+            fmt.det.vid.fps.num = fps
+            fmt.det.vid.fps.denum = 1
+
+            # Create video tee
+            with nogil:
+                status = pjmedia_vid_tee_create(pool, &fmt, 255, &video_tee)
+            if status != 0:
+                raise PJSIPError("Could not create video tee", status)
+            self._video_tee = video_tee
+
+            # Connect capture and video tee ports
+            with nogil:
+                status = pjmedia_vid_port_connect(video_port, video_tee, 0)
+            if status != 0:
+                raise PJSIPError("Could not connect video capture and tee ports", status)
+            self.producer_port = self._video_tee
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    property framerate:
+
+        def __get__(self):
+            cdef int status
+            cdef pj_mutex_t *lock
+            cdef pjmedia_vid_dev_stream *stream
+            cdef pjmedia_vid_dev_param param
+            cdef PJSIPUA ua
+
+            ua = _get_ua()
+            lock = self._lock
+
+            with nogil:
+                status = pj_mutex_lock(lock)
+            if status != 0:
+                raise PJSIPError("failed to acquire lock", status)
+            if self._closed:
+                return None
+            stream = pjmedia_vid_port_get_stream(self._video_port)
+            if stream == NULL:
+                return None
+            try:
+                with nogil:
+                    status = pjmedia_vid_dev_stream_get_param(stream, &param)
+                if status != 0:
+                    return None
+                return float(param.fmt.det.vid.fps.num) / param.fmt.det.vid.fps.denum
+            finally:
+                with nogil:
+                    pj_mutex_unlock(lock)
+
+    property framesize:
+
+        def __get__(self):
+            cdef int status
+            cdef pj_mutex_t *lock
+            cdef pjmedia_vid_dev_stream *stream
+            cdef pjmedia_vid_dev_param param
+            cdef PJSIPUA ua
+
+            ua = _get_ua()
+            lock = self._lock
+
+            with nogil:
+                status = pj_mutex_lock(lock)
+            if status != 0:
+                raise PJSIPError("failed to acquire lock", status)
+            if self._closed:
+                return (-1, -1)
+            stream = pjmedia_vid_port_get_stream(self._video_port)
+            if stream == NULL:
+                return (-1, -1)
+            try:
+                with nogil:
+                    status = pjmedia_vid_dev_stream_get_param(stream, &param)
+                if status != 0:
+                    return (-1, -1)
+                return (param.fmt.det.vid.size.w, param.fmt.det.vid.size.h)
+            finally:
+                with nogil:
+                    pj_mutex_unlock(lock)
+
+    def start(self):
+        cdef int status
+        cdef pj_mutex_t *lock
+
+        lock = self._lock
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            if self._closed:
+                raise SIPCoreError("video device is closed")
+            if self._started:
+                return
+            if self._consumers:
+                self._start()
+            self._started = 1
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    def stop(self):
+        cdef int status
+        cdef pj_mutex_t *lock
+
+        lock = self._lock
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            if self._closed:
+                raise SIPCoreError("video device is closed")
+            if not self._started:
+                return
+            self._stop()
+            self._started = 0
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    def close(self):
+        cdef int status
+        cdef pj_mutex_t *lock
+        cdef pj_mutex_t *global_lock
+        cdef PJSIPUA ua
+
+        try:
+            ua = _get_ua()
+        except:
+            return
+
+        global_lock = ua.video_lock
+        lock = self._lock
+
+        with nogil:
+            status = pj_mutex_lock(global_lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire global video lock", status)
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            pj_mutex_unlock(global_lock)
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            if self._closed:
+                return
+            self.stop()
+            for c in self._consumers.copy():
+                c.producer = None
+            self._closed = 1
+            if self._video_port != NULL:
+                with nogil:
+                    pjmedia_vid_port_stop(self._video_port)
+                    pjmedia_vid_port_disconnect(self._video_port)
+                    pjmedia_vid_port_destroy(self._video_port)
+                    if self._video_tee != NULL:
+                        pjmedia_port_destroy(self._video_tee)
+                self._video_port = NULL
+                self._video_tee = NULL
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+                pj_mutex_unlock(global_lock)
+
+    cdef void _add_consumer(self, VideoConsumer consumer):
+        cdef int status
+        cdef pj_mutex_t *lock
+        cdef pjmedia_port *consumer_port
+        cdef pjmedia_port *producer_port
+
+        lock = self._lock
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            if self._closed:
+                raise SIPCoreError("video device is closed")
+            if consumer in self._consumers:
+                return
+            consumer_port = consumer.consumer_port
+            producer_port = self.producer_port
+            with nogil:
+                status = pjmedia_vid_tee_add_dst_port2(producer_port, 0, consumer_port)
+            if status != 0:
+                raise PJSIPError("Could not connect video consumer with producer", status)
+            self._consumers.add(consumer)
+            if self._started:
+                self._start()
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    cdef void _remove_consumer(self, VideoConsumer consumer):
+        cdef int status
+        cdef pj_mutex_t *lock
+
+        lock = self._lock
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            if self._closed:
+                raise SIPCoreError("video device is closed")
+            if consumer not in self._consumers:
+                return
+            consumer_port = consumer.consumer_port
+            producer_port = self.producer_port
+            with nogil:
+                status = pjmedia_vid_tee_remove_dst_port(producer_port, consumer_port)
+            if status != 0:
+                raise PJSIPError("Could not disconnect video consumer from producer", status)
+            self._consumers.remove(consumer)
+            if not self._consumers:
+                self._stop()
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    cdef void _start(self):
+        # No need to hold the lock, this function is always called with it held
+        if self._running:
+            return
+        _start_video_port(self._video_port)
+        self._running = 1
+
+    cdef void _stop(self):
+        # No need to hold the lock, this function is always called with it held
+        if not self._running:
+            return
+        _stop_video_port(self._video_port)
+        self._running = 0
+
+    def __dealloc__(self):
+        self.close()
+
+
 cdef class VideoCamera(VideoProducer):
     # NOTE: we use a video tee to be able to send the video to multiple consumers at the same
     # time. The video tee, however, is not thread-safe, so we need to make sure the source port
