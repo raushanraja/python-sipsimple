@@ -242,9 +242,10 @@ cdef class VideoConnector:
         cdef pj_pool_t *pool
         cdef pjmedia_port *producer_port
         cdef pjmedia_port *consumer_port
-        cdef pjmedia_master_port * master_port
+        cdef pjmedia_master_port ** master_port_address
 
         self._master_port = NULL
+        master_port_address = &self._master_port
 
         producer_port = remote_video_stream.producer_port
         consumer_port = local_video_stream.consumer_port
@@ -259,7 +260,7 @@ cdef class VideoConnector:
 
         try:
             with nogil:
-                status = pjmedia_master_port_create(pool, consumer_port, producer_port, 0, &master_port)
+                status = pjmedia_master_port_create(pool, consumer_port, producer_port, 0, self._master_port)
             #if status != 0:
             #    raise PJSIPError("Could not create master port tee", status)
             #self._master_port = master_port
