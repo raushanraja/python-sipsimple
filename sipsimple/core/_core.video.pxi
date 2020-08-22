@@ -278,13 +278,9 @@ cdef class VideoConnector:
     def stop(self):
         cdef pjmedia_master_port * master_port
         master_port = self._master_port
-        with nogil:
-            status = pjmedia_master_port_stop(_master_port)
-        if status != 0:
-            raise PJSIPError("Could not stop master port tee", status)
         if self._master_port != NULL:
             with nogil:
-                pjmedia_master_port_destroy(self._master_port)
+                pjmedia_master_port_destroy(master_port)
             self._master_port = NULL
 
 cdef class VideoTeeProducer(VideoProducer):
