@@ -205,6 +205,79 @@ cdef class VideoConsumer:
     def close(self):
         raise NotImplementedError
 
+cdef class VideoConnector:
+    def __cinit__(self, *args, **kwargs):
+        cdef PJSIPUA ua
+        cdef pj_pool_t *pool
+        cdef int status
+        cdef bytes lock_name, pool_name
+
+        ua = _get_ua()
+        lock_name = b"VideoConnector_lock_%d" % id(self)
+        pool_name = b"VideoConnector_pool_%d" % id(self)
+
+        pool = ua.create_memory_pool(pool_name, 4096, 4096)
+        self._pool = pool
+
+        status = pj_mutex_create_recursive(pool, lock_name, &self._lock)
+        if status != 0:
+            raise PJSIPError("Could not create lock", status)
+        self._started = 0
+        self._closed = 0
+
+    def __dealloc__(self):
+        # cython will always call the __dealloc__ method of the parent class *after* the child's
+        # __dealloc__ was executed
+        if self._master_port != NULL:
+            pjmedia_master_port_destroy(self._master_port)
+        cdef PJSIPUA ua
+        try:
+            ua = _get_ua()
+        except:
+            return
+        if self._lock != NULL:
+            pj_mutex_destroy(self._lock)
+        ua.release_memory_pool(self._pool)
+
+    def __init__(self, RemoteVideoStream remote_video_stream, LocalVideoStream local_video_stream):
+        cdef pj_mutex_t *lock
+        cdef pj_pool_t *pool
+        cdef pjmedia_port *producer
+        cdef pjmedia_port *consumer
+        cdef pjmedia_master_port * master_port
+
+        self._master_port = NULL
+
+        producer = remote_video_stream.producer
+        consumer = local_video_stream.consumer
+
+        lock = self._lock
+        pool = self._pool
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+
+        with nogil:
+            status = pjmedia_master_port_create(pool, producer, consumer, 0, &master_port)
+        if status != 0:
+            raise PJSIPError("Could not create master port tee", status)
+        self._master_port = master_port
+
+    def start():
+        with nogil:
+            status = pjmedia_master_port_start(self._master_port)
+        if status != 0:
+            raise PJSIPError("Could not start master port tee", status)
+
+    def stop():
+        with nogil:
+            status = pjmedia_master_port_stop(self._master_port)
+        if status != 0:
+            raise PJSIPError("Could not stop master port tee", status)
+
+
 cdef class VideoTeeProducer(VideoProducer):
     # NOTE: we use a video tee to be able to send the video to multiple consumers at the same
     # time. The video tee, however, is not thread-safe, so we need to make sure the source port
@@ -255,7 +328,7 @@ cdef class VideoTeeProducer(VideoProducer):
 
             # Connect capture and video tee ports
             with nogil:
-                status = pjmedia_vid_port_connect(remote_port, video_tee, 0)
+                status = pjmedia_vid_port_connect(self._video_port, video_tee, 0)
             if status != 0:
                 raise PJSIPError("Could not connect video capture and tee ports", status)
             self.producer_port = self._video_tee
