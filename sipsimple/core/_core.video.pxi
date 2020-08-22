@@ -258,6 +258,7 @@ cdef class VideoConnector:
             raise PJSIPError("failed to acquire lock", status)
 
         try:
+            pass
             #with nogil:
             #    status = pjmedia_master_port_create(pool, consumer_port, producer_port, 0, &master_port)
             #if status != 0:
