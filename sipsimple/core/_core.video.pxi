@@ -215,6 +215,7 @@ cdef class VideoTeeProducer(VideoProducer):
         cdef pjmedia_vid_dev_info vdi
         cdef pjmedia_vid_port *video_port
         cdef pjmedia_port *video_tee
+        cdef pjmedia_port *remote_port
         cdef pjmedia_format fmt
         cdef pj_mutex_t *lock
         cdef pj_pool_t *pool
@@ -239,7 +240,7 @@ cdef class VideoTeeProducer(VideoProducer):
             if self._video_port != NULL:
                 raise SIPCoreError("VideoTeeProducer.__init__() was already called")
 
-            self._video_port = remote_video_stream.producer_port
+            remote_port = remote_video_stream.producer_port
 
             # with nogil:
             #    pjmedia_format_init_video(&fmt, PJMEDIA_FORMAT_VP8, 720, 480, 30000, 1001);
@@ -254,7 +255,7 @@ cdef class VideoTeeProducer(VideoProducer):
 
             # Connect capture and video tee ports
             with nogil:
-                status = pjmedia_vid_port_connect(self._video_port, video_tee, 0)
+                status = pjmedia_vid_port_connect(remote_port, video_tee, 0)
             if status != 0:
                 raise PJSIPError("Could not connect video capture and tee ports", status)
             self.producer_port = self._video_tee
