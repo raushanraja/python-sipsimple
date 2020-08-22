@@ -70,8 +70,9 @@
 #include <pjmedia/transport_srtp.h>
 #include <pjmedia/transport_zrtp.h>
 #include <pjmedia/transport_udp.h>
-#include <pjmedia/vid_port.h>
 #include <pjmedia/vid_codec.h>
+#include <pjmedia/vid_conf.h>
+#include <pjmedia/vid_port.h>
 #include <pjmedia/vid_stream.h>
 #include <pjmedia/vid_tee.h>
 #include <pjmedia/wav_playlist.h>
