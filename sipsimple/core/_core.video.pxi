@@ -265,13 +265,13 @@ cdef class VideoConnector:
             raise PJSIPError("Could not create master port tee", status)
         self._master_port = master_port
 
-    def start():
+    def start(self):
         with nogil:
             status = pjmedia_master_port_start(self._master_port)
         if status != 0:
             raise PJSIPError("Could not start master port tee", status)
 
-    def stop():
+    def stop(self):
         with nogil:
             status = pjmedia_master_port_stop(self._master_port)
         if status != 0:
