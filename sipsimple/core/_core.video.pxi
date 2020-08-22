@@ -228,8 +228,6 @@ cdef class VideoConnector:
     def __dealloc__(self):
         # cython will always call the __dealloc__ method of the parent class *after* the child's
         # __dealloc__ was executed
-        if self._master_port != NULL:
-            pjmedia_master_port_destroy(self._master_port)
         cdef PJSIPUA ua
         try:
             ua = _get_ua()
@@ -242,14 +240,14 @@ cdef class VideoConnector:
     def __init__(self, RemoteVideoStream remote_video_stream, LocalVideoStream local_video_stream):
         cdef pj_mutex_t *lock
         cdef pj_pool_t *pool
-        cdef pjmedia_port *producer
-        cdef pjmedia_port *consumer
+        cdef pjmedia_port *producer_port
+        cdef pjmedia_port *consumer_port
         cdef pjmedia_master_port * master_port
 
         self._master_port = NULL
 
-        producer = remote_video_stream.producer
-        consumer = local_video_stream.consumer
+        producer_port = remote_video_stream.producer_port
+        consumer_port = local_video_stream.consumer_port
 
         lock = self._lock
         pool = self._pool
@@ -260,7 +258,7 @@ cdef class VideoConnector:
             raise PJSIPError("failed to acquire lock", status)
 
         with nogil:
-            status = pjmedia_master_port_create(pool, producer, consumer, 0, &master_port)
+            status = pjmedia_master_port_create(pool, producer_port, consumer_port, 0, &master_port)
         if status != 0:
             raise PJSIPError("Could not create master port tee", status)
         self._master_port = master_port
@@ -276,7 +274,9 @@ cdef class VideoConnector:
             status = pjmedia_master_port_stop(self._master_port)
         if status != 0:
             raise PJSIPError("Could not stop master port tee", status)
-
+        if self._master_port != NULL:
+            pjmedia_master_port_destroy(self._master_port)
+            self._master_port = NULL
 
 cdef class VideoTeeProducer(VideoProducer):
     # NOTE: we use a video tee to be able to send the video to multiple consumers at the same
