@@ -259,7 +259,7 @@ cdef class VideoConnector:
 
         try:
             with nogil:
-                status = pjmedia_master_port_create(pool, producer_port, consumer_port, 0, &master_port)
+                status = pjmedia_master_port_create(pool, consumer_port, producer_port, 0, &master_port)
             if status != 0:
                 raise PJSIPError("Could not create master port tee", status)
             self._master_port = master_port
