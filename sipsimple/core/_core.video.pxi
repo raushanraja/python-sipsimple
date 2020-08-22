@@ -258,11 +258,11 @@ cdef class VideoConnector:
             raise PJSIPError("failed to acquire lock", status)
 
         try:
-            with nogil:
-                status = pjmedia_master_port_create(pool, consumer_port, producer_port, 0, &master_port)
-            if status != 0:
-                raise PJSIPError("Could not create master port tee", status)
-            self._master_port = master_port
+            #with nogil:
+            #    status = pjmedia_master_port_create(pool, consumer_port, producer_port, 0, &master_port)
+            #if status != 0:
+            #    raise PJSIPError("Could not create master port tee", status)
+            #self._master_port = master_port
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
