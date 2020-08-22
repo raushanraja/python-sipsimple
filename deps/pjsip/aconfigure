@@ -6664,7 +6664,7 @@ cat >$CONFIG_STATUS <<_ASEOF || as_write_fail=1
 # Compiler output produced by configure, useful for debugging
 # configure, is in config.log if it exists.
 
-debug=false
+debug=true
 ac_cs_recheck=false
 ac_cs_silent=false
 
