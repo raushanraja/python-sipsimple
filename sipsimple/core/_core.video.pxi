@@ -239,7 +239,7 @@ cdef class VideoTeeProducer(VideoProducer):
             if self._video_port != NULL:
                 raise SIPCoreError("VideoTeeProducer.__init__() was already called")
 
-            self._video_port = remote_video_stream._video_port
+            self._video_port = remote_video_stream.producer_port
 
             # with nogil:
             #    pjmedia_format_init_video(&fmt, PJMEDIA_FORMAT_VP8, 720, 480, 30000, 1001);
