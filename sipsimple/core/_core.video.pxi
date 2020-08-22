@@ -257,25 +257,34 @@ cdef class VideoConnector:
         if status != 0:
             raise PJSIPError("failed to acquire lock", status)
 
-        with nogil:
-            status = pjmedia_master_port_create(pool, producer_port, consumer_port, 0, &master_port)
-        if status != 0:
-            raise PJSIPError("Could not create master port tee", status)
-        self._master_port = master_port
+        try:
+            with nogil:
+                status = pjmedia_master_port_create(pool, producer_port, consumer_port, 0, &master_port)
+            if status != 0:
+                raise PJSIPError("Could not create master port tee", status)
+            self._master_port = master_port
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
 
     def start(self):
+        cdef pjmedia_master_port * master_port
+        master_port = self._master_port
         with nogil:
-            status = pjmedia_master_port_start(self._master_port)
+            status = pjmedia_master_port_start(master_port)
         if status != 0:
             raise PJSIPError("Could not start master port tee", status)
 
     def stop(self):
+        cdef pjmedia_master_port * master_port
+        master_port = self._master_port
         with nogil:
-            status = pjmedia_master_port_stop(self._master_port)
+            status = pjmedia_master_port_stop(_master_port)
         if status != 0:
             raise PJSIPError("Could not stop master port tee", status)
         if self._master_port != NULL:
-            pjmedia_master_port_destroy(self._master_port)
+            with nogil:
+                pjmedia_master_port_destroy(self._master_port)
             self._master_port = NULL
 
 cdef class VideoTeeProducer(VideoProducer):
