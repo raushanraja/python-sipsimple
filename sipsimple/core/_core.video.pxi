@@ -280,7 +280,7 @@ cdef class VideoConnector:
         master_port = self._master_port
         if self._master_port != NULL:
             with nogil:
-                pjmedia_master_port_destroy(master_port)
+                pjmedia_master_port_destroy(master_port, 0)
             self._master_port = NULL
 
 cdef class VideoTeeProducer(VideoProducer):
