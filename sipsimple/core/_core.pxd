@@ -2174,6 +2174,11 @@ cdef class VideoProducer(object):
     cdef void _remove_consumer(self, VideoConsumer consumer)
 
 cdef class VideoConnector:
+    cdef pj_pool_t *_pool
+    cdef pj_mutex_t *_lock
+    cdef int _running
+    cdef int _started
+    cdef int _closed
     cdef pjmedia_master_port *_master_port
 
 
