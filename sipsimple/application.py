@@ -28,7 +28,7 @@ from sipsimple.addressbook import AddressbookManager
 from sipsimple.audio import AudioDevice, RootAudioBridge
 from sipsimple.configuration import ConfigurationManager
 from sipsimple.configuration.settings import SIPSimpleSettings
-from sipsimple.core import AudioMixer, Engine
+from sipsimple.core import AudioMixer, VideoMixer, Engine
 from sipsimple.lookup import DNSManager
 from sipsimple.session import SessionManager
 from sipsimple.storage import ISIPSimpleStorage, ISIPSimpleApplicationDataStorage
@@ -66,6 +66,7 @@ class SIPApplication(object):
     alert_audio_bridge = ApplicationAttribute(value=None)
     voice_audio_device = ApplicationAttribute(value=None)
     voice_audio_bridge = ApplicationAttribute(value=None)
+    video_mixer = ApplicationAttribute(value=None)
 
     video_device = ApplicationAttribute(value=None)
 
@@ -231,7 +232,9 @@ class SIPApplication(object):
             output_device = u'system_default'
         tail_length = settings.audio.echo_canceller.tail_length if settings.audio.echo_canceller.enabled else 0
         voice_mixer = AudioMixer(input_device, output_device, settings.audio.sample_rate, tail_length)
+        video_mixer = VideoMixer()
         voice_mixer.muted = settings.audio.muted
+        self.video_mixer = video_mixer
         self.voice_audio_device = AudioDevice(voice_mixer)
         self.voice_audio_bridge = RootAudioBridge(voice_mixer)
         self.voice_audio_bridge.add(self.voice_audio_device)
