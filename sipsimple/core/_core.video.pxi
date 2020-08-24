@@ -247,11 +247,6 @@ cdef class VideoMixer:
         cdef pjmedia_vid_conf **conf_bridge_address
         cdef bytes conf_pool_name, snd_pool_name
         cdef PJSIPUA ua
-        cdef pjmedia_vid_conf_setting conf_setting
-
-        conf_setting.max_slot_cnt = 32
-        conf_setting.frame_rate = 60
-        conf_setting.layout = PJMEDIA_VID_CONF_LAYOUT_DEFAULT
 
         ua = _get_ua()
         conf_bridge_address = &self._obj
@@ -271,7 +266,7 @@ cdef class VideoMixer:
         conf_pool = ua.create_memory_pool(conf_pool_name, 4096, 4096)
         self._conf_pool = conf_pool
         with nogil:
-            status = pjmedia_vid_conf_create(conf_pool, &conf_setting, conf_bridge_address)
+            status = pjmedia_vid_conf_create(conf_pool, NULL, conf_bridge_address)
         if status != 0:
             raise PJSIPError("Could not create video mixer", status)
         _add_handler(_VideoMixer_dealloc_handler, self, &_dealloc_handler_queue)
