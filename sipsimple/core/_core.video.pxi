@@ -340,9 +340,8 @@ cdef class VideoMixer:
             raise PJSIPError("failed to acquire lock", status)
         try:
             conf_bridge = self._obj
-
             with nogil:
-                status = pjmedia_vid_conf_add_port(conf_bridge, pool, port, NULL, &slot)
+                status = pjmedia_vid_conf_add_port(conf_bridge, pool, port, NULL, NULL, &slot)
             if status != 0:
                 raise PJSIPError("Could not add video object to video mixer", status)
             self.used_slot_count += 1
