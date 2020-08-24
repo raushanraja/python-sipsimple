@@ -1,4 +1,4 @@
-/* $Id: converter.c 4412 2013-03-05 03:12:32Z riza $ */
+/* $Id$ */
 /*
  * Copyright (C) 2010-2011 Teluu Inc. (http://www.teluu.com)
  *
@@ -19,7 +19,6 @@
 #include <pjmedia/converter.h>
 #include <pj/assert.h>
 #include <pj/errno.h>
-#include <pj/log.h>
 
 #define THIS_FILE	"converter.c"
 
@@ -30,12 +29,14 @@ struct pjmedia_converter_mgr
 
 static pjmedia_converter_mgr *converter_manager_instance;
 
-#if PJMEDIA_HAS_LIBSWSCALE && PJMEDIA_HAS_LIBAVUTIL
+#if defined(PJMEDIA_HAS_VIDEO) && (PJMEDIA_HAS_VIDEO != 0) && \
+    defined(PJMEDIA_HAS_LIBSWSCALE) && (PJMEDIA_HAS_LIBSWSCALE != 0)
 PJ_DECL(pj_status_t)
 pjmedia_libswscale_converter_init(pjmedia_converter_mgr *mgr);
 #endif
 
-#if defined(PJMEDIA_HAS_LIBYUV) && PJMEDIA_HAS_LIBYUV != 0
+#if defined(PJMEDIA_HAS_VIDEO) && (PJMEDIA_HAS_VIDEO != 0) && \
+    defined(PJMEDIA_HAS_LIBYUV) && (PJMEDIA_HAS_LIBYUV != 0)
 PJ_DECL(pj_status_t)
 pjmedia_libyuv_converter_init(pjmedia_converter_mgr *mgr);
 #endif
@@ -52,19 +53,21 @@ PJ_DEF(pj_status_t) pjmedia_converter_mgr_create(pj_pool_t *pool,
     if (!converter_manager_instance)
 	converter_manager_instance = mgr;
 
-#if defined(PJMEDIA_HAS_LIBYUV) && PJMEDIA_HAS_LIBYUV != 0
-    status = pjmedia_libyuv_converter_init(mgr);
-    if (status != PJ_SUCCESS) {
-	PJ_PERROR(4,(THIS_FILE, status,
-		     "Error initializing libyuv converter"));
-    }
-#endif
-
-#if PJMEDIA_HAS_LIBSWSCALE && PJMEDIA_HAS_LIBAVUTIL
+#if defined(PJMEDIA_HAS_VIDEO) && (PJMEDIA_HAS_VIDEO != 0) && \
+    defined(PJMEDIA_HAS_LIBSWSCALE) && (PJMEDIA_HAS_LIBSWSCALE != 0)
     status = pjmedia_libswscale_converter_init(mgr);
     if (status != PJ_SUCCESS) {
 	PJ_PERROR(4,(THIS_FILE, status,
 		     "Error initializing libswscale converter"));
+    }
+#endif
+
+#if defined(PJMEDIA_HAS_VIDEO) && (PJMEDIA_HAS_VIDEO != 0) && \
+    defined(PJMEDIA_HAS_LIBYUV) && (PJMEDIA_HAS_LIBYUV != 0)
+    status = pjmedia_libyuv_converter_init(mgr);
+    if (status != PJ_SUCCESS) {
+	PJ_PERROR(4,(THIS_FILE, status,
+		     "Error initializing libyuv converter"));
     }
 #endif
 
@@ -120,7 +123,7 @@ pjmedia_converter_mgr_register_factory(pjmedia_converter_mgr *mgr,
 
     pf = mgr->factory_list.next;
     while (pf != &mgr->factory_list) {
-	if (pf->priority < factory->priority)
+	if (pf->priority > factory->priority)
 	    break;
 	pf = pf->next;
     }
@@ -171,25 +174,8 @@ PJ_DEF(pj_status_t) pjmedia_converter_create(pjmedia_converter_mgr *mgr,
     if (status != PJ_SUCCESS)
 	return status;
 
-    if (param->src.type == PJMEDIA_TYPE_VIDEO) {
-        char src_fourcc_name[5];
-        char dst_fourcc_name[5];
-        PJ_LOG(4, (THIS_FILE, "Converter %p (%s) created for video: %dx%d %s -> %dx%d %s",
-                              cv,
-                              f->name,
-                              param->src.det.vid.size.w,
-                              param->src.det.vid.size.h,
-                              pjmedia_fourcc_name(param->src.id, src_fourcc_name),
-                              param->dst.det.vid.size.w,
-                              param->dst.det.vid.size.h,
-                              pjmedia_fourcc_name(param->dst.id, dst_fourcc_name)));
-    } else if (param->src.type == PJMEDIA_TYPE_AUDIO) {
-        PJ_LOG(4, (THIS_FILE, "Converter %p created for audio", cv));
-    } else {
-        PJ_LOG(4, (THIS_FILE, "Converter %p created for unknown", cv));
-    }
-
     *p_cv = cv;
+
     return PJ_SUCCESS;
 }
 
@@ -202,8 +188,23 @@ PJ_DEF(pj_status_t) pjmedia_converter_convert(pjmedia_converter *cv,
 
 PJ_DEF(void) pjmedia_converter_destroy(pjmedia_converter *cv)
 {
-    PJ_LOG(4, (THIS_FILE, "Converter %p destroyed", cv));
     (*cv->op->destroy)(cv);
 }
 
+PJ_DEF(pj_status_t) pjmedia_converter_convert2(
+				    pjmedia_converter	    *cv,
+				    pjmedia_frame	    *src_frame,
+				    const pjmedia_rect_size *src_frame_size,
+				    const pjmedia_coord	    *src_pos,
+				    pjmedia_frame	    *dst_frame,
+				    const pjmedia_rect_size *dst_frame_size,
+				    const pjmedia_coord	    *dst_pos,
+				    void		    *param)
+{
+    if (!cv->op->convert2)
+	return PJ_ENOTSUP;
+
+    return (*cv->op->convert2)(cv, src_frame, src_frame_size, src_pos,
+			       dst_frame, dst_frame_size, dst_pos, param);
+}
 
