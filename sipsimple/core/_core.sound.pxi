@@ -1371,6 +1371,22 @@ cdef int _AudioMixer_dealloc_handler(object obj) except -1:
     finally:
         pj_mutex_unlock(mixer._lock)
 
+cdef int _VideoMixer_dealloc_handler(object obj) except -1:
+    cdef int status
+    cdef VideoMixer mixer = obj
+    cdef PJSIPUA ua
+
+    ua = _get_ua()
+
+    status = pj_mutex_lock(mixer._lock)
+    if status != 0:
+        raise PJSIPError("failed to acquire lock", status)
+    try:
+        mixer._connected_slots = list()
+        mixer.used_slot_count = 0
+    finally:
+        pj_mutex_unlock(mixer._lock)
+
 cdef int cb_play_wav_eof(pjmedia_port *port, void *user_data) with gil:
     cdef Timer timer
     cdef WaveFile wav_file

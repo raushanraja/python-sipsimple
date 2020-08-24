@@ -2029,6 +2029,23 @@ cdef class AudioMixer(object):
     cdef int _remove_port(self, PJSIPUA ua, unsigned int slot) except -1 with gil
     cdef int _cb_postpoll_stop_sound(self, timer) except -1
 
+cdef class VideoMixer(object):
+    # attributes
+    cdef bint _muted
+    cdef pj_mutex_t *_lock
+    cdef pj_pool_t *_conf_pool
+    cdef pjmedia_vid_conf *_obj
+    cdef list _connected_slots
+    cdef readonly int ec_tail_length
+    cdef readonly int sample_rate
+    cdef readonly int slot_count
+    cdef readonly int used_slot_count
+
+    # private methods
+    cdef int _add_port(self, PJSIPUA ua, pj_pool_t *pool, pjmedia_port *port) except -1 with gil
+    cdef int _remove_port(self, PJSIPUA ua, unsigned int slot) except -1 with gil
+
+
 cdef class ToneGenerator(object):
     # attributes
     cdef int _slot
@@ -2089,6 +2106,7 @@ cdef class MixerPort(object):
 
 cdef int _AudioMixer_dealloc_handler(object obj) except -1
 cdef int cb_play_wav_eof(pjmedia_port *port, void *user_data) with gil
+cdef int _VideoMixer_dealloc_handler(object obj) except -1
 
 cdef class MemBuf:
     # attributes

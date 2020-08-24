@@ -205,6 +205,192 @@ cdef class VideoConsumer:
     def close(self):
         raise NotImplementedError
 
+
+cdef class VideoMixer:
+    def __cinit__(self, *args, **kwargs):
+        cdef int status
+
+        self._connected_slots = list()
+
+        status = pj_mutex_create_recursive(_get_ua()._pjsip_endpoint._pool, "video_mixer_lock", &self._lock)
+        if status != 0:
+            raise PJSIPError("failed to create lock", status)
+
+
+    def __dealloc__(self):
+        global _dealloc_handler_queue
+        cdef PJSIPUA ua
+        cdef pjmedia_vid_conf *conf_bridge = self._obj
+        cdef pjmedia_port *null_port = self._null_port
+
+        _remove_handler(self, &_dealloc_handler_queue)
+
+        try:
+            ua = _get_ua()
+        except:
+            return
+
+        if self._obj != NULL:
+            with nogil:
+                pjmedia_vid_conf_destroy(conf_bridge)
+            self._obj = NULL
+        ua.release_memory_pool(self._conf_pool)
+        self._conf_pool = NULL
+        if self._lock != NULL:
+            pj_mutex_destroy(self._lock)
+
+    def __init__(self):
+        global _dealloc_handler_queue
+        cdef int status
+        cdef pj_pool_t *conf_pool
+        cdef pj_pool_t *snd_pool
+        cdef pjmedia_vid_conf **conf_bridge_address
+        cdef bytes conf_pool_name, snd_pool_name
+        cdef PJSIPUA ua
+        cdef pjmedia_vid_conf_setting conf_setting
+
+        conf_setting.max_slot_cnt = 32
+        conf_setting.frame_rate = 60
+        conf_setting.layout = PJMEDIA_VID_CONF_LAYOUT_DEFAULT
+
+        ua = _get_ua()
+        conf_bridge_address = &self._obj
+
+        if self._obj != NULL:
+            raise SIPCoreError("VideoMixer.__init__() was already called")
+        if ec_tail_length < 0:
+            raise ValueError("ec_tail_length argument cannot be negative")
+        if sample_rate <= 0:
+            raise ValueError("sample_rate argument should be a non-negative integer")
+        if sample_rate % 50:
+            raise ValueError("sample_rate argument should be dividable by 50")
+        self.sample_rate = sample_rate
+        self.slot_count = slot_count
+
+        conf_pool_name = b"VideoMixer_%d" % id(self)
+        conf_pool = ua.create_memory_pool(conf_pool_name, 4096, 4096)
+        self._conf_pool = conf_pool
+        with nogil:
+            status = pjmedia_vid_conf_create(conf_pool, &conf_setting, conf_bridge_address)
+        if status != 0:
+            raise PJSIPError("Could not create video mixer", status)
+        _add_handler(_VideoMixer_dealloc_handler, self, &_dealloc_handler_queue)
+
+    def connect_slots(self, int src_slot, int dst_slot):
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef pjmedia_vid_conf *conf_bridge
+        cdef tuple connection
+        cdef PJSIPUA ua
+
+        ua = _get_ua()
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            conf_bridge = self._obj
+
+            if src_slot < 0:
+                raise ValueError("src_slot argument cannot be negative")
+            if dst_slot < 0:
+                raise ValueError("dst_slot argument cannot be negative")
+            connection = (src_slot, dst_slot)
+            if connection in self._connected_slots:
+                return
+            with nogil:
+                status = pjmedia_vid_conf_connect_port(conf_bridge, src_slot, dst_slot, 0)
+            if status != 0:
+                raise PJSIPError("Could not connect slots on video mixer", status)
+            self._connected_slots.append(connection)
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    def disconnect_slots(self, int src_slot, int dst_slot):
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef pjmedia_vid_conf *conf_bridge
+        cdef tuple connection
+        cdef PJSIPUA ua
+
+        ua = _get_ua()
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            conf_bridge = self._obj
+
+            if src_slot < 0:
+                raise ValueError("src_slot argument cannot be negative")
+            if dst_slot < 0:
+                raise ValueError("dst_slot argument cannot be negative")
+            connection = (src_slot, dst_slot)
+            if connection not in self._connected_slots:
+                return
+            with nogil:
+                status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, dst_slot)
+            if status != 0:
+                raise PJSIPError("Could not disconnect slots on video mixer", status)
+            self._connected_slots.remove(connection)
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    # private methods
+    cdef int _add_port(self, PJSIPUA ua, pj_pool_t *pool, pjmedia_port *port) except -1 with gil:
+        cdef unsigned int slot
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef pjmedia_vid_conf* conf_bridge
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            conf_bridge = self._obj
+
+            with nogil:
+                status = pjmedia_vid_conf_add_port(conf_bridge, pool, port, NULL, &slot)
+            if status != 0:
+                raise PJSIPError("Could not add video object to video mixer", status)
+            self.used_slot_count += 1
+            return slot
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+    cdef int _remove_port(self, PJSIPUA ua, unsigned int slot) except -1 with gil:
+        cdef int status
+        cdef pj_mutex_t *lock = self._lock
+        cdef pjmedia_vid_conf* conf_bridge
+        cdef tuple connection
+        cdef Timer timer
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            conf_bridge = self._obj
+
+            with nogil:
+                status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
+            if status != 0:
+                raise PJSIPError("Could not remove video object from video mixer", status)
+            self._connected_slots = [connection for connection in self._connected_slots if slot not in connection]
+            self.used_slot_count -= 1
+            return 0
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+
+
 cdef class VideoConnector:
     def __cinit__(self, *args, **kwargs):
         cdef PJSIPUA ua
