@@ -601,6 +601,19 @@ cdef extern from "pjmedia.h":
     int pjmedia_conf_adjust_rx_level(pjmedia_conf *conf, unsigned slot, int adj_level) nogil
     int pjmedia_conf_adjust_tx_level(pjmedia_conf *conf, unsigned slot, int adj_level) nogil
 
+    # video conference bridge
+    struct pjmedia_vid_conf_setting
+    struct pjmedia_vid_conf
+    void pjmedia_vid_conf_setting_default(pjmedia_vid_conf_setting *opt) nogil
+    int pjmedia_vid_conf_create(pj_pool_t *pool, pjmedia_vid_conf_setting *opt, pjmedia_vid_conf **p_vid_conf) nogil
+    int pjmedia_vid_conf_destroy(pjmedia_vid_conf *conf) nogil
+    int pjmedia_vid_conf_add_port(pjmedia_vid_conf *vid_conf, pj_pool_t *pool, pjmedia_port *strm_port,
+					       pj_str_t *name, void *opt, unsigned int *p_slot) nogil
+    int pjmedia_vid_conf_remove_port(pjmedia_vid_conf *conf, unsigned int slot) nogil
+    int pjmedia_vid_conf_connect_port(pjmedia_vid_conf *vid_conf, unsigned int src_slot,
+                            unsigned int sink_slot, void *opt) nogil
+    int pjmedia_vid_conf_disconnect_port(pjmedia_vid_conf *vid_conf, unsigned int src_slot, unsigned int sink_slot) nogil
+
     # video devices
     enum pjmedia_vid_dev_cap:
         PJMEDIA_VID_DEV_CAP_OUTPUT_HIDE
