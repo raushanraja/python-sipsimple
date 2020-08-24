@@ -409,7 +409,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_conf_remove_port( pjmedia_vid_conf *vid_conf,
 	      slot, (int)cport->name.slen, cport->name.ptr));
 
     /* Release pool */
-    pj_pool_safe_release(&cport->pool);
+    pj_pool_release(&cport->pool);
 
     if (AUTO_STOP_CLOCK && vid_conf->connect_cnt == 0) {
 	pj_status_t status;
@@ -849,7 +849,7 @@ static void cleanup_render_state(vconf_port *cp,
     cp->render_states[transmitter_idx] = NULL;
 
     if (cp->render_pool[transmitter_idx]) {
-	pj_pool_safe_release(&cp->render_pool[transmitter_idx]);
+	pj_pool_release(&cp->render_pool[transmitter_idx]);
 
 	TRACE_((THIS_FILE, "Cleaned up render state for connection %d->%d",
 		cp->transmitter_slots[transmitter_idx], cp->idx));
