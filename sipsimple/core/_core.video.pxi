@@ -221,7 +221,6 @@ cdef class VideoMixer:
         global _dealloc_handler_queue
         cdef PJSIPUA ua
         cdef pjmedia_vid_conf *conf_bridge = self._obj
-        cdef pjmedia_port *null_port = self._null_port
 
         _remove_handler(self, &_dealloc_handler_queue)
 
@@ -253,14 +252,7 @@ cdef class VideoMixer:
 
         if self._obj != NULL:
             raise SIPCoreError("VideoMixer.__init__() was already called")
-        if ec_tail_length < 0:
-            raise ValueError("ec_tail_length argument cannot be negative")
-        if sample_rate <= 0:
-            raise ValueError("sample_rate argument should be a non-negative integer")
-        if sample_rate % 50:
-            raise ValueError("sample_rate argument should be dividable by 50")
-        self.sample_rate = sample_rate
-        self.slot_count = slot_count
+        self.slot_count = 32
 
         conf_pool_name = b"VideoMixer_%d" % id(self)
         conf_pool = ua.create_memory_pool(conf_pool_name, 4096, 4096)
@@ -295,7 +287,7 @@ cdef class VideoMixer:
             if connection in self._connected_slots:
                 return
             with nogil:
-                status = pjmedia_vid_conf_connect_port(conf_bridge, src_slot, dst_slot, 0)
+                status = pjmedia_vid_conf_connect_port(conf_bridge, src_slot, dst_slot, NULL)
             if status != 0:
                 raise PJSIPError("Could not connect slots on video mixer", status)
             self._connected_slots.append(connection)
