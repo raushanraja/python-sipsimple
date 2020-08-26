@@ -333,7 +333,9 @@ cdef class VideoMixer:
         cdef int status
         cdef pj_mutex_t *lock = self._lock
         cdef pjmedia_vid_conf* conf_bridge
+        cdef pj_pool_t *conf_pool
 
+        conf_pool = self._conf_pool
         with nogil:
             status = pj_mutex_lock(lock)
         if status != 0:
@@ -341,7 +343,7 @@ cdef class VideoMixer:
         try:
             conf_bridge = self._obj
             with nogil:
-                status = pjmedia_vid_conf_add_port(conf_bridge, self.conf_pool, port, NULL, NULL, &slot)
+                status = pjmedia_vid_conf_add_port(conf_bridge, conf_pool, port, NULL, NULL, &slot)
             if status != 0:
                 raise PJSIPError("Could not add video object to video mixer", status)
             self.used_slot_count += 1
