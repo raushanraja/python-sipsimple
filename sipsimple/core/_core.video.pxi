@@ -352,7 +352,7 @@ cdef class VideoMixer:
             with nogil:
                 pj_mutex_unlock(lock)
 
-    cdef int _remove_port(self, PJSIPUA ua, unsigned int slot) except -1 with gil:
+    cdef int _remove_port(self, unsigned int slot) except -1 with gil:
         cdef int status
         cdef pj_mutex_t *lock = self._lock
         cdef pjmedia_vid_conf* conf_bridge

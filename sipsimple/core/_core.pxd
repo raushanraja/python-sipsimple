@@ -2055,8 +2055,8 @@ cdef class VideoMixer(object):
     cdef readonly int used_slot_count
 
     # private methods
-    cdef int _add_port(self, PJSIPUA ua, pj_pool_t *pool, pjmedia_port *port) except -1 with gil
-    cdef int _remove_port(self, PJSIPUA ua, unsigned int slot) except -1 with gil
+    cdef int _add_port(self, pjmedia_port *port) except -1 with gil
+    cdef int _remove_port(self, unsigned int slot) except -1 with gil
 
 
 cdef class ToneGenerator(object):
