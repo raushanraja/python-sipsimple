@@ -78,3 +78,4 @@ class VideoDevice(object):
     muted = property(_get_muted, _set_muted)
     del _get_muted, _set_muted
 
+

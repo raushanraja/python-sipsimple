@@ -328,7 +328,7 @@ cdef class VideoMixer:
                 pj_mutex_unlock(lock)
 
     # private methods
-    cdef int _add_port(self, PJSIPUA ua, pj_pool_t *pool, pjmedia_port *port) except -1 with gil:
+    cdef int _add_port(self, pjmedia_port *port) except -1 with gil:
         cdef unsigned int slot
         cdef int status
         cdef pj_mutex_t *lock = self._lock
@@ -341,7 +341,7 @@ cdef class VideoMixer:
         try:
             conf_bridge = self._obj
             with nogil:
-                status = pjmedia_vid_conf_add_port(conf_bridge, pool, port, NULL, NULL, &slot)
+                status = pjmedia_vid_conf_add_port(conf_bridge, self.conf_pool, port, NULL, NULL, &slot)
             if status != 0:
                 raise PJSIPError("Could not add video object to video mixer", status)
             self.used_slot_count += 1
