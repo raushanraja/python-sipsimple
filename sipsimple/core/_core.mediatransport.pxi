@@ -1487,7 +1487,7 @@ cdef class VideoTransport:
 
         self._timer = None
 
-    def __init__(self, RTPTransport transport, VideoMixer videoMixer, BaseSDPSession remote_sdp=None, int sdp_index=0, list codecs=None):
+    def __init__(self, RTPTransport transport, VideoMixer video_mixer, BaseSDPSession remote_sdp=None, int sdp_index=0, list codecs=None):
         cdef int status
         cdef pj_pool_t *pool
         cdef pjmedia_endpt *media_endpoint
