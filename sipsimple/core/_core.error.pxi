@@ -4,7 +4,7 @@ class SIPCoreError(Exception):
     pass
 
 
-def write_log(log_data)
+def write_log(log_data):
     f = open("/root/sipsimple.log", "a+")
     f.write(log_data)
     f.write("\n")
