@@ -231,20 +231,20 @@ cdef int _VideoMixer_dealloc_handler(object obj) except -1:
 cdef class VideoMixer:
     def __cinit__(self, *args, **kwargs):
         cdef int status
-
+        write_log("VideoMixer __cinit__")
         self._connected_slots = list()
 
         status = pj_mutex_create_recursive(_get_ua()._pjsip_endpoint._pool, "video_mixer_lock", &self._lock)
         if status != 0:
             raise PJSIPError("failed to create lock", status)
-
+        write_log("VideoMixer __cinit__ done")
 
     def __dealloc__(self):
-        global _dealloc_handler_queue
+        global _vid_dealloc_handler_queue
         cdef PJSIPUA ua
         cdef pjmedia_vid_conf *conf_bridge = self._obj
 
-        _remove_handler(self, &_dealloc_handler_queue)
+        _remove_handler(self, &_vid_dealloc_handler_queue)
 
         try:
             ua = _get_ua()
@@ -261,7 +261,7 @@ cdef class VideoMixer:
             pj_mutex_destroy(self._lock)
 
     def __init__(self):
-        global _dealloc_handler_queue
+        global _vid_dealloc_handler_queue
         cdef int status
         cdef pj_pool_t *conf_pool
         cdef pj_pool_t *snd_pool
@@ -269,6 +269,7 @@ cdef class VideoMixer:
         cdef bytes conf_pool_name, snd_pool_name
         cdef PJSIPUA ua
 
+        write_log("VideoMixer __init__ ")
         ua = _get_ua()
         conf_bridge_address = &self._obj
 
@@ -283,7 +284,8 @@ cdef class VideoMixer:
             status = pjmedia_vid_conf_create(conf_pool, NULL, conf_bridge_address)
         if status != 0:
             raise PJSIPError("Could not create video mixer", status)
-        _add_handler(_VideoMixer_dealloc_handler, self, &_dealloc_handler_queue)
+        _add_handler(_VideoMixer_dealloc_handler, self, &_vid_dealloc_handler_queue)
+        write_log("VideoMixer __init__ done")
 
     def connect_slots(self, int src_slot, int dst_slot):
         cdef int status
