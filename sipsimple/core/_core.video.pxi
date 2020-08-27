@@ -1,6 +1,11 @@
 
 import weakref
 
+def write_log(log_data):
+    f = open("/root/sipsimple.log", "a+")
+    f.write(log_data)
+    f.write("\n")
+    f.close()
 
 cdef class VideoProducer:
 
@@ -1204,7 +1209,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef int status
         cdef int slot
         cdef void* ptr
-
+        write_log("inside RemoteVideoStream _initialize")
         with nogil:
             status = pjmedia_vid_stream_get_port(stream, PJMEDIA_DIR_DECODING, &media_port)
         if status != 0:
@@ -1221,6 +1226,7 @@ cdef class RemoteVideoStream(VideoProducer):
         # TODO: we cannot use a tee here, because the remote video is a passive port, we have a pjmedia_port, not a
         # pjmedia_vid_port, so, for now, only one consumer is allowed
         self.producer_port = media_port
+        write_log("inside RemoteVideoStream call _add_port")
         if video_mixer <= 0:
             raise PJSIPError("invalid video mixer", status)
         slot = video_mixer._add_port(media_port)

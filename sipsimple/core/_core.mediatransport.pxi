@@ -3,6 +3,12 @@ import sys
 
 from errno import EADDRINUSE
 
+def write_log(log_data):
+    f = open("/root/sipsimple.log", "a+")
+    f.write(log_data)
+    f.write("\n")
+    f.close()
+
 
 # classes
 
@@ -1506,7 +1512,9 @@ cdef class VideoTransport:
 
         if self.transport is not None:
             raise SIPCoreError("VideoTransport.__init__() was already called")
+        write_log("transport __init__ check video_mixer")
         if video_mixer is not None:
+            write_log("video_mixer is None")
             raise SIPCoreError("video_mixer cannot be None")
         if transport is None:
             raise ValueError("transport argument cannot be None")
@@ -1515,6 +1523,7 @@ cdef class VideoTransport:
         if transport.state != "INIT":
             raise SIPCoreError('RTPTransport object provided is not in the "INIT" state, but in the "%s" state' % transport.state)
         self.transport = transport
+        write_log("transport __init__ set video_mixer")
         self._video_mixer = video_mixer
         transport._get_info(&info)
         global_codecs = ua._pjmedia_endpoint._get_current_video_codecs()
@@ -1757,8 +1766,11 @@ cdef class VideoTransport:
             with nogil:
                 pjmedia_vid_stream_send_rtcp_sdes(stream)
             try:
+                write_log("create local video stream")
                 local_video = LocalVideoStream_create(stream, self._video_mixer)
+                write_log("create remote_video stream")
                 remote_video = RemoteVideoStream_create(stream, self._video_mixer, self._remote_video_event_handler)
+                write_log("create remote_video stream done")
             except PJSIPError:
                 with nogil:
                     pjmedia_vid_stream_destroy(stream)
