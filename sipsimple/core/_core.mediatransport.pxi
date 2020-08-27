@@ -1487,7 +1487,7 @@ cdef class VideoTransport:
 
         self._timer = None
 
-    def __init__(self, RTPTransport transport, BaseSDPSession remote_sdp=None, int sdp_index=0, list codecs=None):
+    def __init__(self, RTPTransport transport, VideoMixer videoMixer, BaseSDPSession remote_sdp=None, int sdp_index=0, list codecs=None):
         cdef int status
         cdef pj_pool_t *pool
         cdef pjmedia_endpt *media_endpoint
@@ -1506,6 +1506,8 @@ cdef class VideoTransport:
 
         if self.transport is not None:
             raise SIPCoreError("VideoTransport.__init__() was already called")
+        if video_mixer is not None:
+            raise SIPCoreError("video_mixer cannot be None")
         if transport is None:
             raise ValueError("transport argument cannot be None")
         if sdp_index < 0:
@@ -1513,6 +1515,7 @@ cdef class VideoTransport:
         if transport.state != "INIT":
             raise SIPCoreError('RTPTransport object provided is not in the "INIT" state, but in the "%s" state' % transport.state)
         self.transport = transport
+        self._video_mixer = video_mixer
         transport._get_info(&info)
         global_codecs = ua._pjmedia_endpoint._get_current_video_codecs()
         if codecs is None:
@@ -1754,8 +1757,8 @@ cdef class VideoTransport:
             with nogil:
                 pjmedia_vid_stream_send_rtcp_sdes(stream)
             try:
-                local_video = LocalVideoStream_create(stream)
-                remote_video = RemoteVideoStream_create(stream, self._remote_video_event_handler)
+                local_video = LocalVideoStream_create(stream, self._video_mixer)
+                remote_video = RemoteVideoStream_create(stream, self._remote_video_event_handler, self._video_mixer)
             except PJSIPError:
                 with nogil:
                     pjmedia_vid_stream_destroy(stream)

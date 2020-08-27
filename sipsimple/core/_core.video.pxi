@@ -378,6 +378,22 @@ cdef class VideoMixer:
                 pj_mutex_unlock(lock)
 
 
+cdef int _VideoMixer_dealloc_handler(object obj) except -1:
+    cdef int status
+    cdef VideoMixer mixer = obj
+    cdef PJSIPUA ua
+
+    ua = _get_ua()
+
+    status = pj_mutex_lock(mixer._lock)
+    if status != 0:
+        raise PJSIPError("failed to acquire lock", status)
+    try:
+        mixer._connected_slots = list()
+        mixer.used_slot_count = 0
+    finally:
+        pj_mutex_unlock(mixer._lock)
+
 
 cdef class VideoConnector:
     def __cinit__(self, *args, **kwargs):
@@ -1103,10 +1119,11 @@ cdef class VideoCamera(VideoProducer):
 
 cdef class LocalVideoStream(VideoConsumer):
 
-    cdef void _initialize(self, pjmedia_port *media_port):
+    cdef void _initialize(self, pjmedia_port *media_port, VideoMixer video_mixer):
         self.consumer_port = media_port
         self._running = 1
         self._closed = 0
+        self._video_mixer = video_mixer
 
     cdef void _set_producer(self, VideoProducer producer):
         old_producer = self._producer
@@ -1152,7 +1169,7 @@ cdef class LocalVideoStream(VideoConsumer):
                 pj_mutex_unlock(global_lock)
 
 
-cdef LocalVideoStream_create(pjmedia_vid_stream *stream):
+cdef LocalVideoStream_create(pjmedia_vid_stream *stream, VideoMixer video_mixer):
     cdef pjmedia_port *media_port
     cdef int status
 
@@ -1164,7 +1181,7 @@ cdef LocalVideoStream_create(pjmedia_vid_stream *stream):
         raise ValueError("invalid media port")
 
     obj = LocalVideoStream()
-    obj._initialize(media_port)
+    obj._initialize(media_port, video_mixer)
     return obj
 
 
@@ -1176,7 +1193,7 @@ cdef class RemoteVideoStream(VideoProducer):
             raise TypeError("event_handler must be a callable or None")
         self._event_handler = event_handler
 
-    cdef void _initialize(self, pjmedia_vid_stream *stream):
+    cdef void _initialize(self, pjmedia_vid_stream *stream, VideoMixer video_mixer):
         cdef pjmedia_port *media_port
         cdef int status
         cdef void* ptr
@@ -1188,6 +1205,7 @@ cdef class RemoteVideoStream(VideoProducer):
         if media_port == NULL:
             raise ValueError("invalid media port")
         self._video_stream = stream
+        self._video_mixer = video_mixer
 
         ptr = <void*>self
         with nogil:
@@ -1528,9 +1546,9 @@ cdef class FrameBufferVideoRenderer(VideoConsumer):
         self.close()
 
 
-cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, format_change_handler=None):
+cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, format_change_handler=None, VideoMixer video_mixer):
     obj = RemoteVideoStream(format_change_handler)
-    obj._initialize(stream)
+    obj._initialize(stream, video_mixer)
     return obj
 
 

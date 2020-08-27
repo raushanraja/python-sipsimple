@@ -2042,22 +2042,6 @@ cdef class AudioMixer(object):
     cdef int _remove_port(self, PJSIPUA ua, unsigned int slot) except -1 with gil
     cdef int _cb_postpoll_stop_sound(self, timer) except -1
 
-cdef class VideoMixer(object):
-    # attributes
-    cdef bint _muted
-    cdef pj_mutex_t *_lock
-    cdef pj_pool_t *_conf_pool
-    cdef pjmedia_vid_conf *_obj
-    cdef list _connected_slots
-    cdef readonly int ec_tail_length
-    cdef readonly int sample_rate
-    cdef readonly int slot_count
-    cdef readonly int used_slot_count
-
-    # private methods
-    cdef int _add_port(self, pjmedia_port *port) except -1 with gil
-    cdef int _remove_port(self, unsigned int slot) except -1 with gil
-
 
 cdef class ToneGenerator(object):
     # attributes
@@ -2240,17 +2224,39 @@ cdef class FrameBufferVideoRenderer(VideoConsumer):
     cdef void _start(self)
     cdef void _stop(self)
 
+
+cdef class VideoMixer(object):
+    # attributes
+    cdef bint _muted
+    cdef pj_mutex_t *_lock
+    cdef pj_pool_t *_conf_pool
+    cdef pjmedia_vid_conf *_obj
+    cdef list _connected_slots
+    cdef readonly int ec_tail_length
+    cdef readonly int sample_rate
+    cdef readonly int slot_count
+    cdef readonly int used_slot_count
+
+    # private methods
+    cdef int _add_port(self, pjmedia_port *port) except -1 with gil
+    cdef int _remove_port(self, unsigned int slot) except -1 with gil
+
+
 cdef class LocalVideoStream(VideoConsumer):
-    cdef void _initialize(self, pjmedia_port *media_port)
+    cdef int _slot
+    cdef VideoMixer _video_mixer
+    cdef void _initialize(self, pjmedia_port *media_port, VideoMixer video_mixer)
 
 cdef class RemoteVideoStream(VideoProducer):
+    cdef int _slot
     cdef pjmedia_vid_stream *_video_stream
     cdef object _event_handler
+    cdef VideoMixer _video_mixer
 
-    cdef void _initialize(self, pjmedia_vid_stream *stream)
+    cdef void _initialize(self, pjmedia_vid_stream *stream, VideoMixer video_mixer)
 
-cdef LocalVideoStream_create(pjmedia_vid_stream *stream)
-cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, format_change_handler=*)
+cdef LocalVideoStream_create(pjmedia_vid_stream *stream, VideoMixer video_mixer)
+cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, format_change_handler=*, VideoMixer video_mixer)
 cdef int RemoteVideoStream_on_event(pjmedia_event *event, void *user_data) with gil
 cdef void _start_video_port(pjmedia_vid_port *port)
 cdef void _stop_video_port(pjmedia_vid_port *port)
@@ -2827,6 +2833,7 @@ cdef class VideoTransport(object):
     cdef Timer _timer
     cdef readonly object direction
     cdef readonly RTPTransport transport
+    cdef readonly VideoMiser _video_mixer
     cdef SDPInfo _sdp_info
     cdef readonly LocalVideoStream local_video
     cdef readonly RemoteVideoStream remote_video

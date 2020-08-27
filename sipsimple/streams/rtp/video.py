@@ -24,6 +24,7 @@ class VideoStream(RTPStream):
 
         from sipsimple.application import SIPApplication
         self.device = SIPApplication.video_device
+        self.video_mixer = SIPApplication.video_mixer
         self._keyframe_timer = None
 
     @property
@@ -152,7 +153,7 @@ class VideoStream(RTPStream):
     def _create_transport(self, rtp_transport, remote_sdp=None, stream_index=None):
         settings = SIPSimpleSettings()
         codecs = list(self.session.account.rtp.video_codec_list or settings.rtp.video_codec_list)
-        return VideoTransport(rtp_transport, remote_sdp=remote_sdp, sdp_index=stream_index or 0, codecs=codecs)
+        return VideoTransport(rtp_transport, self.video_mixer, remote_sdp=remote_sdp, sdp_index=stream_index or 0, codecs=codecs)
 
     def _check_hold(self, direction, is_initial):
         was_on_hold_by_local = self.on_hold_by_local
