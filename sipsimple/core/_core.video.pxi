@@ -1120,10 +1120,13 @@ cdef class VideoCamera(VideoProducer):
 cdef class LocalVideoStream(VideoConsumer):
 
     cdef void _initialize(self, pjmedia_port *media_port, VideoMixer video_mixer):
+        cdef int slot
         self.consumer_port = media_port
         self._running = 1
         self._closed = 0
         self._video_mixer = video_mixer
+        slot = video_mixer._add_port(media_port)
+        self._slot = slot
 
     cdef void _set_producer(self, VideoProducer producer):
         old_producer = self._producer
@@ -1192,10 +1195,12 @@ cdef class RemoteVideoStream(VideoProducer):
         if event_handler is not None and not callable(event_handler):
             raise TypeError("event_handler must be a callable or None")
         self._event_handler = event_handler
+        self._slot = -1
 
     cdef void _initialize(self, pjmedia_vid_stream *stream, VideoMixer video_mixer):
         cdef pjmedia_port *media_port
         cdef int status
+        cdef int slot
         cdef void* ptr
 
         with nogil:
@@ -1214,6 +1219,8 @@ cdef class RemoteVideoStream(VideoProducer):
         # TODO: we cannot use a tee here, because the remote video is a passive port, we have a pjmedia_port, not a
         # pjmedia_vid_port, so, for now, only one consumer is allowed
         self.producer_port = media_port
+        slot = video_mixer._add_port(media_port)
+        self._slot = slot
         self._running = 1
         self._closed = 0
 
