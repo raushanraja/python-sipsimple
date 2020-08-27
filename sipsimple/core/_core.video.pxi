@@ -1222,7 +1222,7 @@ cdef class RemoteVideoStream(VideoProducer):
         if video_mixer <= 0:
             raise PJSIPError("invalid video mixer", status)
         slot = video_mixer._add_port(media_port)
-        #self._slot = slot
+        self._slot = slot
         self._running = 1
         self._closed = 0
 
