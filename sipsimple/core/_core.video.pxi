@@ -240,11 +240,11 @@ cdef class VideoMixer:
         write_log("VideoMixer __cinit__ done")
 
     def __dealloc__(self):
-        global _vid_dealloc_handler_queue
+        global _dealloc_handler_queue
         cdef PJSIPUA ua
         cdef pjmedia_vid_conf *conf_bridge = self._obj
 
-        _remove_handler(self, &_vid_dealloc_handler_queue)
+        _remove_handler(self, &_dealloc_handler_queue)
 
         try:
             ua = _get_ua()
@@ -261,7 +261,7 @@ cdef class VideoMixer:
             pj_mutex_destroy(self._lock)
 
     def __init__(self):
-        global _vid_dealloc_handler_queue
+        global _dealloc_handler_queue
         cdef int status
         cdef pj_pool_t *conf_pool
         cdef pj_pool_t *snd_pool
@@ -271,20 +271,29 @@ cdef class VideoMixer:
 
         write_log("VideoMixer __init__ ")
         ua = _get_ua()
+        write_log("VideoMixer __init__ 1")
         conf_bridge_address = &self._obj
+        write_log("VideoMixer __init__ 2")
 
         if self._obj != NULL:
             raise SIPCoreError("VideoMixer.__init__() was already called")
+        write_log("VideoMixer __init__ 3")
         self.slot_count = 32
 
+        write_log("VideoMixer __init__ 4")
         conf_pool_name = b"VideoMixer_%d" % id(self)
+        write_log("VideoMixer __init__ 5")
         conf_pool = ua.create_memory_pool(conf_pool_name, 4096, 4096)
+        write_log("VideoMixer __init__ 6")
         self._conf_pool = conf_pool
+        write_log("VideoMixer __init__ 7")
         with nogil:
             status = pjmedia_vid_conf_create(conf_pool, NULL, conf_bridge_address)
+        write_log("VideoMixer __init__ 8")
         if status != 0:
             raise PJSIPError("Could not create video mixer", status)
-        _add_handler(_VideoMixer_dealloc_handler, self, &_vid_dealloc_handler_queue)
+        write_log("VideoMixer __init__ 9")
+        _add_handler(_VideoMixer_dealloc_handler, self, &_dealloc_handler_queue)
         write_log("VideoMixer __init__ done")
 
     def connect_slots(self, int src_slot, int dst_slot):
