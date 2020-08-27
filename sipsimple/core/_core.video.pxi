@@ -206,6 +206,23 @@ cdef class VideoConsumer:
         raise NotImplementedError
 
 
+cdef int _VideoMixer_dealloc_handler(object obj) except -1:
+    cdef int status
+    cdef VideoMixer mixer = obj
+    cdef PJSIPUA ua
+
+    ua = _get_ua()
+
+    status = pj_mutex_lock(mixer._lock)
+    if status != 0:
+        raise PJSIPError("failed to acquire lock", status)
+    try:
+        mixer._connected_slots = list()
+        mixer.used_slot_count = 0
+    finally:
+        pj_mutex_unlock(mixer._lock)
+
+
 cdef class VideoMixer:
     def __cinit__(self, *args, **kwargs):
         cdef int status
@@ -376,23 +393,6 @@ cdef class VideoMixer:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
-
-
-cdef int _VideoMixer_dealloc_handler(object obj) except -1:
-    cdef int status
-    cdef VideoMixer mixer = obj
-    cdef PJSIPUA ua
-
-    ua = _get_ua()
-
-    status = pj_mutex_lock(mixer._lock)
-    if status != 0:
-        raise PJSIPError("failed to acquire lock", status)
-    try:
-        mixer._connected_slots = list()
-        mixer.used_slot_count = 0
-    finally:
-        pj_mutex_unlock(mixer._lock)
 
 
 cdef class VideoConnector:
