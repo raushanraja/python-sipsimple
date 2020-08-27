@@ -2256,7 +2256,7 @@ cdef class RemoteVideoStream(VideoProducer):
     cdef void _initialize(self, pjmedia_vid_stream *stream, VideoMixer video_mixer)
 
 cdef LocalVideoStream_create(pjmedia_vid_stream *stream, VideoMixer video_mixer)
-cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, format_change_handler=*, VideoMixer video_mixer)
+cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, VideoMixer video_mixer, format_change_handler=*)
 cdef int RemoteVideoStream_on_event(pjmedia_event *event, void *user_data) with gil
 cdef void _start_video_port(pjmedia_vid_port *port)
 cdef void _stop_video_port(pjmedia_vid_port *port)
@@ -2833,7 +2833,7 @@ cdef class VideoTransport(object):
     cdef Timer _timer
     cdef readonly object direction
     cdef readonly RTPTransport transport
-    cdef readonly VideoMiser _video_mixer
+    cdef readonly VideoMixer _video_mixer
     cdef SDPInfo _sdp_info
     cdef readonly LocalVideoStream local_video
     cdef readonly RemoteVideoStream remote_video

@@ -1546,7 +1546,7 @@ cdef class FrameBufferVideoRenderer(VideoConsumer):
         self.close()
 
 
-cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, format_change_handler=None, VideoMixer video_mixer):
+cdef RemoteVideoStream_create(pjmedia_vid_stream *stream, VideoMixer video_mixer, format_change_handler=None):
     obj = RemoteVideoStream(format_change_handler)
     obj._initialize(stream, video_mixer)
     return obj

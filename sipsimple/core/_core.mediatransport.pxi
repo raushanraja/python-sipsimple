@@ -1758,7 +1758,7 @@ cdef class VideoTransport:
                 pjmedia_vid_stream_send_rtcp_sdes(stream)
             try:
                 local_video = LocalVideoStream_create(stream, self._video_mixer)
-                remote_video = RemoteVideoStream_create(stream, self._remote_video_event_handler, self._video_mixer)
+                remote_video = RemoteVideoStream_create(stream, self._video_mixer, self._remote_video_event_handler)
             except PJSIPError:
                 with nogil:
                     pjmedia_vid_stream_destroy(stream)
