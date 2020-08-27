@@ -1125,8 +1125,8 @@ cdef class LocalVideoStream(VideoConsumer):
         self._running = 1
         self._closed = 0
         self._video_mixer = video_mixer
-        slot = video_mixer._add_port(media_port)
-        self._slot = slot
+        #slot = video_mixer._add_port(media_port)
+        #self._slot = slot
 
     cdef void _set_producer(self, VideoProducer producer):
         old_producer = self._producer
@@ -1219,8 +1219,8 @@ cdef class RemoteVideoStream(VideoProducer):
         # TODO: we cannot use a tee here, because the remote video is a passive port, we have a pjmedia_port, not a
         # pjmedia_vid_port, so, for now, only one consumer is allowed
         self.producer_port = media_port
-        slot = video_mixer._add_port(media_port)
-        self._slot = slot
+        #slot = video_mixer._add_port(media_port)
+        #self._slot = slot
         self._running = 1
         self._closed = 0
 
