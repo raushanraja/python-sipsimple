@@ -4,7 +4,7 @@ class SIPCoreError(Exception):
     pass
 
 
-def write_log(log_data):
+def error_log(log_data):
     f = open("/root/sipsimple.log", "a+")
     f.write(log_data)
     f.write("\n")
@@ -15,8 +15,8 @@ class PJSIPError(SIPCoreError):
 
     def __init__(self, message, status):
         self.status = status
-        write_log("PJSIPError %s" % (message))
-        write_log("status - %s" % (_pj_status_to_str(status)))
+        error_log("PJSIPError %s" % (message))
+        error_log("status - %s" % (_pj_status_to_str(status)))
         SIPCoreError.__init__(self, "%s: %s" % (message, _pj_status_to_str(status)))
 
     @property

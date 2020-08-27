@@ -36,6 +36,12 @@ from sipsimple.threading import ThreadManager, run_in_thread, run_in_twisted_thr
 from sipsimple.threading.green import run_in_green_thread
 from sipsimple.video import VideoDevice
 
+def write_log(log_data):
+    f = open("/root/sipsimple.log", "a+")
+    f.write(log_data)
+    f.write("\n")
+    f.close()
+
 
 class ApplicationAttribute(object):
     def __init__(self, value):
@@ -232,9 +238,12 @@ class SIPApplication(object):
             output_device = u'system_default'
         tail_length = settings.audio.echo_canceller.tail_length if settings.audio.echo_canceller.enabled else 0
         voice_mixer = AudioMixer(input_device, output_device, settings.audio.sample_rate, tail_length)
+        write_log("creating VideoMixer")
         video_mixer = VideoMixer()
+        write_log("VideoMixer created %r" % video_mixer)
         voice_mixer.muted = settings.audio.muted
         self.video_mixer = video_mixer
+        write_log("self.VideoMixer %r" % self.video_mixer)
         self.voice_audio_device = AudioDevice(voice_mixer)
         self.voice_audio_bridge = RootAudioBridge(voice_mixer)
         self.voice_audio_bridge.add(self.voice_audio_device)
