@@ -1362,6 +1362,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pjmedia_port *producer_port
         cdef pjmedia_vid_port *consumer_port
         cdef pjmedia_vid_conf *conf_bridge
+        cdef VideoMixer video_mixer
         cdef int src_slot
         cdef int sink_slot
         cdef PJSIPUA ua
@@ -1384,7 +1385,8 @@ cdef class RemoteVideoStream(VideoProducer):
             producer_port = self.producer_port
             if consumer_port == NULL:
                 write_log("use video conference bridge for _add_consumer ")
-                conf_bridge = self.video_mixer._obj
+                video_mixer = self.video_mixer
+                conf_bridge = video_mixer._obj
                 src_slot = consumer._slot
                 sink_slot = self._slot
                 if src_slot <= 0:
