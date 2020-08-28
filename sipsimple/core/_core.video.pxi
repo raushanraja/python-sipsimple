@@ -244,6 +244,7 @@ cdef class VideoMixer:
         cdef PJSIPUA ua
         cdef pjmedia_vid_conf *conf_bridge = self._obj
 
+        write_log("VideoMixer __dealloc__ ")
         _remove_handler(self, &_dealloc_handler_queue)
 
         try:
@@ -259,6 +260,7 @@ cdef class VideoMixer:
         self._conf_pool = NULL
         if self._lock != NULL:
             pj_mutex_destroy(self._lock)
+        write_log("VideoMixer __dealloc__ done")
 
     def __init__(self):
         global _dealloc_handler_queue

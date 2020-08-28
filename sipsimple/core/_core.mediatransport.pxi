@@ -1513,7 +1513,7 @@ cdef class VideoTransport:
         if self.transport is not None:
             raise SIPCoreError("VideoTransport.__init__() was already called")
         write_log("transport __init__ check video_mixer")
-        if video_mixer is not None:
+        if video_mixer is None:
             write_log("video_mixer is None")
             raise SIPCoreError("video_mixer cannot be None")
         if transport is None:
