@@ -728,6 +728,7 @@ cdef class VideoTeeProducer(VideoProducer):
         cdef pj_mutex_t *lock
         cdef pjmedia_port *consumer_port
         cdef pjmedia_port *producer_port
+        cdef pjmedia_vid_conf *conf_bridge
 
         lock = self._lock
 
@@ -1360,6 +1361,9 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pj_mutex_t *lock
         cdef pjmedia_port *producer_port
         cdef pjmedia_vid_port *consumer_port
+        cdef pjmedia_vid_conf *conf_bridge
+        cdef int src_slot
+        cdef int sink_slot
         cdef PJSIPUA ua
 
         ua = _get_ua()
@@ -1378,8 +1382,22 @@ cdef class RemoteVideoStream(VideoProducer):
                 raise SIPCoreError("another consumer is already attached to this producer")
             consumer_port = consumer._video_port
             producer_port = self.producer_port
-            with nogil:
-                status = pjmedia_vid_port_connect(consumer_port, producer_port, 0)
+            if consumer_port <= 0:
+                write_log("use video conference bridge for _add_consumer ")
+                conf_bridge = self.video_mixer._obj
+                src_slot = consumer._slot
+                sink_slot = self._slot
+                if src_slot <= 0:
+                    raise PJSIPError("src_slot <= 0")
+                if sink_slot <= 0:
+                    raise PJSIPError("sink_slot <= 0")
+                write_log("use video conference bridge connectog slots ")
+                with nogil:
+                    status = pjmedia_vid_conf_connect_port(conf_bridge, src_slot, sink_slot, NULL)
+                write_log("use video conference bridge connectog slots done")
+            else:
+                with nogil:
+                    status = pjmedia_vid_port_connect(consumer_port, producer_port, 0)
             if status != 0:
                 raise PJSIPError("Could not connect video consumer with producer", status)
             self._consumers.add(consumer)
