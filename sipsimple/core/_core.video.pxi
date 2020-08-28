@@ -1246,6 +1246,7 @@ cdef class RemoteVideoStream(VideoProducer):
         self._slot = slot
         self._running = 1
         self._closed = 0
+        write_log("inside RemoteVideoStream _initialize done")
 
     property framerate:
 
