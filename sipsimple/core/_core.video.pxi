@@ -1387,8 +1387,8 @@ cdef class RemoteVideoStream(VideoProducer):
                 write_log("use video conference bridge for _add_consumer ")
                 video_mixer = self._video_mixer
                 conf_bridge = video_mixer._obj
-                src_slot = consumer._slot
-                sink_slot = self._slot
+                sink_slot = consumer._slot
+                src_slot = self._slot
                 if src_slot <= 0:
                     raise PJSIPError("src_slot <= 0")
                 if sink_slot <= 0:

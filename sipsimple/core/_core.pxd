@@ -2169,6 +2169,7 @@ cdef class VideoConsumer(object):
     cdef pj_mutex_t *_lock
     cdef int _running
     cdef int _closed
+    cdef int _slot
     cdef VideoProducer _producer
     cdef object __weakref__
     cdef object weakref
@@ -2183,6 +2184,7 @@ cdef class VideoProducer(object):
     cdef int _running
     cdef int _started
     cdef int _closed
+    cdef int _slot
     cdef object _consumers
 
     cdef void _add_consumer(self, VideoConsumer consumer)
@@ -2243,12 +2245,10 @@ cdef class VideoMixer(object):
 
 
 cdef class LocalVideoStream(VideoConsumer):
-    cdef int _slot
     cdef VideoMixer _video_mixer
     cdef void _initialize(self, pjmedia_port *media_port, VideoMixer video_mixer)
 
 cdef class RemoteVideoStream(VideoProducer):
-    cdef int _slot
     cdef pjmedia_vid_stream *_video_stream
     cdef object _event_handler
     cdef VideoMixer _video_mixer
