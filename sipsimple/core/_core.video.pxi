@@ -1389,10 +1389,10 @@ cdef class RemoteVideoStream(VideoProducer):
                 conf_bridge = video_mixer._obj
                 sink_slot = consumer._slot
                 src_slot = self._slot
-                if src_slot <= 0:
-                    raise PJSIPError("src_slot <= 0", -1)
-                if sink_slot <= 0:
-                    raise PJSIPError("sink_slot <= 0", -1)
+                if src_slot < 0:
+                    raise PJSIPError("src_slot < 0", -1)
+                if sink_slot < 0:
+                    raise PJSIPError("sink_slot < 0", -1)
                 write_log("use video conference bridge connectog slots ")
                 with nogil:
                     status = pjmedia_vid_conf_connect_port(conf_bridge, src_slot, sink_slot, NULL)
