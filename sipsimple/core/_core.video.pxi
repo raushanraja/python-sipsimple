@@ -1385,7 +1385,7 @@ cdef class RemoteVideoStream(VideoProducer):
             producer_port = self.producer_port
             if consumer_port == NULL:
                 write_log("use video conference bridge for _add_consumer ")
-                video_mixer = self.video_mixer
+                video_mixer = self._video_mixer
                 conf_bridge = video_mixer._obj
                 src_slot = consumer._slot
                 sink_slot = self._slot
