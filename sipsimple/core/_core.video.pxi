@@ -1371,7 +1371,7 @@ cdef class RemoteVideoStream(VideoProducer):
                     status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
                 if status != 0:
                     raise PJSIPError("Vid conf Could not remove slot", status)
-                   self._slot = -1
+                self._slot = -1
                 write_log("use video conference remove slot done")
         finally:
             with nogil:
