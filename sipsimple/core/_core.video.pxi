@@ -1460,7 +1460,7 @@ cdef class RemoteVideoStream(VideoProducer):
                     status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
                 if status != 0:
                     raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
-            else if consumer_port != NULL:
+            elif consumer_port != NULL:
                 with nogil:
                     status = pjmedia_vid_port_disconnect(consumer_port)
                 if status != 0:
