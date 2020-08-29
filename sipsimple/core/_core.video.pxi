@@ -1167,6 +1167,7 @@ cdef class LocalVideoStream(VideoConsumer):
         cdef pjmedia_vid_conf *conf_bridge
         cdef int slot
 
+        write_log("LocalVideoStream close ")
         try:
             ua = _get_ua()
         except:
@@ -1202,6 +1203,7 @@ cdef class LocalVideoStream(VideoConsumer):
             with nogil:
                 pj_mutex_unlock(lock)
                 pj_mutex_unlock(global_lock)
+            write_log("LocalVideoStream close done")
 
 
 cdef LocalVideoStream_create(pjmedia_vid_stream *stream, VideoMixer video_mixer):
@@ -1335,6 +1337,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pjmedia_vid_conf *conf_bridge
         cdef int slot
 
+        write_log("RemoteVideoStream close ")
         try:
             ua = _get_ua()
         except:
@@ -1377,6 +1380,7 @@ cdef class RemoteVideoStream(VideoProducer):
             with nogil:
                 pj_mutex_unlock(lock)
                 pj_mutex_unlock(global_lock)
+            write_log("RemoteVideoStream close done")
 
     cdef void _add_consumer(self, VideoConsumer consumer):
         cdef int status
@@ -1438,6 +1442,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef int src_slot
         cdef int sink_slot
 
+        write_log("RemoteVideoStream _remove_consumer ")
         ua = _get_ua()
         lock = self._lock
 
@@ -1456,6 +1461,7 @@ cdef class RemoteVideoStream(VideoProducer):
 
             if sink_slot>=0 and  src_slot>=0:
                 conf_bridge = self._video_mixer._obj
+                write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port ")
                 with nogil:
                     status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
                 if status != 0:
@@ -1469,6 +1475,7 @@ cdef class RemoteVideoStream(VideoProducer):
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+            write_log("RemoteVideoStream _remove_consumer done ")
 
 
 cdef class FrameBufferVideoRenderer(VideoConsumer):
