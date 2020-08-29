@@ -1164,6 +1164,8 @@ cdef class LocalVideoStream(VideoConsumer):
         cdef pj_mutex_t *global_lock
         cdef pj_mutex_t *lock
         cdef PJSIPUA ua
+        cdef pjmedia_vid_conf *conf_bridge
+        cdef int slot
 
         try:
             ua = _get_ua()
@@ -1182,6 +1184,15 @@ cdef class LocalVideoStream(VideoConsumer):
         if status != 0:
             pj_mutex_unlock(global_lock)
             raise PJSIPError("failed to acquire lock", status)
+        if self._slot >= 0:
+            conf_bridge = self._video_mixer._obj
+            slot = self._slot
+            with nogil:
+                status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
+            if status != 0:
+                raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
+            self._slot = -1
+            write_log("LocalVidStream video conference remove slot done")
         try:
             if self._closed:
                 return
@@ -1321,6 +1332,8 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef VideoConsumer consumer
         cdef void* ptr
         cdef pjmedia_port *media_port
+        cdef pjmedia_vid_conf *conf_bridge
+        cdef int slot
 
         try:
             ua = _get_ua()
@@ -1351,6 +1364,15 @@ cdef class RemoteVideoStream(VideoProducer):
                 pjmedia_event_unsubscribe(NULL, &RemoteVideoStream_on_event, ptr, media_port)
             self._closed = 1
             self._event_handler = None
+            if self._slot >= 0:
+                conf_bridge = self._video_mixer._obj
+                slot = self._slot
+                with nogil:
+                    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
+                if status != 0:
+                    raise PJSIPError("Vid conf Could not remove slot", status)
+                   self._slot = -1
+                write_log("use video conference remove slot done")
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
@@ -1412,6 +1434,9 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pj_mutex_t *lock
         cdef PJSIPUA ua
         cdef pjmedia_vid_port *consumer_port
+        cdef pjmedia_vid_conf *conf_bridge
+        cdef int src_slot
+        cdef int sink_slot
 
         ua = _get_ua()
         lock = self._lock
@@ -1426,10 +1451,21 @@ cdef class RemoteVideoStream(VideoProducer):
             if consumer not in self._consumers:
                 return
             consumer_port = consumer._video_port
-            with nogil:
-                status = pjmedia_vid_port_disconnect(consumer_port)
-            if status != 0:
-                raise PJSIPError("Could not disconnect video consumer from producer", status)
+            if consumer_port <= 0:
+                sink_slot = consumer._slot
+                src_slot = self._slot
+
+                if sink_slot>=0 and  src_slot>=0:
+                    conf_bridge = self._video_mixer._obj
+                    with nogil:
+                        status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot, NULL)
+                    if status != 0:
+                        raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
+            else:
+                with nogil:
+                    status = pjmedia_vid_port_disconnect(consumer_port)
+                if status != 0:
+                    raise PJSIPError("Could not disconnect video consumer from producer", status)
             self._consumers.remove(consumer)
         finally:
             with nogil:
