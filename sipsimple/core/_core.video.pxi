@@ -1451,17 +1451,16 @@ cdef class RemoteVideoStream(VideoProducer):
             if consumer not in self._consumers:
                 return
             consumer_port = consumer._video_port
-            if consumer_port <= 0:
-                sink_slot = consumer._slot
-                src_slot = self._slot
+            sink_slot = consumer._slot
+            src_slot = self._slot
 
-                if sink_slot>=0 and  src_slot>=0:
-                    conf_bridge = self._video_mixer._obj
-                    with nogil:
-                        status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot, NULL)
-                    if status != 0:
-                        raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
-            else:
+            if sink_slot>=0 and  src_slot>=0:
+                conf_bridge = self._video_mixer._obj
+                with nogil:
+                    status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
+                if status != 0:
+                    raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
+            else if consumer_port != NULL:
                 with nogil:
                     status = pjmedia_vid_port_disconnect(consumer_port)
                 if status != 0:
