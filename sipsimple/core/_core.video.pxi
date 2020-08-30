@@ -1147,7 +1147,7 @@ cdef class LocalVideoStream(VideoConsumer):
             raise PJSIPError("invalid video mixer", video_mixer)
         self._video_mixer = video_mixer
         slot = video_mixer._add_port(media_port)
-        #self._slot = slot
+        self._slot = slot
 
     cdef void _set_producer(self, VideoProducer producer):
         old_producer = self._producer
