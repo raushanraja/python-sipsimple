@@ -34,7 +34,7 @@
  * this may cause stuck if port remove/disconnect is called from the clock
  * callback. So better disable this for now.
  */
-#define AUTO_STOP_CLOCK 0
+#define AUTO_STOP_CLOCK 1
 
 /* Maximum number of consecutive errors that will only be printed once. */
 #define MAX_ERR_COUNT 150
