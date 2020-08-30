@@ -1471,6 +1471,8 @@ cdef class RemoteVideoStream(VideoProducer):
 
         num_slots = 32
         write_log("RemoteVideoStream _remove_consumer self %r" % self )
+        write_log("RemoteVideoStream _remove_consumer consumer %r" % consumer )
+        write_log("RemoteVideoStream consumers %r" % self._consumers )
         ua = _get_ua()
         lock = self._lock
 
