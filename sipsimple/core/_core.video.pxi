@@ -1354,6 +1354,8 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pjmedia_port *media_port
         cdef pjmedia_vid_conf *conf_bridge
         cdef int slot
+        cdef int src_slot
+        cdef int sink_slot
 
         write_log("RemoteVideoStream close %r " % self)
         try:
@@ -1378,11 +1380,22 @@ cdef class RemoteVideoStream(VideoProducer):
             if self._closed:
                 write_log("RemoteVideoStream close %r 2" % self)
                 return
-            if self._consumers:
+            if self._consumers and len(self._consumers) > 0:
                 write_log("RemoteVideoStream close %r 3" % self)
                 consumer = self._consumers.pop()
-                write_log("RemoteVideoStream close %r 4" % self)
                 consumer.producer = None
+                sink_slot = consumer._slot
+                src_slot = self._slot
+                write_log("RemoteVideoStream close sink_slot %r, src_slot %r" % (sink_slot, src_slot))
+                if sink_slot>=0 and src_slot>=0:
+                    conf_bridge = self._video_mixer._obj
+                    if conf_bridge == NULL:
+                        write_log("conf_bridge is NULL")
+                        raise PJSIPError("conf_bridge is NULL", -1)
+                    with nogil:
+                        status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
+                    if status != 0:
+                        raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
                 write_log("RemoteVideoStream close %r 5" % self)
             ptr = <void*>self
             media_port = self.producer_port
@@ -1466,10 +1479,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pjmedia_vid_conf *conf_bridge
         cdef int src_slot
         cdef int sink_slot
-        cdef unsigned slots[32]
-        cdef unsigned num_slots
 
-        num_slots = 32
         write_log("RemoteVideoStream _remove_consumer self %r" % self )
         write_log("RemoteVideoStream _remove_consumer consumer %r" % consumer )
         write_log("RemoteVideoStream consumers %r" % self._consumers )
@@ -1497,12 +1507,6 @@ cdef class RemoteVideoStream(VideoProducer):
                     write_log("conf_bridge is NULL")
                     raise PJSIPError("conf_bridge is NULL", -1)
 
-                with nogil:
-                    status = pjmedia_vid_conf_enum_ports(conf_bridge, slots, &num_slots)
-                if status != 0:
-                    raise PJSIPError("pjmedia_vid_conf_enum_ports failed", status)
-                write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port ")
-                write_log("RemoteVideoStream got %r slots " % num_slots)
                 with nogil:
                     status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
                 if status != 0:
