@@ -1193,13 +1193,13 @@ cdef class LocalVideoStream(VideoConsumer):
             if slot >= 0:
                 conf_bridge = self._video_mixer._obj
                 write_log("LocalVideoStream close 6 %r" % slot)
-                if conf_bridge == NULL:
-                    write_log("LocalVideoStream conf_bridge is NULL")
-                with nogil:
-                    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
+                #if conf_bridge == NULL:
+                #    write_log("LocalVideoStream conf_bridge is NULL")
+                #with nogil:
+                #    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
                 write_log("LocalVideoStream close 8")
-                if status != 0:
-                    raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
+                #if status != 0:
+                #    raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
                 write_log("LocalVideoStream close 9")
                 self._slot = -1
                 write_log("LocalVidStream video conference remove slot done")
