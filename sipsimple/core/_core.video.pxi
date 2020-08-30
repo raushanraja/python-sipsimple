@@ -1149,10 +1149,10 @@ cdef class LocalVideoStream(VideoConsumer):
         self._video_mixer = video_mixer
         slot = video_mixer._add_port(media_port)
         self._slot = slot
-        write_log("LocalVideoStream _initialize done ")
+        write_log("LocalVideoStream _initialize done slot %r" % slot)
 
     cdef void _set_producer(self, VideoProducer producer):
-        write_log("LocalVideoStream _set_producer ")
+        write_log("LocalVideoStream _set_producer %r, producer %r" % (self, producer))
         old_producer = self._producer
         if old_producer is producer:
             write_log("LocalVideoStream _set_producer return ")
@@ -1172,10 +1172,11 @@ cdef class LocalVideoStream(VideoConsumer):
         cdef pjmedia_vid_conf *conf_bridge
         cdef int slot
 
-        write_log("LocalVideoStream close ")
+        write_log("LocalVideoStream close %r " % self)
         try:
             ua = _get_ua()
         except:
+            write_log("LocalVideoStream close 1")
             return
 
         global_lock = ua.video_lock
@@ -1192,6 +1193,7 @@ cdef class LocalVideoStream(VideoConsumer):
             raise PJSIPError("failed to acquire lock", status)
         try:
             if self._closed:
+                write_log("LocalVideoStream close 2")
                 return
             self._set_producer(None)
             slot = self._slot
@@ -1269,6 +1271,7 @@ cdef class RemoteVideoStream(VideoProducer):
         if video_mixer <= 0:
             raise PJSIPError("invalid video mixer", status)
         slot = video_mixer._add_port(media_port)
+        write_log("inside RemoteVideoStream _initialize %r, slot %r" % (self, slot))
         self._slot = slot
         self._running = 1
         self._closed = 0
@@ -1338,6 +1341,7 @@ cdef class RemoteVideoStream(VideoProducer):
         pass
 
     def stop(self):
+        write_log("RemoteVideoStream stop %r " % self)
         pass
 
     def close(self):
@@ -1355,6 +1359,7 @@ cdef class RemoteVideoStream(VideoProducer):
         try:
             ua = _get_ua()
         except:
+            write_log("RemoteVideoStream close %r 1" % self)
             return
 
         global_lock = ua.video_lock
@@ -1371,10 +1376,14 @@ cdef class RemoteVideoStream(VideoProducer):
             raise PJSIPError("failed to acquire lock", status)
         try:
             if self._closed:
+                write_log("RemoteVideoStream close %r 2" % self)
                 return
             if self._consumers:
+                write_log("RemoteVideoStream close %r 3" % self)
                 consumer = self._consumers.pop()
+                write_log("RemoteVideoStream close %r 4" % self)
                 consumer.producer = None
+                write_log("RemoteVideoStream close %r 5" % self)
             ptr = <void*>self
             media_port = self.producer_port
             with nogil:
