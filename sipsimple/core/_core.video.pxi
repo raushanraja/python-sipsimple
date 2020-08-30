@@ -1204,7 +1204,7 @@ cdef class LocalVideoStream(VideoConsumer):
                     write_log("LocalVideoStream conf_bridge is NULL")
                 with nogil:
                     status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
-                rite_log("LocalVideoStream close 8")
+                write_log("LocalVideoStream close 8")
                 if status != 0:
                     raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
                 write_log("LocalVideoStream close 9")
