@@ -1392,10 +1392,12 @@ cdef class RemoteVideoStream(VideoProducer):
                     if conf_bridge == NULL:
                         write_log("conf_bridge is NULL")
                         raise PJSIPError("conf_bridge is NULL", -1)
+                    write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port close %r" % self)
                     with nogil:
                         status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
                     if status != 0:
                         raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
+                    self._slot = -1
                 write_log("RemoteVideoStream close %r 5" % self)
             ptr = <void*>self
             media_port = self.producer_port
