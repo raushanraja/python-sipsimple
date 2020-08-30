@@ -1140,6 +1140,7 @@ cdef class LocalVideoStream(VideoConsumer):
 
     cdef void _initialize(self, pjmedia_port *media_port, VideoMixer video_mixer):
         cdef int slot
+        write_log("LocalVideoStream _initialize %r " % self)
         self.consumer_port = media_port
         self._running = 1
         self._closed = 0
@@ -1148,16 +1149,20 @@ cdef class LocalVideoStream(VideoConsumer):
         self._video_mixer = video_mixer
         slot = video_mixer._add_port(media_port)
         self._slot = slot
+        write_log("LocalVideoStream _initialize done ")
 
     cdef void _set_producer(self, VideoProducer producer):
+        write_log("LocalVideoStream _set_producer ")
         old_producer = self._producer
         if old_producer is producer:
+            write_log("LocalVideoStream _set_producer return ")
             return
         if old_producer is not None and not old_producer.closed:
             old_producer._remove_consumer(self)
         self._producer = producer
         if producer is not None:
             producer._add_consumer(self)
+        write_log("LocalVideoStream _set_producer done ")
 
     def close(self):
         cdef int status
@@ -1231,17 +1236,19 @@ cdef class RemoteVideoStream(VideoProducer):
 
     def __init__(self, object event_handler=None):
         super(RemoteVideoStream, self).__init__()
+        write_log("RemoteVideoStream __init__ %r " % self)
         if event_handler is not None and not callable(event_handler):
             raise TypeError("event_handler must be a callable or None")
         self._event_handler = event_handler
         self._slot = -1
+        write_log("RemoteVideoStream __init__ done ")
 
     cdef void _initialize(self, pjmedia_vid_stream *stream, VideoMixer video_mixer):
         cdef pjmedia_port *media_port
         cdef int status
         cdef int slot
         cdef void* ptr
-        write_log("inside RemoteVideoStream _initialize")
+        write_log("inside RemoteVideoStream _initialize %r" % self)
         with nogil:
             status = pjmedia_vid_stream_get_port(stream, PJMEDIA_DIR_DECODING, &media_port)
         if status != 0:
@@ -1276,6 +1283,7 @@ cdef class RemoteVideoStream(VideoProducer):
             cdef pjmedia_vid_stream_info info
             cdef PJSIPUA ua
 
+            write_log("inside RemoteVideoStream __get__ framerate %r" % self)
             ua = _get_ua()
             lock = self._lock
             stream = self._video_stream
@@ -1305,6 +1313,7 @@ cdef class RemoteVideoStream(VideoProducer):
             cdef pjmedia_vid_stream_info info
             cdef PJSIPUA ua
 
+            write_log("inside RemoteVideoStream __get__  framesize %r" % self)
             ua = _get_ua()
             lock = self._lock
             stream = self._video_stream
@@ -1342,7 +1351,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pjmedia_vid_conf *conf_bridge
         cdef int slot
 
-        write_log("RemoteVideoStream close ")
+        write_log("RemoteVideoStream close %r " % self)
         try:
             ua = _get_ua()
         except:
@@ -1398,6 +1407,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef int sink_slot
         cdef PJSIPUA ua
 
+        write_log("RemoteVideoStream _add_consumer")
         ua = _get_ua()
         lock = self._lock
 
@@ -1437,6 +1447,7 @@ cdef class RemoteVideoStream(VideoProducer):
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+            write_log("RemoteVideoStream _add_consumer done")
 
     cdef void _remove_consumer(self, VideoConsumer consumer):
         cdef int status
@@ -1450,7 +1461,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef unsigned num_slots
 
         num_slots = 32
-        write_log("RemoteVideoStream _remove_consumer ")
+        write_log("RemoteVideoStream _remove_consumer self %r" % self )
         ua = _get_ua()
         lock = self._lock
 
@@ -1462,6 +1473,7 @@ cdef class RemoteVideoStream(VideoProducer):
             if self._closed:
                 raise SIPCoreError("producer is closed")
             if consumer not in self._consumers:
+                write_log("RemoteVideoStream consumer noyt found")
                 return
             consumer_port = consumer._video_port
             sink_slot = consumer._slot
