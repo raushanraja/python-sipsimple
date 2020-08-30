@@ -1485,10 +1485,10 @@ cdef class RemoteVideoStream(VideoProducer):
                 if status != 0:
                     raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
                 write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port done")
-                with nogil:
-                    status = pjmedia_vid_conf_remove_port(conf_bridge, src_slot)
-                if status != 0:
-                    raise PJSIPError("Video conf Could not remove slot", status)
+                #with nogil:
+                #    status = pjmedia_vid_conf_remove_port(conf_bridge, src_slot)
+                #if status != 0:
+                #    raise PJSIPError("Video conf Could not remove slot", status)
                 write_log("RemoteVideoStream pjmedia_vid_conf_remove_port done")
             elif consumer_port != NULL:
                 with nogil:
