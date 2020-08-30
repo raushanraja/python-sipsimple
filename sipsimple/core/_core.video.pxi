@@ -1192,9 +1192,9 @@ cdef class LocalVideoStream(VideoConsumer):
         if self._slot >= 0:
             write_log("LocalVideoStream close 5")
             conf_bridge = self._video_mixer._obj
-            write_log("LocalVideoStream close 6")
             slot = self._slot
-            write_log("LocalVideoStream close 7")
+            write_log("LocalVideoStream close 6 %r" % slot)
+            write_log("LocalVideoStream close 7 %r" % conf_bridge)
             with nogil:
                 status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
             write_log("LocalVideoStream close 8")
