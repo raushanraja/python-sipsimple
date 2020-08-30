@@ -1446,7 +1446,10 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pjmedia_vid_conf *conf_bridge
         cdef int src_slot
         cdef int sink_slot
+        cdef unsigned slots[32]
+        cdef unsigned num_slots
 
+        num_slots = 32
         write_log("RemoteVideoStream _remove_consumer ")
         ua = _get_ua()
         lock = self._lock
@@ -1467,7 +1470,16 @@ cdef class RemoteVideoStream(VideoProducer):
             write_log("RemoteVideoStream sink_slot %r, src_slot %r" % (sink_slot, src_slot))
             if sink_slot>=0 and src_slot>=0:
                 conf_bridge = self._video_mixer._obj
+                if conf_bridge == NULL:
+                    write_log("conf_bridge is NULL")
+                    raise PJSIPError("conf_bridge is NULL", -1)
+
+                with nogil:
+                    status = pjmedia_vid_conf_enum_ports(conf_bridge, slots, &num_slots)
+                if status != 0:
+                    raise PJSIPError("pjmedia_vid_conf_enum_ports failed", status)
                 write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port ")
+                write_log("RemoteVideoStream got %r slots " % num_slots)
                 with nogil:
                     status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
                 if status != 0:
