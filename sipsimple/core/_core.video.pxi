@@ -1173,42 +1173,36 @@ cdef class LocalVideoStream(VideoConsumer):
         except:
             return
 
-        write_log("LocalVideoStream close 1")
         global_lock = ua.video_lock
         lock = self._lock
 
-        write_log("LocalVideoStream close 2")
         with nogil:
             status = pj_mutex_lock(global_lock)
         if status != 0:
             raise PJSIPError("failed to acquire global video lock", status)
-        write_log("LocalVideoStream close 3")
         with nogil:
             status = pj_mutex_lock(lock)
         if status != 0:
             pj_mutex_unlock(global_lock)
             raise PJSIPError("failed to acquire lock", status)
-        write_log("LocalVideoStream close 4")
-        if self._slot >= 0:
-            write_log("LocalVideoStream close 5")
-            conf_bridge = self._video_mixer._obj
-            slot = self._slot
-            write_log("LocalVideoStream close 6 %r" % slot)
-            write_log("LocalVideoStream close 7")
-            if conf_bridge == NULL:
-                write_log("LocalVideoStream conf_bridge is NULL")
-            with nogil:
-                status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
-            write_log("LocalVideoStream close 8")
-            if status != 0:
-                raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
-            write_log("LocalVideoStream close 9")
-            self._slot = -1
-            write_log("LocalVidStream video conference remove slot done")
         try:
             if self._closed:
                 return
             self._set_producer(None)
+            slot = self._slot
+            if slot >= 0:
+                conf_bridge = self._video_mixer._obj
+                write_log("LocalVideoStream close 6 %r" % slot)
+                if conf_bridge == NULL:
+                    write_log("LocalVideoStream conf_bridge is NULL")
+                with nogil:
+                    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
+                write_log("LocalVideoStream close 8")
+                if status != 0:
+                    raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
+                write_log("LocalVideoStream close 9")
+                self._slot = -1
+                write_log("LocalVidStream video conference remove slot done")
             self._closed = 1
         finally:
             with nogil:
@@ -1470,13 +1464,20 @@ cdef class RemoteVideoStream(VideoProducer):
             sink_slot = consumer._slot
             src_slot = self._slot
 
-            if sink_slot>=0 and  src_slot>=0:
+            write_log("RemoteVideoStream sink_slot %r, src_slot %r" % (sink_slot, src_slot))
+            if sink_slot>=0 and src_slot>=0:
                 conf_bridge = self._video_mixer._obj
                 write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port ")
                 with nogil:
                     status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, sink_slot)
                 if status != 0:
                     raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
+                write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port done")
+                with nogil:
+                    status = pjmedia_vid_conf_remove_port(conf_bridge, src_slot)
+                if status != 0:
+                    raise PJSIPError("Video conf Could not remove slot", status)
+                write_log("RemoteVideoStream pjmedia_vid_conf_remove_port done")
             elif consumer_port != NULL:
                 with nogil:
                     status = pjmedia_vid_port_disconnect(consumer_port)
