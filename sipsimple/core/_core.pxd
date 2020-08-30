@@ -596,6 +596,7 @@ cdef extern from "pjmedia.h":
     int pjmedia_conf_add_port(pjmedia_conf *conf, pj_pool_t *pool, pjmedia_port *strm_port,
                               pj_str_t *name, unsigned int *p_slot) nogil
     int pjmedia_conf_remove_port(pjmedia_conf *conf, unsigned int slot) nogil
+    int pjmedia_vid_conf_enum_ports(pjmedia_vid_conf *vid_conf, unsigned slots[],unsigned *count) nogil
     int pjmedia_conf_connect_port(pjmedia_conf *conf, unsigned int src_slot, unsigned int sink_slot, int level) nogil
     int pjmedia_conf_disconnect_port(pjmedia_conf *conf, unsigned int src_slot, unsigned int sink_slot) nogil
     int pjmedia_conf_adjust_rx_level(pjmedia_conf *conf, unsigned slot, int adj_level) nogil
