@@ -1152,7 +1152,7 @@ cdef class LocalVideoStream(VideoConsumer):
             self._slot = slot
         else:
             self._slot = -1
-        write_log("LocalVideoStream _initialize done slot %r" % slot)
+        write_log("LocalVideoStream _initialize done slot %r" % self.slot)
 
     cdef void _set_producer(self, VideoProducer producer):
         write_log("LocalVideoStream _set_producer %r, producer %r" % (self, producer))
@@ -1482,7 +1482,7 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef pjmedia_vid_port *consumer_port
         cdef pjmedia_vid_conf *conf_bridge
         cdef int src_slot
-        cdef int sink_slot
+        #cdef int sink_slot
 
         write_log("RemoteVideoStream _remove_consumer self %r" % self )
         write_log("RemoteVideoStream _remove_consumer consumer %r" % consumer )
@@ -1500,13 +1500,13 @@ cdef class RemoteVideoStream(VideoProducer):
             if consumer not in self._consumers:
                 write_log("RemoteVideoStream consumer noyt found")
                 return
-            #consumer_port = consumer._video_port
+            consumer_port = consumer._video_port
             #sink_slot = consumer._slot
             src_slot = self._slot
 
+            conf_bridge = self._video_mixer._obj
             #write_log("RemoteVideoStream sink_slot %r, src_slot %r" % (sink_slot, src_slot))
             #if sink_slot>=0 and src_slot>=0:
-            #    conf_bridge = self._video_mixer._obj
             #    if conf_bridge == NULL:
             #        write_log("conf_bridge is NULL")
             #        raise PJSIPError("conf_bridge is NULL", -1)
