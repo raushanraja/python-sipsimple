@@ -1389,7 +1389,7 @@ cdef class RemoteVideoStream(VideoProducer):
                 consumer.producer = None
                 #sink_slot = consumer._slot
                 #src_slot = self._slot
-                write_log("RemoteVideoStream close sink_slot %r, src_slot %r" % (sink_slot, src_slot))
+                #write_log("RemoteVideoStream close sink_slot %r, src_slot %r" % (sink_slot, src_slot))
                 #if sink_slot>=0 and src_slot>=0:
                 #    conf_bridge = self._video_mixer._obj
                 #    if conf_bridge == NULL:
