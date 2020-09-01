@@ -1159,7 +1159,7 @@ cdef class LocalVideoStream(VideoConsumer):
             old_producer._remove_consumer(self)
 
         if media_port != NULL and self._slot < 0:
-            slot = self.video_mixer._add_port(media_port)
+            slot = self._video_mixer._add_port(media_port)
             self._slot = slot
 
         self._producer = producer
@@ -1459,7 +1459,7 @@ cdef class RemoteVideoStream(VideoProducer):
             consumer_port = consumer._video_port
             producer_port = self.producer_port
             if producer_port != NULL and self.slot < 0:
-                slot = self.video_mixer._add_port(producer_port)
+                slot = self._video_mixer._add_port(producer_port)
                 self.slot = slot
             if consumer_port == NULL:
                 write_log("use video conference bridge for _add_consumer ")
