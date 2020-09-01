@@ -1254,6 +1254,12 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef int slot
         cdef void* ptr
         write_log("inside RemoteVideoStream _initialize %r" % self)
+
+        try:
+            ua = _get_ua()
+        except:
+            return
+
         with nogil:
             status = pjmedia_vid_stream_get_port(stream, PJMEDIA_DIR_DECODING, &media_port)
         if status != 0:
@@ -1434,7 +1440,10 @@ cdef class RemoteVideoStream(VideoProducer):
         cdef PJSIPUA ua
 
         write_log("RemoteVideoStream _add_consumer")
-        ua = _get_ua()
+        try:
+            ua = _get_ua()
+        except:
+            return
         lock = self._lock
 
         with nogil:
