@@ -1158,8 +1158,8 @@ cdef class LocalVideoStream(VideoConsumer):
         if old_producer is not None and not old_producer.closed:
             old_producer._remove_consumer(self)
 
-        if media_port != NULL and self._slot < 0:
-            slot = self._video_mixer._add_port(media_port)
+        if self.consumer_port != NULL and self._slot < 0:
+            slot = self._video_mixer._add_port(self.consumer_port)
             self._slot = slot
 
         self._producer = producer
