@@ -1201,16 +1201,17 @@ cdef class LocalVideoStream(VideoConsumer):
             self._set_producer(None)
             slot = self._slot
             if slot >= 0:
-                conf_bridge = self._video_mixer._obj
-                write_log("LocalVideoStream close 6 %r" % slot)
-                if conf_bridge == NULL:
-                    write_log("LocalVideoStream conf_bridge is NULL")
-                with nogil:
-                    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
-                write_log("LocalVideoStream close 8")
-                if status != 0:
-                    raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
-                write_log("LocalVideoStream close 9")
+                self._video_mixer._remove_port(slot)
+                # conf_bridge = self._video_mixer._obj
+                # write_log("LocalVideoStream close 6 %r" % slot)
+                # if conf_bridge == NULL:
+                #    write_log("LocalVideoStream conf_bridge is NULL")
+                # with nogil:
+                #    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
+                # write_log("LocalVideoStream close 8")
+                #if status != 0:
+                #    raise PJSIPError("LocalVidStream vid conf Could not remove slot", status)
+                #write_log("LocalVideoStream close 9")
                 self._slot = -1
                 write_log("LocalVidStream video conference remove slot done")
             self._closed = 1
@@ -1412,12 +1413,13 @@ cdef class RemoteVideoStream(VideoProducer):
             self._closed = 1
             self._event_handler = None
             if self._slot >= 0:
-                conf_bridge = self._video_mixer._obj
-                slot = self._slot
-                with nogil:
-                    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
-                if status != 0:
-                    raise PJSIPError("Vid conf Could not remove slot", status)
+                self._video_mixer._remove_port(self._slot)
+                #conf_bridge = self._video_mixer._obj
+                #slot = self._slot
+                #with nogil:
+                #    status = pjmedia_vid_conf_remove_port(conf_bridge, slot)
+                #if status != 0:
+                #    raise PJSIPError("Vid conf Could not remove slot", status)
                 self._slot = -1
                 write_log("use video conference remove slot done")
         finally:
@@ -1528,11 +1530,12 @@ cdef class RemoteVideoStream(VideoProducer):
             #        raise PJSIPError("Video conf Could not disconnect video consumer from producer", status)
             #    write_log("RemoteVideoStream pjmedia_vid_conf_disconnect_port done")
             if src_slot>=0:
-                with nogil:
-                    status = pjmedia_vid_conf_remove_port(conf_bridge, src_slot)
-                if status != 0:
-                    raise PJSIPError("Video conf Could not remove slot", status)
-                write_log("RemoteVideoStream pjmedia_vid_conf_remove_port done")
+                self._video_mixer._remove_port(src_slot)
+                #with nogil:
+                #    status = pjmedia_vid_conf_remove_port(conf_bridge, src_slot)
+                #if status != 0:
+                #    raise PJSIPError("Video conf Could not remove slot", status)
+                #write_log("RemoteVideoStream pjmedia_vid_conf_remove_port done")
                 self._slot = -1
             if consumer_port != NULL:
                 with nogil:
