@@ -605,7 +605,6 @@ cdef extern from "pjmedia.h":
     struct pjmedia_vid_conf_setting
     struct pjmedia_vid_conf
     void pjmedia_vid_conf_setting_default(pjmedia_vid_conf_setting *opt) nogil
-    int pjmedia_vid_conf_create(pj_pool_t *pool, pjmedia_vid_conf_setting *opt, pjmedia_vid_conf **p_vid_conf) nogil
     int pjmedia_vid_conf_destroy(pjmedia_vid_conf *conf) nogil
     int pjmedia_vid_conf_add_port(pjmedia_vid_conf *vid_conf, pj_pool_t *pool, pjmedia_port *strm_port,
 					       pj_str_t *name, void *opt, unsigned int *p_slot) nogil
@@ -1525,6 +1524,11 @@ cdef extern from "pjsip_ua.h":
     pjsip_replaces_hdr *pjsip_replaces_hdr_create(pj_pool_t *pool) nogil
     int pjsip_replaces_verify_request(pjsip_rx_data *rdata, pjsip_dialog **p_dlg, int lock_dlg, pjsip_tx_data **p_tdata) nogil
     int pjsip_replaces_init_module(pjsip_endpoint *endpt) nogil
+
+
+cdef extern from "pjmedia.h":
+    int pjmedia_vid_conf_create(pj_pool_t *pool, pjmedia_vid_conf_setting *opt, pjsip_endpoint *endpoint,
+                            pjmedia_vid_conf **p_vid_conf) nogil
 
 
 # declarations
