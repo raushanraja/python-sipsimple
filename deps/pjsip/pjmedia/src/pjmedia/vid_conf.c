@@ -409,7 +409,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_conf_remove_port( pjmedia_vid_conf *vid_conf,
 	      slot, (int)cport->name.slen, cport->name.ptr));
 
     /* Release pool */
-    pj_pool_release(&cport->pool);
+    //pj_pool_release(&cport->pool);
 
     if (AUTO_STOP_CLOCK && vid_conf->connect_cnt == 0) {
 	pj_status_t status;
