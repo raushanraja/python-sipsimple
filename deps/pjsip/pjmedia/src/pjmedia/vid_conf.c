@@ -152,7 +152,6 @@ PJ_DEF(pj_status_t) pjmedia_vid_conf_create(
     } else {
 	pjmedia_vid_conf_setting_default(&vid_conf->opt);
     }
-    vid_conf->endpoint = endpoint;
 
     /* Allocate ports */
     vid_conf->ports = (vconf_port**)
