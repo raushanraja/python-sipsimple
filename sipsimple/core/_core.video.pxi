@@ -1147,12 +1147,7 @@ cdef class LocalVideoStream(VideoConsumer):
         if video_mixer <= 0:
             raise PJSIPError("invalid video mixer", video_mixer)
         self._video_mixer = video_mixer
-        if media_port != NULL:
-            slot = video_mixer._add_port(media_port)
-            self._slot = slot
-        else:
-            self._slot = -1
-        write_log("LocalVideoStream _initialize done slot %r" % self.slot)
+        self._slot = -1
 
     cdef void _set_producer(self, VideoProducer producer):
         write_log("LocalVideoStream _set_producer %r, producer %r" % (self, producer))
@@ -1162,6 +1157,11 @@ cdef class LocalVideoStream(VideoConsumer):
             return
         if old_producer is not None and not old_producer.closed:
             old_producer._remove_consumer(self)
+
+        if media_port != NULL and self._slot < 0:
+            slot = video_mixer._add_port(media_port)
+            self._slot = slot
+
         self._producer = producer
         if producer is not None:
             producer._add_consumer(self)
@@ -1279,9 +1279,7 @@ cdef class RemoteVideoStream(VideoProducer):
         write_log("inside RemoteVideoStream call _add_port")
         if video_mixer <= 0:
             raise PJSIPError("invalid video mixer", status)
-        slot = video_mixer._add_port(media_port)
-        write_log("inside RemoteVideoStream _initialize %r, slot %r" % (self, slot))
-        self._slot = slot
+        self._slot = -1
         self._running = 1
         self._closed = 0
         write_log("inside RemoteVideoStream _initialize done")
@@ -1446,6 +1444,7 @@ cdef class RemoteVideoStream(VideoProducer):
             return
         lock = self._lock
 
+
         with nogil:
             status = pj_mutex_lock(lock)
         if status != 0:
@@ -1459,6 +1458,9 @@ cdef class RemoteVideoStream(VideoProducer):
                 raise SIPCoreError("another consumer is already attached to this producer")
             consumer_port = consumer._video_port
             producer_port = self.producer_port
+            if producer_port != NULL and self.slot < 0:
+                slot = video_mixer._add_port(producer_port)
+                self.slot = slot
             if consumer_port == NULL:
                 write_log("use video conference bridge for _add_consumer ")
                 video_mixer = self._video_mixer
