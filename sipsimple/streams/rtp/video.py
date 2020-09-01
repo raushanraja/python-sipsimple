@@ -102,7 +102,8 @@ class VideoStream(RTPStream):
             if self._transport is not None:
                 self.notification_center.remove_observer(self, sender=self._transport)
                 self.notification_center.remove_observer(self, sender=self._rtp_transport)
-                call_in_thread('device-io', self._transport.stop)
+                #call_in_thread('device-io', self._transport.stop)
+                self._transport.stop()
                 self._transport = None
                 self._rtp_transport = None
             self.state = "ENDED"
