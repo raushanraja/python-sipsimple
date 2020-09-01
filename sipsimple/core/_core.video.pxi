@@ -1458,9 +1458,9 @@ cdef class RemoteVideoStream(VideoProducer):
                 raise SIPCoreError("another consumer is already attached to this producer")
             consumer_port = consumer._video_port
             producer_port = self.producer_port
-            if producer_port != NULL and self.slot < 0:
+            if producer_port != NULL and self._slot < 0:
                 slot = self._video_mixer._add_port(producer_port)
-                self.slot = slot
+                self._slot = slot
             if consumer_port == NULL:
                 write_log("use video conference bridge for _add_consumer ")
                 video_mixer = self._video_mixer
