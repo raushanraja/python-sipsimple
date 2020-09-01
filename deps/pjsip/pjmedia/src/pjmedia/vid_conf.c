@@ -260,7 +260,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_conf_add_port( pjmedia_vid_conf *vid_conf,
     pj_assert(index != vid_conf->opt.max_slot_cnt);
 
     /* Create pool */
-    //pool = pj_pool_create(parent_pool->factory, name->ptr, 500, 500, NULL);
+    pool = pj_pool_create(parent_pool->factory, name->ptr, 500, 500, NULL);
     PJ_ASSERT_RETURN(pool, PJ_ENOMEM);
 
     /* Create port. */
