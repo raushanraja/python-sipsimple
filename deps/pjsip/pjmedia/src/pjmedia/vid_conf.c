@@ -124,7 +124,7 @@ PJ_DEF(void) pjmedia_vid_conf_setting_default(pjmedia_vid_conf_setting *opt)
 {
     pj_bzero(opt, sizeof(*opt));
     opt->max_slot_cnt = 32;
-    opt->frame_rate = 30;
+    opt->frame_rate = 90;
 }
 
 
