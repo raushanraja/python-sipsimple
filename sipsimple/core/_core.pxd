@@ -2192,24 +2192,6 @@ cdef class VideoProducer(object):
     cdef void _add_consumer(self, VideoConsumer consumer)
     cdef void _remove_consumer(self, VideoConsumer consumer)
 
-cdef class VideoConnector:
-    cdef pj_pool_t *_pool
-    cdef pj_mutex_t *_lock
-    cdef int _running
-    cdef int _started
-    cdef int _closed
-    cdef pjmedia_master_port *_master_port
-
-
-cdef class VideoTeeProducer(VideoProducer):
-    cdef pjmedia_port *_video_tee
-    cdef readonly unicode name
-    cdef readonly unicode real_name
-
-    cdef void _start(self)
-    cdef void _stop(self)
-    cdef void add_dest(self, pjmedia_port *dest_port)
-
 cdef class VideoCamera(VideoProducer):
     cdef pjmedia_port *_video_tee
     cdef readonly unicode name
