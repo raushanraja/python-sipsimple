@@ -1,6 +1,11 @@
 
 import sys
 
+def write_log(log_data):
+    f = open("/root/sipsimple.log", "a+")
+    f.write(log_data)
+    f.write("\n")
+    f.close()
 
 # classes
 
@@ -374,12 +379,16 @@ cdef class PJMEDIAEndpoint:
         cdef int i
         cdef list retval
         cdef int status
+        write_log("inside _get_video_codecs")
         status = pjmedia_vid_codec_mgr_enum_codecs(NULL, &count, info, prio)
         if status != 0:
             raise PJSIPError("Could not get available video codecs", status)
+        write_log("video codecs count is %r", count)
         retval = list()
         for i from 0 <= i < count:
             if info[i].packings & PJMEDIA_VID_PACKING_PACKETS:
+                write_log("video codecs encoding for i %r", i)
+                write_log("video codecs adding encoding %r", info[i].encoding_name)
                 retval.append((prio[i], _pj_str_to_str(info[i].encoding_name), info[i].pt))
         return retval
 
