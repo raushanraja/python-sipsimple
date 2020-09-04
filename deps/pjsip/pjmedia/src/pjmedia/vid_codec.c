@@ -1,5 +1,5 @@
-/* $Id: vid_codec.c 4008 2012-04-03 04:03:19Z nanang $ */
-/* 
+/* $Id$ */
+/*
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  * Copyright (C) 2003-2008 Benny Prijono <benny@prijono.org>
  *
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <pjmedia/vid_codec.h>
 #include <pjmedia/errno.h>
@@ -51,7 +51,7 @@ typedef struct pjmedia_vid_codec_desc
     pjmedia_codec_id	             id;        /**< Fully qualified name   */
     pjmedia_codec_priority           prio;      /**< Priority.		    */
     pjmedia_vid_codec_factory       *factory;	/**< The factory.	    */
-    pjmedia_vid_codec_default_param *def_param; /**< Default codecs 
+    pjmedia_vid_codec_default_param *def_param; /**< Default codecs
 					             parameters.	    */
 } pjmedia_vid_codec_desc;
 
@@ -86,7 +86,7 @@ static void sort_codecs(pjmedia_vid_codec_mgr *mgr);
  * Duplicate video codec parameter.
  */
 PJ_DEF(pjmedia_vid_codec_param*) pjmedia_vid_codec_param_clone(
-					pj_pool_t *pool, 
+					pj_pool_t *pool,
 					const pjmedia_vid_codec_param *src)
 {
     pjmedia_vid_codec_param *p;
@@ -99,15 +99,15 @@ PJ_DEF(pjmedia_vid_codec_param*) pjmedia_vid_codec_param_clone(
     /* Update codec param */
     pj_memcpy(p, src, sizeof(pjmedia_vid_codec_param));
     for (i = 0; i < src->dec_fmtp.cnt; ++i) {
-	pj_strdup(pool, &p->dec_fmtp.param[i].name, 
+	pj_strdup(pool, &p->dec_fmtp.param[i].name,
 		  &src->dec_fmtp.param[i].name);
-	pj_strdup(pool, &p->dec_fmtp.param[i].val, 
+	pj_strdup(pool, &p->dec_fmtp.param[i].val,
 		  &src->dec_fmtp.param[i].val);
     }
     for (i = 0; i < src->enc_fmtp.cnt; ++i) {
-	pj_strdup(pool, &p->enc_fmtp.param[i].name, 
+	pj_strdup(pool, &p->enc_fmtp.param[i].name,
 		  &src->enc_fmtp.param[i].name);
-	pj_strdup(pool, &p->enc_fmtp.param[i].val, 
+	pj_strdup(pool, &p->enc_fmtp.param[i].val,
 		  &src->enc_fmtp.param[i].val);
     }
 
@@ -240,7 +240,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_mgr_register_factory(
  * Unregister a codec factory.
  */
 PJ_DEF(pj_status_t) pjmedia_vid_codec_mgr_unregister_factory(
-				pjmedia_vid_codec_mgr *mgr, 
+				pjmedia_vid_codec_mgr *mgr,
 				pjmedia_vid_codec_factory *factory)
 {
     unsigned i;
@@ -261,14 +261,14 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_mgr_unregister_factory(
     pj_list_erase(factory);
 
 
-    /* Remove all supported codecs from the codec manager that were created 
+    /* Remove all supported codecs from the codec manager that were created
      * by the specified factory.
      */
     for (i=0; i<mgr->codec_cnt; ) {
 
 	if (mgr->codec_desc[i].factory == factory) {
 	    /* Remove the codec from array of codec descriptions */
-	    pj_array_erase(mgr->codec_desc, sizeof(mgr->codec_desc[0]), 
+	    pj_array_erase(mgr->codec_desc, sizeof(mgr->codec_desc[0]),
 			   mgr->codec_cnt, i);
 	    --mgr->codec_cnt;
 
@@ -287,8 +287,8 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_mgr_unregister_factory(
  * Enum all codecs.
  */
 PJ_DEF(pj_status_t) pjmedia_vid_codec_mgr_enum_codecs(
-                                pjmedia_vid_codec_mgr *mgr, 
-			        unsigned *count, 
+                                pjmedia_vid_codec_mgr *mgr,
+			        unsigned *count,
 			        pjmedia_vid_codec_info codecs[],
 			        unsigned *prio)
 {
@@ -303,10 +303,10 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_mgr_enum_codecs(
 
     if (*count > mgr->codec_cnt)
 	*count = mgr->codec_cnt;
-    
+
     for (i=0; i<*count; ++i) {
-	pj_memcpy(&codecs[i], 
-		  &mgr->codec_desc[i].info, 
+	pj_memcpy(&codecs[i],
+		  &mgr->codec_desc[i].info,
 		  sizeof(pjmedia_vid_codec_info));
     }
 
@@ -409,10 +409,7 @@ PJ_DEF(char*) pjmedia_vid_codec_info_to_id(
 
 
 /*
- * Find codecs by the unique codec identifier. This function will find
- * all codecs that match the codec identifier prefix. For example, if
- * "L16" is specified, then it will find "L16/8000/1", "L16/16000/1",
- * and so on, up to the maximum count specified in the argument.
+ * Find codecs by the unique codec identifier.
  */
 PJ_DEF(pj_status_t) pjmedia_vid_codec_mgr_find_codecs_by_id(
                                      pjmedia_vid_codec_mgr *mgr,

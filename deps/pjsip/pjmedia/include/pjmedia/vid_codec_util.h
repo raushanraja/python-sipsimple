@@ -1,5 +1,5 @@
-/* $Id: vid_codec_util.h 3715 2011-08-19 09:35:25Z nanang $ */
-/* 
+/* $Id$ */
+/*
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  * Copyright (C) 2003-2008 Benny Prijono <benny@prijono.org>
  *
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #ifndef __PJMEDIA_VID_CODEC_UTIL_H__
 #define __PJMEDIA_VID_CODEC_UTIL_H__
@@ -149,6 +149,43 @@ PJ_DECL(pj_status_t) pjmedia_vid_codec_h264_match_sdp(
  * @return		PJ_SUCCESS on success.
  */
 PJ_DECL(pj_status_t) pjmedia_vid_codec_h264_apply_fmtp(
+				pjmedia_vid_codec_param *param);
+
+
+/**
+ * Definition of VPX parameters.
+ */
+typedef struct pjmedia_vid_codec_vpx_fmtp
+{
+    unsigned	    max_fr;	    /**< Max frame rate    		    */
+    unsigned	    max_fs;	    /**< Max frame size (in macroblocks)    */
+    pj_uint8_t	    profile_id;     /**< Profile ID			    */
+} pjmedia_vid_codec_vpx_fmtp;
+
+
+/**
+ * Parse SDP fmtp of VPX.
+ *
+ * @param fmtp		The VPX SDP fmtp to be parsed.
+ * @param vpx_fmtp	The parsing result.
+ *
+ * @return		PJ_SUCCESS on success.
+ */
+PJ_DECL(pj_status_t) pjmedia_vid_codec_vpx_parse_fmtp(
+				const pjmedia_codec_fmtp *fmtp,
+				pjmedia_vid_codec_vpx_fmtp *vpx_fmtp);
+
+
+/**
+ * Parse and apply the encoding and decoding SDP fmtp of VPX in the
+ * specified codec parameter. This will validate size and fps to conform
+ * to VPX level specified in SDP fmtp "max-fr" and "max-fs".
+ *
+ * @param param		The codec parameter.
+ *
+ * @return		PJ_SUCCESS on success.
+ */
+PJ_DECL(pj_status_t) pjmedia_vid_codec_vpx_apply_fmtp(
 				pjmedia_vid_codec_param *param);
 
 

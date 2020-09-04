@@ -1,5 +1,5 @@
-/* $Id: vid_codec.h 3956 2012-02-21 08:31:26Z nanang $ */
-/* 
+/* $Id$ */
+/*
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  * Copyright (C) 2003-2008 Benny Prijono <benny@prijono.org>
  *
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #ifndef __PJMEDIA_VID_CODEC_H__
 #define __PJMEDIA_VID_CODEC_H__
@@ -107,9 +107,9 @@ typedef struct pjmedia_vid_encode_opt
 } pjmedia_vid_encode_opt;
 
 
-/** 
- * Identification used to search for codec factory that supports specific 
- * codec specification. 
+/**
+ * Identification used to search for codec factory that supports specific
+ * codec specification.
  */
 typedef struct pjmedia_vid_codec_info
 {
@@ -119,10 +119,10 @@ typedef struct pjmedia_vid_codec_info
     pj_str_t	        encoding_desc;	/**< Encoding desc		    */
     unsigned            clock_rate;     /**< Clock rate			    */
     pjmedia_dir         dir;            /**< Direction                      */
-    unsigned            dec_fmt_id_cnt; /**< # of supported encoding source 
+    unsigned            dec_fmt_id_cnt; /**< # of supported encoding source
                                              format IDs                     */
     pjmedia_format_id   dec_fmt_id[PJMEDIA_VID_CODEC_MAX_DEC_FMT_CNT];
-                                        /**< Supported encoding source 
+                                        /**< Supported encoding source
                                              format IDs                     */
     unsigned		packings;	/**< Supported or requested packings,
 					     strategies, bitmask from
@@ -135,13 +135,13 @@ typedef struct pjmedia_vid_codec_info
 } pjmedia_vid_codec_info;
 
 
-/** 
+/**
  * Detailed codec attributes used in configuring a codec and in querying
  * the capability of codec factories. Default attributes of any codecs could
  * be queried using #pjmedia_vid_codec_mgr_get_default_param() and modified
  * using #pjmedia_vid_codec_mgr_set_default_param().
  *
- * Please note that codec parameter also contains SDP specific setting, 
+ * Please note that codec parameter also contains SDP specific setting,
  * #dec_fmtp and #enc_fmtp, which may need to be set appropriately based on
  * the effective setting. See each codec documentation for more detail.
  */
@@ -174,7 +174,7 @@ typedef struct pjmedia_vid_codec_param
  * @return	    Duplicated codec parameter.
  */
 PJ_DECL(pjmedia_vid_codec_param*) pjmedia_vid_codec_param_clone(
-					pj_pool_t *pool, 
+					pj_pool_t *pool,
 					const pjmedia_vid_codec_param *src);
 
 /**
@@ -189,30 +189,30 @@ typedef struct pjmedia_vid_codec pjmedia_vid_codec;
  */
 typedef struct pjmedia_vid_codec_op
 {
-    /** 
+    /**
      * See #pjmedia_vid_codec_init().
      */
-    pj_status_t	(*init)(pjmedia_vid_codec *codec, 
+    pj_status_t	(*init)(pjmedia_vid_codec *codec,
 			pj_pool_t *pool );
 
-    /** 
+    /**
      * See #pjmedia_vid_codec_open().
      */
-    pj_status_t	(*open)(pjmedia_vid_codec *codec, 
+    pj_status_t	(*open)(pjmedia_vid_codec *codec,
 			pjmedia_vid_codec_param *param );
 
-    /** 
+    /**
      * See #pjmedia_vid_codec_close().
      */
     pj_status_t (*close)(pjmedia_vid_codec *codec);
 
-    /** 
+    /**
      * See #pjmedia_vid_codec_modify().
      */
     pj_status_t	(*modify)(pjmedia_vid_codec *codec,
 			  const pjmedia_vid_codec_param *param);
 
-    /** 
+    /**
      * See #pjmedia_vid_codec_get_param().
      */
     pj_status_t	(*get_param)(pjmedia_vid_codec *codec,
@@ -286,13 +286,13 @@ struct pjmedia_vid_codec
 
 
 /**
- * This structure describes operations that must be supported by codec 
+ * This structure describes operations that must be supported by codec
  * factories.
  */
 typedef struct pjmedia_vid_codec_factory_op
 {
-    /** 
-     * Check whether the factory can create codec with the specified 
+    /**
+     * Check whether the factory can create codec with the specified
      * codec info.
      *
      * @param factory	The codec factory.
@@ -301,10 +301,10 @@ typedef struct pjmedia_vid_codec_factory_op
      * @return		PJ_SUCCESS if this factory is able to create an
      *			instance of codec with the specified info.
      */
-    pj_status_t	(*test_alloc)(pjmedia_vid_codec_factory *factory, 
+    pj_status_t	(*test_alloc)(pjmedia_vid_codec_factory *factory,
 			      const pjmedia_vid_codec_info *info );
 
-    /** 
+    /**
      * Create default attributes for the specified codec ID. This function
      * can be called by application to get the capability of the codec.
      *
@@ -314,28 +314,28 @@ typedef struct pjmedia_vid_codec_factory_op
      *
      * @return		PJ_SUCCESS if success.
      */
-    pj_status_t (*default_attr)(pjmedia_vid_codec_factory *factory, 
+    pj_status_t (*default_attr)(pjmedia_vid_codec_factory *factory,
     				const pjmedia_vid_codec_info *info,
     				pjmedia_vid_codec_param *attr );
 
-    /** 
+    /**
      * Enumerate supported codecs that can be created using this factory.
-     * 
+     *
      *  @param factory	The codec factory.
      *  @param count	On input, specifies the number of elements in
      *			the array. On output, the value will be set to
      *			the number of elements that have been initialized
      *			by this function.
-     *  @param info	The codec info array, which contents will be 
+     *  @param info	The codec info array, which contents will be
      *			initialized upon return.
      *
      *  @return		PJ_SUCCESS on success.
      */
-    pj_status_t (*enum_info)(pjmedia_vid_codec_factory *factory, 
-			     unsigned *count, 
+    pj_status_t (*enum_info)(pjmedia_vid_codec_factory *factory,
+			     unsigned *count,
 			     pjmedia_vid_codec_info codecs[]);
 
-    /** 
+    /**
      * Create one instance of the codec with the specified codec info.
      *
      * @param factory	The codec factory.
@@ -344,12 +344,12 @@ typedef struct pjmedia_vid_codec_factory_op
      *
      * @return		PJ_SUCCESS on success.
      */
-    pj_status_t (*alloc_codec)(pjmedia_vid_codec_factory *factory, 
+    pj_status_t (*alloc_codec)(pjmedia_vid_codec_factory *factory,
 			       const pjmedia_vid_codec_info *info,
 			       pjmedia_vid_codec **p_codec);
 
-    /** 
-     * This function is called by codec manager to return a particular 
+    /**
+     * This function is called by codec manager to return a particular
      * instance of codec back to the codec factory.
      *
      * @param factory	The codec factory.
@@ -357,7 +357,7 @@ typedef struct pjmedia_vid_codec_factory_op
      *
      * @return		PJ_SUCCESS on success.
      */
-    pj_status_t (*dealloc_codec)(pjmedia_vid_codec_factory *factory, 
+    pj_status_t (*dealloc_codec)(pjmedia_vid_codec_factory *factory,
 				 pjmedia_vid_codec *codec );
 
 } pjmedia_vid_codec_factory_op;
@@ -437,7 +437,7 @@ PJ_DECL(pjmedia_vid_codec_mgr*) pjmedia_vid_codec_mgr_instance(void);
 PJ_DECL(void) pjmedia_vid_codec_mgr_set_instance(pjmedia_vid_codec_mgr* mgr);
 
 
-/** 
+/**
  * Register codec factory to codec manager. This will also register
  * all supported codecs in the factory to the codec manager.
  *
@@ -447,7 +447,7 @@ PJ_DECL(void) pjmedia_vid_codec_mgr_set_instance(pjmedia_vid_codec_mgr* mgr);
  *
  * @return	    PJ_SUCCESS on success.
  */
-PJ_DECL(pj_status_t) 
+PJ_DECL(pj_status_t)
 pjmedia_vid_codec_mgr_register_factory( pjmedia_vid_codec_mgr *mgr,
 				        pjmedia_vid_codec_factory *factory);
 
@@ -462,8 +462,8 @@ pjmedia_vid_codec_mgr_register_factory( pjmedia_vid_codec_mgr *mgr,
  *
  * @return	    PJ_SUCCESS on success.
  */
-PJ_DECL(pj_status_t) 
-pjmedia_vid_codec_mgr_unregister_factory( pjmedia_vid_codec_mgr *mgr, 
+PJ_DECL(pj_status_t)
+pjmedia_vid_codec_mgr_unregister_factory( pjmedia_vid_codec_mgr *mgr,
 				          pjmedia_vid_codec_factory *factory);
 
 /**
@@ -476,7 +476,7 @@ pjmedia_vid_codec_mgr_unregister_factory( pjmedia_vid_codec_mgr *mgr,
  *		    the array. On output, the value will be set to
  *		    the number of elements that have been initialized
  *		    by this function.
- * @param info	    The codec info array, which contents will be 
+ * @param info	    The codec info array, which contents will be
  *		    initialized upon return.
  * @param prio	    Optional pointer to receive array of codec priorities.
  *
@@ -500,7 +500,7 @@ pjmedia_vid_codec_mgr_enum_codecs(pjmedia_vid_codec_mgr *mgr,
  *
  * @return	    PJ_SUCCESS on success.
  */
-PJ_DECL(pj_status_t) 
+PJ_DECL(pj_status_t)
 pjmedia_vid_codec_mgr_get_codec_info( pjmedia_vid_codec_mgr *mgr,
 				      unsigned pt,
 				      const pjmedia_vid_codec_info **info);
@@ -516,7 +516,7 @@ pjmedia_vid_codec_mgr_get_codec_info( pjmedia_vid_codec_mgr *mgr,
  *
  * @return	    PJ_SUCCESS on success.
  */
-PJ_DECL(pj_status_t) 
+PJ_DECL(pj_status_t)
 pjmedia_vid_codec_mgr_get_codec_info2(pjmedia_vid_codec_mgr *mgr,
 				      pjmedia_format_id fmt_id,
 				      const pjmedia_vid_codec_info **info);
@@ -524,7 +524,8 @@ pjmedia_vid_codec_mgr_get_codec_info2(pjmedia_vid_codec_mgr *mgr,
 
 /**
  * Convert codec info struct into a unique codec identifier.
- * A codec identifier looks something like "H263/90000".
+ * A codec identifier looks something like "H263/34", where "H263" is the
+ * codec name and "34" is the (default) payload type.
  *
  * @param info	    The codec info
  * @param id	    Buffer to put the codec info string.
@@ -540,8 +541,8 @@ PJ_DECL(char*) pjmedia_vid_codec_info_to_id(const pjmedia_vid_codec_info *info,
 /**
  * Find codecs by the unique codec identifier. This function will find
  * all codecs that match the codec identifier prefix. For example, if
- * "H26" is specified, then it will find "H263/90000", "H264/90000",
- * and so on, up to the maximum count specified in the argument.
+ * "H26" is specified, then it will find "H263", "H264", and so on,
+ * up to the maximum count specified in the argument.
  *
  * @param mgr	    The codec manager instance. If NULL, the default codec
  *		    manager instance will be used.

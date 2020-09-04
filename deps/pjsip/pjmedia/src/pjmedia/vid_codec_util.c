@@ -1,5 +1,5 @@
-/* $Id: vid_codec_util.c 4362 2013-02-21 14:51:56Z nanang $ */
-/* 
+/* $Id$ */
+/*
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  * Copyright (C) 2003-2008 Benny Prijono <benny@prijono.org>
  *
@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA 
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 #include <pjmedia/vid_codec_util.h>
 #include <pjmedia/errno.h>
@@ -50,7 +50,7 @@
 /* ITU resolution definition */
 struct mpi_resolution_t
 {
-    pj_str_t		name;    
+    pj_str_t		name;
     pjmedia_rect_size	size;
 }
 mpi_resolutions [] =
@@ -131,7 +131,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_parse_h263_fmtp(
 		if (mpi<1 || mpi>32)
 		    return PJMEDIA_SDP_EINFMTP;
 
-		h263_fmtp->mpi[h263_fmtp->mpi_cnt].size = 
+		h263_fmtp->mpi[h263_fmtp->mpi_cnt].size =
 						    mpi_resolutions[j].size;
 		h263_fmtp->mpi[h263_fmtp->mpi_cnt].val = mpi;
 		++h263_fmtp->mpi_cnt;
@@ -161,19 +161,19 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_parse_h263_fmtp(
 }
 
 
-static unsigned fps_to_mpi(const pjmedia_ratio *fps) 
+static unsigned fps_to_mpi(const pjmedia_ratio *fps)
 {
     unsigned mpi;
 
     /* Original formula = (fps->denum * 30000) / (fps->num * 1001) */
     mpi = (fps->denum*30000 + fps->num*1001/2) / (fps->num*1001);
-    
+
     /* Normalize, should be in the range of 1-32 */
     if (mpi > 32) mpi = 32;
     if (mpi < 1) mpi = 1;
 
     return mpi;
-};
+}
 
 PJ_DEF(pj_status_t) pjmedia_vid_codec_h263_apply_fmtp(
 				pjmedia_vid_codec_param *param)
@@ -265,7 +265,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h263_apply_fmtp(
 	pjmedia_vid_codec_h263_fmtp fmtp;
 	pjmedia_video_format_detail *vfd;
 	pj_status_t status;
-	
+
 	status = pjmedia_vid_codec_parse_h263_fmtp(&param->dec_fmtp,
 						   &fmtp);
 	if (status != PJ_SUCCESS)
@@ -282,7 +282,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h263_apply_fmtp(
 	    vfd->fps.denum = 1001;
 	} else {
 	    unsigned i, max_size = 0, max_size_idx = 0, min_mpi = 32;
-	    
+
 	    /* Get the largest size and the lowest MPI */
 	    for (i = 0; i < fmtp.mpi_cnt; ++i) {
 		if (fmtp.mpi[i].size.w * fmtp.mpi[i].size.h > max_size) {
@@ -399,7 +399,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_parse_fmtp(
 		return status;
 	} else if (pj_stricmp(&fmtp->param[i].name, &PACKETIZATION_MODE)==0) {
 	    tmp = pj_strtoul(&fmtp->param[i].val);
-	    if (tmp <= 2) 
+	    if (tmp <= 2)
 		h264_fmtp->packetization_mode = (pj_uint8_t)tmp;
 	    else
 		return PJMEDIA_SDP_EINFMTP;
@@ -429,7 +429,6 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_parse_fmtp(
 		const pj_uint8_t start_code[3] = {0, 0, 1};
 		char *p;
 		pj_uint8_t *nal;
-		pj_status_t status;
 
 		/* Find field separator ',' */
 		tmp_st = sps_st;
@@ -490,7 +489,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_match_sdp(pj_pool_t *pool,
 
     /* Parse offer */
     status = pjmedia_stream_info_parse_fmtp(
-				    NULL, offer, 
+				    NULL, offer,
 				    pj_strtoul(&offer->desc.fmt[o_fmt_idx]),
 				    &o_fmtp_raw);
     if (status != PJ_SUCCESS)
@@ -502,7 +501,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_match_sdp(pj_pool_t *pool,
 
     /* Parse answer */
     status = pjmedia_stream_info_parse_fmtp(
-				    NULL, answer, 
+				    NULL, answer,
 				    pj_strtoul(&answer->desc.fmt[a_fmt_idx]),
 				    &a_fmtp_raw);
     if (status != PJ_SUCCESS)
@@ -515,13 +514,15 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_match_sdp(pj_pool_t *pool,
     if (option & PJMEDIA_SDP_NEG_FMT_MATCH_ALLOW_MODIFY_ANSWER) {
 	unsigned i;
 
-	/* Flexible negotiation, adjust our answer to the offer.
-	 * Apply Postel's Principle (TM) in it's full glory.
+	/* Flexible negotiation, if the answer has higher capability than
+	 * the offer, adjust the answer capability to be match to the offer.
 	 */
-	if (a_fmtp.profile_idc != o_fmtp.profile_idc)
+	if (a_fmtp.profile_idc >= o_fmtp.profile_idc)
 	    a_fmtp.profile_idc = o_fmtp.profile_idc;
 	if (a_fmtp.profile_iop != o_fmtp.profile_iop)
 	    a_fmtp.profile_iop = o_fmtp.profile_iop;
+	if (a_fmtp.level >= o_fmtp.level)
+	    a_fmtp.level = o_fmtp.level;
 	if (a_fmtp.packetization_mode >= o_fmtp.packetization_mode)
 	    a_fmtp.packetization_mode = o_fmtp.packetization_mode;
 
@@ -529,6 +530,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_match_sdp(pj_pool_t *pool,
 #if H264_STRICT_SDP_NEGO
 	if (a_fmtp.profile_idc != o_fmtp.profile_idc ||
 	    a_fmtp.profile_iop != o_fmtp.profile_iop ||
+	    a_fmtp.level != o_fmtp.level ||
 	    a_fmtp.packetization_mode != o_fmtp.packetization_mode)
 	{
 	    return PJMEDIA_SDP_EFORMATNOTEQUAL;
@@ -548,6 +550,8 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_match_sdp(pj_pool_t *pool,
 		pj_val_to_hex_digit(a_fmtp.profile_idc, p);
 		p += 2;
 		pj_val_to_hex_digit(a_fmtp.profile_iop, p);
+		p += 2;
+		pj_val_to_hex_digit(a_fmtp.level, p);
 	    }
 	    else if (pj_stricmp(&a_fmtp_raw.param[i].name, &PACKETIZATION_MODE) == 0)
 	    {
@@ -560,6 +564,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_match_sdp(pj_pool_t *pool,
 	/* Strict negotiation */
 	if (a_fmtp.profile_idc != o_fmtp.profile_idc ||
 	    a_fmtp.profile_iop != o_fmtp.profile_iop ||
+	    a_fmtp.level != o_fmtp.level ||
 	    a_fmtp.packetization_mode != o_fmtp.packetization_mode)
 	{
 	    return PJMEDIA_SDP_EFORMATNOTEQUAL;
@@ -688,7 +693,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_apply_fmtp(
 
 	if (vfd->size.w && vfd->size.h) {
 	    unsigned mb, mbps;
-	    
+
 	    /* Scale down the resolution if it exceeds profile spec */
 	    mb = CALC_H264_MB_NUM(vfd->size);
 	    mbps = CALC_H264_MBPS(vfd->size, vfd->fps);
@@ -722,7 +727,7 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_apply_fmtp(
 	pjmedia_ratio r;
 	pjmedia_rect_size highest_size;
 	pj_status_t status;
-	
+
 	status = pjmedia_vid_codec_h264_parse_fmtp(&param->dec_fmtp,
 						   &fmtp);
 	if (status != PJ_SUCCESS)
@@ -751,6 +756,119 @@ PJ_DEF(pj_status_t) pjmedia_vid_codec_h264_apply_fmtp(
 	    vfd->avg_bps = fmtp.max_br * 1000;
 	if (vfd->max_bps < fmtp.max_br * 1000)
 	    vfd->max_bps = fmtp.max_br * 1000;
+    }
+
+    return PJ_SUCCESS;
+}
+
+
+/* VPX fmtp parser */
+PJ_DEF(pj_status_t) pjmedia_vid_codec_vpx_parse_fmtp(
+				    const pjmedia_codec_fmtp *fmtp,
+				    pjmedia_vid_codec_vpx_fmtp *vpx_fmtp)
+{
+    const pj_str_t PROFILE_ID	= {"profile-id", 10};
+    const pj_str_t MAX_FR	= {"max-fr", 6};
+    const pj_str_t MAX_FS	= {"max-fs", 6};
+
+    unsigned i;
+
+    pj_bzero(vpx_fmtp, sizeof(*vpx_fmtp));
+
+    for (i = 0; i < fmtp->cnt; ++i) {
+    	unsigned tmp;
+
+	if (pj_stricmp(&fmtp->param[i].name, &MAX_FS) == 0) {
+	    tmp = pj_strtoul(&fmtp->param[i].val);
+	    vpx_fmtp->max_fs = PJ_MAX(tmp, vpx_fmtp->max_fs);
+	} else if (pj_stricmp(&fmtp->param[i].name, &MAX_FR) == 0) {
+	    tmp = pj_strtoul(&fmtp->param[i].val);
+	    vpx_fmtp->max_fr = PJ_MAX(tmp, vpx_fmtp->max_fr);
+	} else if (pj_stricmp(&fmtp->param[i].name, &PROFILE_ID) == 0) {
+	    tmp = pj_strtoul(&fmtp->param[i].val);
+	    vpx_fmtp->profile_id = (pj_uint8_t)
+				   PJ_MAX(tmp, vpx_fmtp->profile_id);
+	}
+    }
+
+    return PJ_SUCCESS;
+}
+
+
+PJ_DEF(pj_status_t) pjmedia_vid_codec_vpx_apply_fmtp(
+				pjmedia_vid_codec_param *param)
+{
+    if (param->dir & PJMEDIA_DIR_ENCODING) {
+	pjmedia_vid_codec_vpx_fmtp fmtp;
+	pjmedia_video_format_detail *vfd;
+	pj_status_t status;
+
+	/* Get remote param */
+	status = pjmedia_vid_codec_vpx_parse_fmtp(&param->enc_fmtp,
+						  &fmtp);
+	if (status != PJ_SUCCESS)
+	    return status;
+
+	/* Adjust fps and size to conform to the parameter
+	 * specified by remote SDP fmtp.
+	 */
+	vfd = pjmedia_format_get_video_format_detail(&param->enc_fmt,
+						     PJ_TRUE);
+
+	if (fmtp.max_fr > 0) {
+	    if ((float)vfd->fps.num/vfd->fps.denum > (float)fmtp.max_fr) {
+	    	vfd->fps.num   = fmtp.max_fr;
+	    	vfd->fps.denum = 1;
+	    }
+	}
+
+	if (fmtp.max_fs > 0) {
+	    unsigned max_res = ((int)pj_isqrt(fmtp.max_fs * 8)) * 16;
+
+	    if (vfd->size.w > max_res || vfd->size.h > max_res) {
+	        /* Here we maintain the aspect ratio. Or should we scale down
+	         * to some predetermined resolution instead (for example,
+	         * if the requested resolution is 640x480 and max_res is
+	         * 600, should we scale down to 480x360)?
+	         */
+	    	unsigned larger = (vfd->size.w > vfd->size.h)?
+	    			  vfd->size.w: vfd->size.h;
+	    	float scale = (float)max_res/larger;
+
+	    	vfd->size.w = (int)(scale * vfd->size.w);
+	    	vfd->size.h = (int)(scale * vfd->size.h);
+	    }
+	}
+    }
+
+    if (param->dir & PJMEDIA_DIR_DECODING) {
+	/* Here we just want to find the highest fps and resolution possible
+	 * from the fmtp and set it as the decoder param.
+	 */
+	pjmedia_vid_codec_vpx_fmtp fmtp;
+	pjmedia_video_format_detail *vfd;
+	pj_status_t status;
+
+	/* Get remote param */
+	status = pjmedia_vid_codec_vpx_parse_fmtp(&param->dec_fmtp,
+						  &fmtp);
+	if (status != PJ_SUCCESS)
+	    return status;
+
+	vfd = pjmedia_format_get_video_format_detail(&param->dec_fmt,
+						     PJ_TRUE);
+
+	if (fmtp.max_fr > 0) {
+	    vfd->fps.num   = fmtp.max_fr;
+	    vfd->fps.denum = 1;
+	}
+
+	if (fmtp.max_fs > 0) {
+	    unsigned max_res = ((int)pj_isqrt(fmtp.max_fs * 8)) * 16;
+
+	    vfd->size.w = max_res;
+	    vfd->size.h = max_res;
+	}
     }
 
     return PJ_SUCCESS;
