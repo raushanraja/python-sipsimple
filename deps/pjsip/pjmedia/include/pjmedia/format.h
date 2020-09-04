@@ -1,4 +1,4 @@
-/* $Id: format.h 4470 2013-04-15 10:40:26Z bennylp $ */
+/* $Id$ */
 /*
  * Copyright (C) 2008-2011 Teluu Inc. (http://www.teluu.com)
  * Copyright (C) 2003-2008 Benny Prijono <benny@prijono.org>
@@ -97,7 +97,6 @@ typedef enum pjmedia_format_id
     /**
      * 32bit RGB with alpha channel
      */
-    PJMEDIA_FORMAT_ARGB     = PJMEDIA_FORMAT_PACK('A', 'R', 'G', 'B'),
     PJMEDIA_FORMAT_RGBA     = PJMEDIA_FORMAT_PACK('R', 'G', 'B', 'A'),
     PJMEDIA_FORMAT_BGRA     = PJMEDIA_FORMAT_PACK('B', 'G', 'R', 'A'),
 
@@ -181,10 +180,18 @@ typedef enum pjmedia_format_id
      * This is planar 4:2:0/12bpp YUV format, the data can be treated as
      * two planes of color components, where the first plane contains
      * only the Y samples, the second plane contains interleaved
+     * U (Cb) - V (Cr) samples.
+     */
+    PJMEDIA_FORMAT_NV12	    = PJMEDIA_FORMAT_PACK('N', 'V', '1', '2'),
+
+    /**
+     * This is planar 4:2:0/12bpp YUV format, the data can be treated as
+     * two planes of color components, where the first plane contains
+     * only the Y samples, the second plane contains interleaved
      * V (Cr) - U (Cb) samples.
      */
     PJMEDIA_FORMAT_NV21	    = PJMEDIA_FORMAT_PACK('N', 'V', '2', '1'),
-    
+
     /**
      * This is planar 4:2:2/16bpp YUV format, the data can be treated as
      * three planes of color components, where the first plane contains
@@ -212,12 +219,14 @@ typedef enum pjmedia_format_id
     PJMEDIA_FORMAT_H263P    = PJMEDIA_FORMAT_PACK('P', '2', '6', '3'),
     PJMEDIA_FORMAT_H264     = PJMEDIA_FORMAT_PACK('H', '2', '6', '4'),
 
+    PJMEDIA_FORMAT_VP8      = PJMEDIA_FORMAT_PACK('V', 'P', '8', '0'),
+    PJMEDIA_FORMAT_VP9      = PJMEDIA_FORMAT_PACK('V', 'P', '9', '0'),
+
     PJMEDIA_FORMAT_MJPEG    = PJMEDIA_FORMAT_PACK('M', 'J', 'P', 'G'),
     PJMEDIA_FORMAT_MPEG1VIDEO = PJMEDIA_FORMAT_PACK('M', 'P', '1', 'V'),
     PJMEDIA_FORMAT_MPEG2VIDEO = PJMEDIA_FORMAT_PACK('M', 'P', '2', 'V'),
     PJMEDIA_FORMAT_MPEG4    = PJMEDIA_FORMAT_PACK('M', 'P', 'G', '4'),
 
-    PJMEDIA_FORMAT_VP8 = PJMEDIA_FORMAT_PACK('L', 'V', 'P', '8'),
 } pjmedia_format_id;
 
 /**
