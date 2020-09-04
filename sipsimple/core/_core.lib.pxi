@@ -386,8 +386,9 @@ cdef class PJMEDIAEndpoint:
         write_log("video codecs count is %r" % count)
         retval = list()
         for i from 0 <= i < count:
+            write_log("video codecs encoding for i %r" % i)
+            write_log("video codecs found encoding %r" % info[i].encoding_name)
             if info[i].packings & PJMEDIA_VID_PACKING_PACKETS:
-                write_log("video codecs encoding for i %r" % i)
                 write_log("video codecs adding encoding %r" % info[i].encoding_name)
                 retval.append((prio[i], _pj_str_to_str(info[i].encoding_name), info[i].pt))
         return retval
