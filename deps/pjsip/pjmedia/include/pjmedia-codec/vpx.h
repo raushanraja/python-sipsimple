@@ -1,37 +1,43 @@
-/**
- * Copyright (C) 2010 Regis Montoya (aka r3gis - www.r3gis.fr)
- * This file is part of pjsip_android.
+/* $Id$ */
+/*
+ * Copyright (C) 2019 Teluu Inc. (http://www.teluu.com)
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-#ifndef __PJMEDIA_CODECS_VPX_H__
-#define __PJMEDIA_CODECS_VPX_H__
-
+#ifndef __PJMEDIA_CODEC_VPX_H__
+#define __PJMEDIA_CODEC_VPX_H__
 
 #include <pjmedia-codec/types.h>
 #include <pjmedia/vid_codec.h>
 
+/**
+ * @file pjmedia-codec/vpx.h
+ * @brief VPX codec
+ */
+
+
 PJ_BEGIN_DECL
 
 /**
- * @defgroup PJMEDIA_CODEC_VPX libvpx Codecs
+ * @defgroup PJMEDIA_CODEC_VPX VPX Codec
  * @ingroup PJMEDIA_CODEC_VID_CODECS
  * @{
  */
 
 /**
- * Initialize and register libvpx video codecs factory to pjmedia endpoint.
+ * Initialize and register VPX codec factory.
  *
  * @param mgr	    The video codec manager instance where this codec will
  * 		    be registered to. Specify NULL to use default instance
@@ -41,25 +47,23 @@ PJ_BEGIN_DECL
  *
  * @return	    PJ_SUCCESS on success.
  */
-PJ_DECL(pj_status_t) pjmedia_codec_vpx_init(pjmedia_vid_codec_mgr *mgr,
-                                                   pj_pool_factory *pf);
-
+PJ_DECL(pj_status_t) pjmedia_codec_vpx_vid_init(pjmedia_vid_codec_mgr *mgr,
+                                                pj_pool_factory *pf);
 
 /**
- * Unregister libvpx video codecs factory from the video codec manager and
- * deinitialize the codecs library.
+ * Unregister VPX video codecs factory from the video codec manager and
+ * deinitialize the codec library.
  *
  * @return	    PJ_SUCCESS on success.
  */
-PJ_DECL(pj_status_t) pjmedia_codec_vpx_deinit(void);
+PJ_DECL(pj_status_t) pjmedia_codec_vpx_vid_deinit(void);
+
+
+/**
+ * @}  PJMEDIA_CODEC_VPX
+ */
 
 
 PJ_END_DECL
 
-
-/**
- * @}
- */
-
-#endif	/* __PJMEDIA_CODECS_VPX_H__ */
-
+#endif	/* __PJMEDIA_CODEC_VPX_H__ */
