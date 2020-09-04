@@ -269,7 +269,7 @@ cdef class PJMEDIAEndpoint:
         if status != 0:
             raise PJSIPError("Could not initialize ffmpeg video codecs", status)
         self._has_ffmpeg_video = 1
-        status = pjmedia_codec_vpx_init(NULL, &caching_pool._obj.factory)
+        status = pjmedia_codec_vpx_vid_init(NULL, &caching_pool._obj.factory)
         if status != 0:
             raise PJSIPError("Could not initialize vpx video codecs", status)
         self._has_vpx = 1
@@ -284,7 +284,7 @@ cdef class PJMEDIAEndpoint:
         if self._has_ffmpeg_video:
             pjmedia_codec_ffmpeg_vid_deinit()
         if self._has_vpx:
-            pjmedia_codec_vpx_deinit()
+            pjmedia_codec_vpx_vid_deinit()
         if pjmedia_vid_codec_mgr_instance() != NULL:
             pjmedia_vid_codec_mgr_destroy(NULL)
         if pjmedia_event_mgr_instance() != NULL:
