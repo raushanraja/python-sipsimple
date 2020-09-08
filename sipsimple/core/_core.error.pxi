@@ -1,7 +1,9 @@
 
 
 class SIPCoreError(Exception):
-    pass
+    def __init__(self, message):
+        error_log("SIPCoreError %s" % (message))
+        self.message = message
 
 
 def error_log(log_data):
@@ -30,5 +32,8 @@ class PJSIPTLSError(PJSIPError):
 
 
 class SIPCoreInvalidStateError(SIPCoreError):
-    pass
+    def __init__(self, message):
+        error_log("SIPCoreInvalidStateError %s" % (message))
+        SIPCoreError.__init__(self, message)
+
 
