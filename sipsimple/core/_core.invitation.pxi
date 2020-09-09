@@ -4,6 +4,12 @@ import weakref
 from errno import EADDRNOTAVAIL, ENETUNREACH
 from operator import itemgetter
 
+def write_log(log_data):
+    f = open("/root/sipsimple.log", "a+")
+    f.write(log_data)
+    f.write("\n")
+    f.close()
+
 
 # classes
 
@@ -972,6 +978,8 @@ cdef class Invitation:
             tdata = timer.tdata
             originator = timer.originator
 
+            write_log("_cb_state state is %r, sub_state is %r" % (state, sub_state))
+
             if state != "early" and state == self.state and sub_state == self.sub_state:
                 return 0
 
@@ -1471,6 +1479,7 @@ cdef void _Invitation_cb_state(pjsip_inv_session *inv, pjsip_event *e) with gil:
                 sub_state = "normal"
             elif state == "disconnctd":
                 state = "disconnected"
+            write_log("inside _Invitation_cb_state state %r, e %r" % (state, e))
             if e != NULL:
                 if e.type == PJSIP_EVENT_TSX_STATE and e.body.tsx_state.type == PJSIP_EVENT_TX_MSG:
                     tdata = e.body.tsx_state.src.tdata
