@@ -1480,7 +1480,7 @@ cdef void _Invitation_cb_state(pjsip_inv_session *inv, pjsip_event *e) with gil:
                 sub_state = "normal"
             elif state == "disconnctd":
                 state = "disconnected"
-            write_log("inside _Invitation_cb_state state %r, e %r" % (state, e))
+            write_log("inside _Invitation_cb_state state %r" % (state))
             if e != NULL:
                 if e.type == PJSIP_EVENT_TSX_STATE and e.body.tsx_state.type == PJSIP_EVENT_TX_MSG:
                     tdata = e.body.tsx_state.src.tdata
