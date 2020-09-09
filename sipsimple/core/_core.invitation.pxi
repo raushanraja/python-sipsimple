@@ -1106,6 +1106,7 @@ cdef class Invitation:
                 self._timer = None
             self.state = state
             self.sub_state = sub_state
+            write_log("sending event %r" % event_dict)
             _add_event("SIPInvitationChangedState", event_dict)
         finally:
             with nogil:
