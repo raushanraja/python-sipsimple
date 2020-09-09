@@ -978,7 +978,8 @@ cdef class Invitation:
             tdata = timer.tdata
             originator = timer.originator
 
-            write_log("_cb_state state is %r, sub_state is %r" % (state, sub_state))
+            write_log("_cb_state state is %r" % (state))
+            write_log("_cb_state sub_state is %r" % (sub_state))
 
             if state != "early" and state == self.state and sub_state == self.sub_state:
                 return 0
