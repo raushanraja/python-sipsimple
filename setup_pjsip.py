@@ -21,7 +21,7 @@ else:
 # to be used. -Saul
 
 if sys_platform == "darwin":
-    min_osx_version = "10.13"
+    min_osx_version = "10.15"
     try:
         osx_sdk_path = subprocess.check_output(["xcodebuild", "-version", "-sdk", "macosx", "Path"]).strip()
     except subprocess.CalledProcessError as e:
@@ -140,7 +140,7 @@ class PJSIP_build_ext(build_ext):
         build_ext.initialize_options(self)
         self.pjsip_clean_compile = 0
         self.pjsip_verbose_build = 0
-        self.pjsip_dir = os.path.join(os.path.dirname(__file__), "deps", "pjsip")
+        self.pjsip_dir = os.path.join(os.path.dirname(__file__), "deps", "pjproject")
 
     def configure_pjsip(self):
         log.info("Configuring PJSIP")
@@ -189,7 +189,7 @@ class PJSIP_build_ext(build_ext):
         extension.library_dirs = self.get_opts_from_string(build_mak_vars["PJ_LDFLAGS"], "-L")
         extension.libraries = self.get_opts_from_string(build_mak_vars["PJ_LDLIBS"], "-l")
         extension.define_macros = [tuple(define.split("=", 1)) for define in self.get_opts_from_string(build_mak_vars["PJ_CFLAGS"], "-D")]
-        extension.define_macros.append(("PJ_SVN_REVISION", open(os.path.join(self.build_dir, "base_rev"), "r").read().strip()))
+        #extension.define_macros.append(("PJ_SVN_REVISION", open(os.path.join(self.build_dir, "base_rev"), "r").read().strip()))
         extension.define_macros.append(("__PYX_FORCE_INIT_THREADS", 1))
         extension.extra_compile_args.append("-Wno-unused-function")    # silence warning
 
@@ -208,7 +208,7 @@ class PJSIP_build_ext(build_ext):
     def cython_sources(self, sources, extension):
         log.info("Compiling Cython extension %s" % extension.name)
         if extension.name == "sipsimple.core._core":
-            self.build_dir = os.path.join(self.build_temp, "pjsip")
+            self.build_dir = os.path.join(self.build_temp, "pjproject")
             if self.pjsip_clean_compile:
                 self.clean_pjsip()
             copy_tree(self.pjsip_dir, self.build_dir, verbose=0)
