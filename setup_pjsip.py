@@ -190,6 +190,7 @@ class PJSIP_build_ext(build_ext):
         extension.libraries = self.get_opts_from_string(build_mak_vars["PJ_LDLIBS"], "-l")
         extension.define_macros = [tuple(define.split("=", 1)) for define in self.get_opts_from_string(build_mak_vars["PJ_CFLAGS"], "-D")]
         #extension.define_macros.append(("PJ_SVN_REVISION", open(os.path.join(self.build_dir, "base_rev"), "r").read().strip()))
+        extension.define_macros.append(("PJ_SVN_REVISION", "5249"))
         extension.define_macros.append(("__PYX_FORCE_INIT_THREADS", 1))
         extension.extra_compile_args.append("-Wno-unused-function")    # silence warning
 
