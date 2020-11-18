@@ -168,9 +168,9 @@ cdef class PJSIPUA:
         status = pjsip_endpt_register_module(self._pjsip_endpoint._obj, &self._event_module)
         if status != 0:
             raise PJSIPError("Could not load events module", status)
-        status = pjmedia_aud_dev_set_observer_cb(_cb_audio_dev_process_event);
-        if status != 0:
-            raise PJSIPError("Could not set audio_change callbacks", status)
+        #status = pjmedia_aud_dev_set_observer_cb(_cb_audio_dev_process_event);
+        #if status != 0:
+        #    raise PJSIPError("Could not set audio_change callbacks", status)
         status = pj_rwmutex_create(self._pjsip_endpoint._pool, "ua_audio_change_rwlock", &self.audio_change_rwlock)
         if status != 0:
             raise PJSIPError("Could not initialize audio change rwmutex", status)
