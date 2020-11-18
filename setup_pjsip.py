@@ -181,8 +181,10 @@ class PJSIP_build_ext(build_ext):
     def clean_pjsip(self):
         log.info("Cleaning PJSIP")
         try:
+            log.info("remove build_dir %s", self.build_dir)
             shutil.rmtree(self.build_dir)
         except OSError, e:
+            log.info("error in clean_pjsip")
             if e.errno == errno.ENOENT:
                 return
             raise
@@ -216,9 +218,11 @@ class PJSIP_build_ext(build_ext):
             self.build_dir = os.path.join(self.build_temp, "pjproject")
             if self.pjsip_clean_compile:
                 self.clean_pjsip()
+            log.info("copy_tree from self.pjsip_dir %s to %s", self.pjsip_dir, self.build_dir)
             copy_tree(self.pjsip_dir, self.build_dir, verbose=0)
             if not os.path.exists(os.path.join(self.build_dir, "build.mak")):
                 self.configure_pjsip()
+            log.info("copy_tree from self.pjsip_dir %s to %s", self.pjsip_dir, self.build_dir)
             self.update_extension(extension)
             self.compile_pjsip()
         return build_ext.cython_sources(self, sources, extension)
