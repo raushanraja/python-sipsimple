@@ -191,6 +191,7 @@ class PJSIP_build_ext(build_ext):
 
     def update_extension(self, extension):
         build_mak_vars = self.get_makefile_variables(os.path.join(self.build_dir, "build.mak"))
+        log.info("build_mak_vars is %r", build_mak_vars)
         extension.include_dirs = self.get_opts_from_string(build_mak_vars["PJ_CFLAGS"], "-I")
         extension.library_dirs = self.get_opts_from_string(build_mak_vars["PJ_LDFLAGS"], "-L")
         extension.libraries = self.get_opts_from_string(build_mak_vars["PJ_LDLIBS"], "-l")
@@ -222,7 +223,7 @@ class PJSIP_build_ext(build_ext):
             copy_tree(self.pjsip_dir, self.build_dir, verbose=0)
             if not os.path.exists(os.path.join(self.build_dir, "build.mak")):
                 self.configure_pjsip()
-            log.info("copy_tree from self.pjsip_dir %s to %s", self.pjsip_dir, self.build_dir)
+            log.info("update_extension ")
             self.update_extension(extension)
             self.compile_pjsip()
         return build_ext.cython_sources(self, sources, extension)
