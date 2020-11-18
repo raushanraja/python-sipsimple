@@ -174,7 +174,9 @@ class PJSIP_build_ext(build_ext):
 
     def compile_pjsip(self):
         log.info("Compiling PJSIP")
-        self.distutils_exec_process([self.get_make_cmd()], silent=not self.pjsip_verbose_build, cwd=self.build_dir)
+        cmd = self.get_make_cmd()
+        log.info("execute cmd %r", cmd)
+        self.distutils_exec_process([cmd], silent=not self.pjsip_verbose_build, cwd=self.build_dir)
 
     def clean_pjsip(self):
         log.info("Cleaning PJSIP")
