@@ -141,7 +141,7 @@ class PJSIP_build_ext(build_ext):
     def initialize_options(self):
         build_ext.initialize_options(self)
         self.pjsip_clean_compile = 0
-        self.pjsip_verbose_build = 0
+        self.pjsip_verbose_build = 1
         self.pjsip_dir = os.path.join(os.path.dirname(__file__), "deps", "pjproject")
 
     def configure_pjsip(self):
@@ -167,6 +167,7 @@ class PJSIP_build_ext(build_ext):
         libvpx_path = env.get("SIPSIMPLE_LIBVPX_PATH", None)
         if libvpx_path is not None:
             cmd.append("--with-vpx=%s" % os.path.abspath(os.path.expanduser(libvpx_path)))
+        log.info("run cmd %s", cmd)
         self.distutils_exec_process(cmd, silent=not self.pjsip_verbose_build, cwd=self.build_dir, env=env)
         if "#define PJ_HAS_SSL_SOCK 1\n" not in open(os.path.join(self.build_dir, "pjlib", "include", "pj", "compat", "os_auto.h")).readlines():
             os.remove(os.path.join(self.build_dir, "build.mak"))
@@ -193,9 +194,13 @@ class PJSIP_build_ext(build_ext):
         build_mak_vars = self.get_makefile_variables(os.path.join(self.build_dir, "build.mak"))
         log.info("build_mak_vars is %r", build_mak_vars)
         extension.include_dirs = self.get_opts_from_string(build_mak_vars["PJ_CFLAGS"], "-I")
+        log.info("extension.include_dirs is %r", extension.include_dirs)
         extension.library_dirs = self.get_opts_from_string(build_mak_vars["PJ_LDFLAGS"], "-L")
+        log.info("extension.library_dirs is %r", extension.library_dirs)
         extension.libraries = self.get_opts_from_string(build_mak_vars["PJ_LDLIBS"], "-l")
+        log.info("extension.libraries is %r", extension.libraries)
         extension.define_macros = [tuple(define.split("=", 1)) for define in self.get_opts_from_string(build_mak_vars["PJ_CFLAGS"], "-D")]
+        log.info("extension.define_macros is %r", extension.define_macros)
         #extension.define_macros.append(("PJ_SVN_REVISION", open(os.path.join(self.build_dir, "base_rev"), "r").read().strip()))
         extension.define_macros.append(("PJ_SVN_REVISION", "5249"))
         extension.define_macros.append(("__PYX_FORCE_INIT_THREADS", 1))
@@ -211,7 +216,9 @@ class PJSIP_build_ext(build_ext):
             extension.include_dirs.append("%s/usr/include" % osx_sdk_path)
 
         extension.depends = build_mak_vars["PJ_LIB_FILES"].split()
+        log.info("extension.depends is %r", extension.depends)
         self.libraries = extension.depends[:]
+        log.info("self.libraries is %r", self.libraries)
 
     def cython_sources(self, sources, extension):
         log.info("Compiling Cython extension %s" % extension.name)
@@ -222,6 +229,7 @@ class PJSIP_build_ext(build_ext):
             log.info("copy_tree from self.pjsip_dir %s to %s", self.pjsip_dir, self.build_dir)
             copy_tree(self.pjsip_dir, self.build_dir, verbose=0)
             if not os.path.exists(os.path.join(self.build_dir, "build.mak")):
+                log.info("call configure_pjsip")
                 self.configure_pjsip()
             log.info("update_extension ")
             self.update_extension(extension)
