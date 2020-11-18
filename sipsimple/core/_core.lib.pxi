@@ -348,7 +348,7 @@ cdef class PJMEDIAEndpoint:
         all_codecs = set(self._get_all_codecs())
         codec_set = new_codecs.difference(all_codecs)
         if len(codec_set) > 0:
-            raise SIPCoreError("Unknown codec(s): %s" % ", ".join(codec_set))
+            raise SIPCoreError("Unknown codec(s): %s, all %s, new %s" % (", ".join(codec_set), ", ".join(all_codecs), ", ".join(new_codecs))
         # reverse the codec data tuples so that we can easily sort on sample rate
         # to make sure that bigger sample rates get higher priority
         codecs = [list(reversed(codec_data)) for codec_data in self._get_codecs()]
