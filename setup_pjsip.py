@@ -192,7 +192,7 @@ class PJSIP_build_ext(build_ext):
 
     def update_extension(self, extension):
         build_mak_vars = self.get_makefile_variables(os.path.join(self.build_dir, "build.mak"))
-        log.info("build_mak_vars is %r", build_mak_vars)
+        #log.info("build_mak_vars is %r", build_mak_vars)
         extension.include_dirs = self.get_opts_from_string(build_mak_vars["PJ_CFLAGS"], "-I")
         log.info("extension.include_dirs is %r", extension.include_dirs)
         extension.library_dirs = self.get_opts_from_string(build_mak_vars["PJ_LDFLAGS"], "-L")
