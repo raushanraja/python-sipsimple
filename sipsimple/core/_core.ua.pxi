@@ -872,7 +872,7 @@ cdef class PJSIPUA:
         timer._scheduled = 0
         return 0
 
-    cdef int _cb_rx_request(self, pjsip_rx_data *rdata) except 0:
+    cdef int _cb_rx_request(self, cdef pjsip_rx_data *rdata) except 0:
         global _event_hdr_name
         cdef int status
         cdef int bad_request
@@ -1044,7 +1044,7 @@ cdef void _cb_detect_nat_type(void *user_data, pj_stun_nat_detect_result_ptr_con
     except:
         ua._handle_exception(0)
 
-cdef int _PJSIPUA_cb_rx_request(pjsip_rx_data *rdata) with gil:
+cdef int _PJSIPUA_cb_rx_request(cdef pjsip_rx_data *rdata) with gil:
     cdef PJSIPUA ua
     try:
         ua = _get_ua()
