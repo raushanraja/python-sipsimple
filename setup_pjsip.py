@@ -50,7 +50,7 @@ from Cython.Distutils import build_ext
 class PJSIP_build_ext(build_ext):
     config_site = ["#define PJ_SCANNER_USE_BITWISE 0",
                    "#define PJSIP_SAFE_MODULE 0",
-                   "#define PJSIP_MAX_PKT_LEN 262144",
+                   "#define PJSIP_MAX_PKT_LEN 16000",
                    "#define PJSIP_UNESCAPE_IN_PLACE 1",
                    "#define PJMEDIA_AUDIO_DEV_HAS_COREAUDIO %d" % (1 if sys_platform=="darwin" else 0),
                    "#define PJMEDIA_AUDIO_DEV_HAS_ALSA %d" % (1 if sys_platform=="linux" else 0),
@@ -79,8 +79,7 @@ class PJSIP_build_ext(build_ext):
                    "#define PJMEDIA_VIDEO_DEV_HAS_AVF %d" % (1 if sys_platform=="darwin" else 0),
                    "#define PJMEDIA_VIDEO_DEV_HAS_DSHOW %d" % (1 if sys_platform=="win32" else 0),
                    "#define PJMEDIA_VIDEO_DEV_HAS_CBAR_SRC 1",
-                   "#define PJMEDIA_VIDEO_DEV_HAS_NULL 1",
-                   "#define PJSIP_MAX_PKT_LEN 4000"]
+                   "#define PJMEDIA_VIDEO_DEV_HAS_NULL 1"]
 
     user_options = build_ext.user_options
     user_options.extend([
