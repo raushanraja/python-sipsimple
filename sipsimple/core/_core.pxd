@@ -1415,9 +1415,7 @@ cdef extern from "pjsip.h":
     int pjsip_dlg_inc_session(pjsip_dialog *dlg, pjsip_module *mod) nogil
     int pjsip_dlg_dec_session(pjsip_dialog *dlg, pjsip_module *mod) nogil
 
-
-cdef extern from "sip_multipart.h":
-
+    # multipart
     struct pjsip_multipart_part:
         pjsip_msg_body	   *body;
     pjsip_msg_body* pjsip_multipart_create(pj_pool_t *pool, pjsip_media_type *ctype, pj_str_t *boundary) nogil
