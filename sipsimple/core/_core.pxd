@@ -2706,6 +2706,7 @@ cdef class Invitation(object):
     cdef int init_incoming(self, PJSIPUA ua, pjsip_rx_data *rdata, unsigned int inv_options) except -1
     cdef int process_incoming_transfer(self, PJSIPUA ua, pjsip_rx_data *rdata) except -1
     cdef int process_incoming_options(self, PJSIPUA ua, pjsip_rx_data *rdata) except -1
+    cdef pjsip_msg_body * create_multipart_message_body(self, content_vals, pjsip_msg_body * sdp_body)
     cdef PJSIPUA _check_ua(self)
     cdef int _do_dealloc(self) except -1
     cdef int _update_contact_header(self, BaseContactHeader contact_header) except -1
