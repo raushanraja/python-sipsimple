@@ -145,9 +145,12 @@ class PJSIP_build_ext(build_ext):
         self.pjsip_dir = os.path.join(os.path.dirname(__file__), "deps", "pjproject")
 
     def configure_pjsip(self):
-        log.info("Configuring PJSIP")
-        with open(os.path.join(self.build_dir, "pjlib", "include", "pj", "config_site.h"), "wb") as f:
-            f.write("\n".join(self.config_site+[""]))
+        log.info("Configuring PJSIP with config %s", self.config_site)
+        try:
+            with open(os.path.join(self.build_dir, "pjlib", "include", "pj", "config_site.h"), "wb") as f:
+                f.write("\n".join(self.config_site+[""]))
+        except Exception as e:
+            log.info("exception in open file config_site.h %r", e.message)
         cflags = "-DNDEBUG -g -fPIC -fno-omit-frame-pointer -fno-strict-aliasing -Wno-unused-label"
         if self.debug or hasattr(sys, 'gettotalrefcount'):
             log.info("PJSIP will be built without optimizations")
