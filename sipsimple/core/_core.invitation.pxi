@@ -349,7 +349,7 @@ cdef class Invitation:
             _str_to_pj_str(subtype, &subtype_str)
             _str_to_pj_str(content, &content_str)
 
-            body = pjsip_msg_body_create(self._dialog.pool, type_str, subtype_str, content_str)
+            body = pjsip_msg_body_create(self._dialog.pool, &type_str, &subtype_str, &content_str)
             if body == NULL:
                 raise SIPCoreError('error in pjsip_multipart_create in create_message_body')
 
