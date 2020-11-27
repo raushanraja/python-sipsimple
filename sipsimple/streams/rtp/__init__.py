@@ -410,12 +410,14 @@ class RTPStream(object):
         remote_stream = remote_sdp.media[stream_index]
         if remote_stream.media != cls.type:
             raise UnknownStreamError
-        if remote_stream.transport not in ('RTP/AVP', 'RTP/SAVP'):
-            raise InvalidStreamError("expected RTP/AVP or RTP/SAVP transport in %s stream, got %s" % (cls.type, remote_stream.transport))
+        if remote_stream.transport not in ('RTP/AVP', 'RTP/SAVP', 'RTP/AVPF', 'RTP/SAVPF'):
+            raise InvalidStreamError("expected RTP/AVP(F) or RTP/SAVP(F) transport in %s stream, got %s" % (cls.type, remote_stream.transport))
         local_encryption_policy = session.account.rtp.encryption.key_negotiation if session.account.rtp.encryption.enabled else None
         if local_encryption_policy == "sdes_mandatory" and not "crypto" in remote_stream.attributes:
             raise InvalidStreamError("SRTP/SDES is locally mandatory but it's not remotely enabled")
         if remote_stream.transport == 'RTP/SAVP' and "crypto" in remote_stream.attributes and local_encryption_policy not in ("opportunistic", "sdes_optional", "sdes_mandatory"):
+            raise InvalidStreamError("SRTP/SDES is remotely mandatory but it's not locally enabled")
+        if remote_stream.transport == 'RTP/SAVPF' and "crypto" in remote_stream.attributes and local_encryption_policy not in ("opportunistic", "sdes_optional", "sdes_mandatory"):
             raise InvalidStreamError("SRTP/SDES is remotely mandatory but it's not locally enabled")
         account_preferred_codecs = getattr(session.account.rtp, '%s_codec_list' % cls.type)
         general_codecs = getattr(settings.rtp, '%s_codec_list' % cls.type)
@@ -428,7 +430,7 @@ class RTPStream(object):
         if "zrtp-hash" in remote_stream.attributes:
             stream._incoming_stream_encryption = 'zrtp'
         elif "crypto" in remote_stream.attributes:
-            stream._incoming_stream_encryption = 'sdes_mandatory' if remote_stream.transport=='RTP/SAVP' else 'sdes_optional'
+            stream._incoming_stream_encryption = 'sdes_mandatory' if remote_stream.transport in ['RTP/SAVP', 'RTP/SAVPF'] else 'sdes_optional'
         else:
             stream._incoming_stream_encryption = None
         return stream

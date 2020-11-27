@@ -325,8 +325,59 @@ cdef class Invitation:
         if status != 0:
             raise PJSIPError(error_message, status)
 
+    cdef pjsip_msg_body * create_multipart_message_body(self, content_vals, pjsip_msg_body * sdp_body):
+        cdef pjsip_msg_body * bodies
+        cdef pjsip_msg_body * body
+        cdef pjsip_multipart_part* part
+
+        bodies = pjsip_multipart_create(self._dialog.pool, NULL, NULL)
+        if bodies == NULL:
+            raise SIPCoreError('error in pjsip_multipart_create in create_message_body')
+
+        for content_val in content_vals:
+            content_type = content_val['content-type']
+            content = content_val['content']
+            content_type = content_type.split('/')
+            type = content_type[0]
+            subtype = content_type[1]
+
+            body = pjsip_msg_body_create(self._dialog.pool, _str_to_pj_str(type), _str_to_pj_str(subtype), _str_to_pj_str(content))
+            if body == NULL:
+                raise SIPCoreError('error in pjsip_multipart_create in create_message_body')
+
+            part = pjsip_multipart_create_part(self._dialog.pool)
+            if part == NULL:
+                raise SIPCoreError('error in pjsip_multipart_create_part in create_message_body')
+
+            part.body = body
+
+            status = pjsip_multipart_add_part(self._dialog.pool, bodies, part)
+            if status != 0:
+                raise PJSIPError("failed in pjsip_multipart_add_part in create_message_body", status)
+
+        if sdp != NULL:
+            part = pjsip_multipart_create_part(self._dialog.pool)
+            if part == NULL:
+                raise SIPCoreError('error in pjsip_multipart_create_part in create_message_body')
+
+            part.body = sdp
+
+            status = pjsip_multipart_add_part(self._dialog.pool, bodies, part)
+            if status != 0:
+                raise PJSIPError("failed in pjsip_multipart_add_part in create_message_body", status)
+
+        return bodies
+
+
     def send_invite(self, SIPURI request_uri not None, FromHeader from_header not None, ToHeader to_header not None, RouteHeader route_header not None, ContactHeader contact_header not None,
-                    SDPSession sdp not None, Credentials credentials=None, list extra_headers not None=list(), timeout=None):
+                    SDPSession sdp not None, Credentials credentials=None, list extra_headers not None=list(), timeout=None, multipart_content=None):
+        '''
+            multipart_content should be an array of dict like the following values
+            [{
+                'content' : 'xxx',
+                'content-type' : 'text/html'
+            }]
+        '''
         cdef int status
         cdef pj_mutex_t *lock = self._lock
         cdef pjmedia_sdp_session *local_sdp
@@ -334,6 +385,7 @@ cdef class Invitation:
         cdef pjsip_replaces_hdr *pj_replaces_hdr
         cdef pjsip_route_hdr *route_set
         cdef pjsip_tx_data *tdata
+        cdef pjsip_msg_body *msg_body
         cdef PJSIPUA ua
         cdef PJSTR contact_str
         cdef PJSTR from_header_str
@@ -436,6 +488,9 @@ cdef class Invitation:
                 _dict_to_pjsip_param(replaces_header.parameters, &pj_replaces_hdr.other_param, self._dialog.pool)
                 pjsip_msg_add_hdr(tdata.msg, <pjsip_hdr *>pj_replaces_hdr)
             _add_headers_to_tdata(tdata, extra_headers)
+            if multipart_content != None:
+                msg_body = self.create_multipart_message_body(multipart_content, tdata.msg.body)
+                tdata.msg.body = msg_body
             with nogil:
                 status = pjsip_inv_send_msg(self._invite_session, tdata)
             if status != 0:
@@ -463,6 +518,8 @@ cdef class Invitation:
             with nogil:
                 pj_mutex_unlock(lock)
 
+    '''
+    this was just temp code added for video passthrough, should not be used anymore
     def send_response_sdp_passthru(self, int code, str reason=None, BaseContactHeader contact_header=None, BaseSDPSession sdp=None, list extra_headers not None=list()):
         cdef int status
         cdef int clean_tdata = 0
@@ -517,6 +574,8 @@ cdef class Invitation:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+    this was just temp code added for video passthrough, should not be used anymore
+    '''
 
     def send_response(self, int code, str reason=None, BaseContactHeader contact_header=None, BaseSDPSession sdp=None, list extra_headers not None=list()):
         cdef int status

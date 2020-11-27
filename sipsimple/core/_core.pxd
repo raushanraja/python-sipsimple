@@ -1415,6 +1415,19 @@ cdef extern from "pjsip.h":
     int pjsip_dlg_inc_session(pjsip_dialog *dlg, pjsip_module *mod) nogil
     int pjsip_dlg_dec_session(pjsip_dialog *dlg, pjsip_module *mod) nogil
 
+
+cdef extern from "sip_multipart.h":
+
+    struct pjsip_multipart_part:
+        pjsip_msg_body	   *body;
+    pjsip_msg_body* pjsip_multipart_create(pj_pool_t *pool, pjsip_media_type *ctype, pj_str_t *boundary) nogil
+    PJ_DECL(pj_status_t) pjsip_multipart_add_part(pj_pool_t *pool,
+                              pjsip_msg_body *mp,
+                              pjsip_multipart_part *part);
+    pjsip_multipart_part* pjsip_multipart_create_part(pj_pool_t *pool) nogil
+    pjsip_multipart_part* pjsip_multipart_get_first_part(pjsip_msg_body *mp) nogil
+
+
 cdef extern from "pjsip-simple/evsub_msg.h":
     struct pjsip_event_hdr:
         pj_str_t event_type
@@ -2809,6 +2822,8 @@ cdef class VideoTransport(object):
     cdef object weakref
     cdef int _is_offer
     cdef int _is_started
+    cdef int _consumer_slot
+    cdef int _producer_slot
     cdef unsigned int _packets_received
     cdef pj_mutex_t *_lock
     cdef pj_pool_t *_pool
@@ -2819,8 +2834,27 @@ cdef class VideoTransport(object):
     cdef readonly RTPTransport transport
     cdef readonly VideoMixer _video_mixer
     cdef SDPInfo _sdp_info
-    cdef readonly LocalVideoStream local_video
-    cdef readonly RemoteVideoStream remote_video
+    #cdef readonly LocalVideoStream local_video
+    #cdef readonly RemoteVideoStream remote_video
+
+    # private methods
+    cdef PJSIPUA _check_ua(self)
+    cdef int _cb_check_rtp(self, MediaCheckTimer timer) except -1 with gil
+
+cdef class RttTextTransport(object):
+    # attributes
+    cdef object __weakref__
+    cdef object weakref
+    cdef int _is_offer
+    cdef int _is_started
+    cdef int _slot
+    cdef unsigned int _packets_received
+    cdef pj_mutex_t *_lock
+    cdef pj_pool_t *_pool
+    cdef Timer _timer
+    cdef readonly object direction
+    cdef readonly RTPTransport transport
+    cdef SDPInfo _sdp_info
 
     # private methods
     cdef PJSIPUA _check_ua(self)

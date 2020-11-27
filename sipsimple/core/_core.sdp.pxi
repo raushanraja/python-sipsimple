@@ -417,7 +417,8 @@ cdef class BaseSDPMediaStream:
                     15: MediaCodec('G728',  8000),
                     16: MediaCodec('DVI4', 11025),
                     17: MediaCodec('DVI4', 22050),
-                    18: MediaCodec('G729',  8000)}
+                    18: MediaCodec('G729',  8000),
+                    18: MediaCodec('T140',  8000)}
 
     def __init__(self, *args, **kwargs):
         raise TypeError("BaseSDPMediaStream cannot be instantiated directly")
