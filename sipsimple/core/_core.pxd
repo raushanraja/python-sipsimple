@@ -1421,7 +1421,7 @@ cdef extern from "sip_multipart.h":
     struct pjsip_multipart_part:
         pjsip_msg_body	   *body;
     pjsip_msg_body* pjsip_multipart_create(pj_pool_t *pool, pjsip_media_type *ctype, pj_str_t *boundary) nogil
-    pj_status_t pjsip_multipart_add_part(pj_pool_t *pool,
+    int pjsip_multipart_add_part(pj_pool_t *pool,
                               pjsip_msg_body *mp,
                               pjsip_multipart_part *part);
     pjsip_multipart_part* pjsip_multipart_create_part(pj_pool_t *pool) nogil

@@ -329,6 +329,7 @@ cdef class Invitation:
         cdef pjsip_msg_body * bodies
         cdef pjsip_msg_body * body
         cdef pjsip_multipart_part* part
+        cdef int status
 
         bodies = pjsip_multipart_create(self._dialog.pool, NULL, NULL)
         if bodies == NULL:
