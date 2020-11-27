@@ -330,6 +330,9 @@ cdef class Invitation:
         cdef pjsip_msg_body * body
         cdef pjsip_multipart_part* part
         cdef int status
+        cdef pj_str_t type_str
+        cdef pj_str_t subtype_str
+        cdef pj_str_t content_str
 
         bodies = pjsip_multipart_create(self._dialog.pool, NULL, NULL)
         if bodies == NULL:
@@ -342,7 +345,11 @@ cdef class Invitation:
             type = content_type[0]
             subtype = content_type[1]
 
-            body = pjsip_msg_body_create(self._dialog.pool, _str_to_pj_str(type), _str_to_pj_str(subtype), _str_to_pj_str(content))
+            _str_to_pj_str(type, &type_str)
+            _str_to_pj_str(subtype, &subtype_str)
+            _str_to_pj_str(content, &content_str)
+
+            body = pjsip_msg_body_create(self._dialog.pool, type_str, subtype_str, content_str)
             if body == NULL:
                 raise SIPCoreError('error in pjsip_multipart_create in create_message_body')
 
