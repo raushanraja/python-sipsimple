@@ -363,12 +363,12 @@ cdef class Invitation:
             if status != 0:
                 raise PJSIPError("failed in pjsip_multipart_add_part in create_message_body", status)
 
-        if sdp != NULL:
+        if sdp_body != NULL:
             part = pjsip_multipart_create_part(self._dialog.pool)
             if part == NULL:
                 raise SIPCoreError('error in pjsip_multipart_create_part in create_message_body')
 
-            part.body = sdp
+            part.body = sdp_body
 
             status = pjsip_multipart_add_part(self._dialog.pool, bodies, part)
             if status != 0:
