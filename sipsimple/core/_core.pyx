@@ -62,6 +62,6 @@ __all__ = ["PJ_VERSION", "PJ_SVN_REVISION", "CORE_REVISION",
            "Invitation",
            "DialogID",
            "SDPSession", "FrozenSDPSession", "SDPMediaStream", "FrozenSDPMediaStream", "SDPConnection", "FrozenSDPConnection", "SDPAttribute", "FrozenSDPAttribute", "SDPNegotiator",
-           "RTPTransport", "AudioTransport", "VideoTransport", "RttTextTransport"]
+           "RTPTransport", "AudioTransport", "VideoTransport"]
 
 

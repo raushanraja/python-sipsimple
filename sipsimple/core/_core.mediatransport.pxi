@@ -2074,7 +2074,8 @@ cdef class VideoTransport:
         elif name == "REQUESTED_KEYFRAME":
             _add_event("RTPVideoTransportRequestedKeyFrame", dict(obj=self))
 
-
+'''
+work on this later
 cdef class RttTextTransport:
     def __cinit__(self, *args, **kwargs):
         cdef int status
@@ -2514,6 +2515,7 @@ cdef class RttTextTransport:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
+'''
 
 cdef class ICECandidate:
     def __init__(self, component, cand_type, address, port, priority, rel_addr=''):
