@@ -33,6 +33,14 @@ class VideoStream(RTPStream):
         return self._transport.remote_video if self._transport else None
     '''
 
+    @property
+    def producer_slot(self):
+        return self._transport.producer_slot if self._transport else None
+
+    @property
+    def consumer_slot(self):
+        return self._transport.consumer_slot if self._transport else None
+
     @classmethod
     def new_from_sdp(cls, session, remote_sdp, stream_index):
         stream = super(VideoStream, cls).new_from_sdp(session, remote_sdp, stream_index)
