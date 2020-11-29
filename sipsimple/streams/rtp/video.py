@@ -27,9 +27,11 @@ class VideoStream(RTPStream):
         self.video_mixer = SIPApplication.video_mixer
         self._keyframe_timer = None
 
+    '''
     @property
     def producer(self):
         return self._transport.remote_video if self._transport else None
+    '''
 
     @classmethod
     def new_from_sdp(cls, session, remote_sdp, stream_index):
@@ -51,7 +53,7 @@ class VideoStream(RTPStream):
                 raise RuntimeError("VideoStream.start() may only be called in the INITIALIZED state")
             settings = SIPSimpleSettings()
             self._transport.start(local_sdp, remote_sdp, stream_index, timeout=settings.rtp.timeout)
-            self._transport.local_video.producer = self.device.producer
+            #self._transport.local_video.producer = self.device.producer
             self._save_remote_sdp_rtp_info(remote_sdp, stream_index)
             self._check_hold(self._transport.direction, True)
             if self._try_ice and self._ice_state == "NULL":
@@ -141,10 +143,12 @@ class VideoStream(RTPStream):
         self._transport.send_keyframe()
         self.notification_center.post_notification('VideoStreamRequestedKeyFrame', sender=self, data=notification.data)
 
+    '''
     def _NH_VideoDeviceDidChangeCamera(self, notification):
         new_camera = notification.data.new_camera
         if self._transport is not None and self._transport.local_video is not None:
             self._transport.local_video.producer = new_camera
+    '''
 
     def _NH_ExponentialTimerDidTimeout(self, notification):
         if self._transport is not None:
