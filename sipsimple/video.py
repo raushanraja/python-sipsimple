@@ -123,8 +123,8 @@ class VideoBridge(object):
 
     def add(self, stream):
         with self._lock:
-            if stream._transport.video_mixer is not self.video_mixer:
-                raise ValueError("expected port with Mixer %r, got %r" % (self.video_mixer, stream._transport.video_mixer))
+            if stream._transport._video_mixer is not self.video_mixer:
+                raise ValueError("expected port with Mixer %r, got %r" % (self.video_mixer, stream._transport._video_mixer))
             if weakref.ref(stream) in self.streams:
                 return
             for other in (wr() for wr in self.streams):
