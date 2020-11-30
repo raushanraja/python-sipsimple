@@ -305,6 +305,7 @@ cdef class VideoMixer:
         cdef tuple connection
         cdef PJSIPUA ua
 
+        write_log("VideoMixer connect_slots %r to %r" % (str(src_slot), str(dst_slot)))
         ua = _get_ua()
 
         with nogil:
@@ -320,12 +321,14 @@ cdef class VideoMixer:
                 raise ValueError("dst_slot argument cannot be negative")
             connection = (src_slot, dst_slot)
             if connection in self._connected_slots:
+                write_log("VideoMixer slot already connected")
                 return
             with nogil:
                 status = pjmedia_vid_conf_connect_port(conf_bridge, src_slot, dst_slot, NULL)
             if status != 0:
                 raise PJSIPError("Could not connect slots on video mixer", status)
             self._connected_slots.append(connection)
+            write_log("VideoMixer slots connected now")
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
