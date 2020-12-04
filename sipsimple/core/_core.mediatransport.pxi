@@ -1375,7 +1375,7 @@ cdef class AudioTransport:
             raise PJSIPError("failed to acquire lock", status)
         try:
             if self._obj == NULL:
-                raise SIPCoreError("Stream is not active")
+                raise SIPCoreError("update_direction Stream is not active")
             if direction not in valid_sdp_directions:
                 raise SIPCoreError("Unknown direction: %s" % direction)
             if direction != self.direction:
@@ -1397,7 +1397,7 @@ cdef class AudioTransport:
             raise PJSIPError("failed to acquire lock", status)
         try:
             if self._obj == NULL:
-                raise SIPCoreError("Stream is not active")
+                raise SIPCoreError("update_sdp Stream is not active")
             self._sdp_info.local_media = local_sdp.media[index]
             self._sdp_info.local_sdp = local_sdp
             self._sdp_info.remote_sdp = remote_sdp
@@ -1932,7 +1932,7 @@ cdef class VideoTransport:
             stream = self._obj
 
             if self._obj == NULL:
-                raise SIPCoreError("Stream is not active")
+                raise SIPCoreError("Video update_direction stream is not active")
             if direction not in valid_sdp_directions:
                 raise SIPCoreError("Unknown direction: %s" % direction)
             self.direction = direction
@@ -1952,7 +1952,7 @@ cdef class VideoTransport:
             raise PJSIPError("failed to acquire lock", status)
         try:
             if self._obj == NULL:
-                raise SIPCoreError("Stream is not active")
+                raise SIPCoreError("Video update_sdp stream is not active")
             self._sdp_info.local_media = local_sdp.media[index]
             self._sdp_info.local_sdp = local_sdp
             self._sdp_info.remote_sdp = remote_sdp
@@ -1986,7 +1986,7 @@ cdef class VideoTransport:
         try:
             stream = self._obj
             if self._obj == NULL:
-                raise SIPCoreError("Stream is not active")
+                raise SIPCoreError("Video pause stream is not active")
             with nogil:
                 status = pjmedia_vid_stream_pause(stream, pj_dir)
             if status != 0:
@@ -2020,7 +2020,7 @@ cdef class VideoTransport:
         try:
             stream = self._obj
             if self._obj == NULL:
-                raise SIPCoreError("Stream is not active")
+                raise SIPCoreError("Video resume stream is not active")
             with nogil:
                 status = pjmedia_vid_stream_resume(stream, pj_dir)
             if status != 0:
