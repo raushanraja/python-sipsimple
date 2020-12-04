@@ -1810,7 +1810,7 @@ cdef class VideoTransport:
                 status = pjmedia_vid_stream_create(media_endpoint, pool, stream_info, transport, NULL, &stream)
             if status != 0:
                 raise PJSIPError("Could not initialize RTP for video session", status)
-
+            self._obj = stream
             with nogil:
                 status = pjmedia_vid_stream_start(stream)
             if status != 0:
@@ -1826,7 +1826,7 @@ cdef class VideoTransport:
                     pjmedia_vid_stream_destroy(stream)
                 self._obj = NULL
                 raise PJSIPError("Could not get encoding video stream port", status)
-            ptr = <void*>self
+            #ptr = <void*>self
             #with nogil:
             #    pjmedia_event_subscribe(NULL, &VideoStream_on_event, ptr, media_port);
             # add it to the video mixer
