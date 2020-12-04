@@ -2099,7 +2099,7 @@ cdef class VideoTransport:
 
     def _video_event_handler(self, str name, object data):
         if name == "FORMAT_CHANGED":
-            if self._producer_slot !== -1:
+            if self._producer_slot != -1:
                 self._video_mixer.reconnect_slot(self._producer_slot)
             size, framerate = data
             _add_event("RTPVideoTransportRemoteFormatDidChange", dict(obj=self, size=size, framerate=framerate))
