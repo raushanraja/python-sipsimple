@@ -365,6 +365,35 @@ cdef class VideoMixer:
             with nogil:
                 pj_mutex_unlock(lock)
 
+    def reconnect_slot(self, int src_slot):
+        cdef pjmedia_vid_conf *conf_bridge
+        cdef int _connected_src_slot
+        cdef int dst_slot
+        cdef PJSIPUA ua
+
+        ua = _get_ua()
+
+        with nogil:
+            status = pj_mutex_lock(lock)
+        if status != 0:
+            raise PJSIPError("failed to acquire lock", status)
+        try:
+            conf_bridge = self._obj
+            for (_connected_src_slot, dst_slot) in self._connected_slots:
+                if _connected_src_slot == src_slot:
+                    with nogil:
+                        status = pjmedia_vid_conf_disconnect_port(conf_bridge, src_slot, dst_slot)
+                    if status != 0:
+                        raise PJSIPError("Could not disconnect slots on video mixer", status)
+                    with nogil:
+                        status = pjmedia_vid_conf_connect_port(conf_bridge, src_slot, dst_slot, NULL)
+                    if status != 0:
+                        raise PJSIPError("Could not connect slots on video mixer", status)
+        finally:
+            with nogil:
+                pj_mutex_unlock(lock)
+
+
     # private methods
     cdef int _add_port(self, pjmedia_port *port) except -1 with gil:
         cdef unsigned int slot

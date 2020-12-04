@@ -1469,6 +1469,36 @@ cdef class AudioTransport:
                 pj_mutex_unlock(lock)
 
 
+cdef int VideoStream_on_event(pjmedia_event *event, void *user_data) with gil:
+    cdef PJSIPUA ua
+    cdef VideoTransport transport
+    cdef pjmedia_format fmt
+
+    try:
+        ua = _get_ua()
+    except:
+        return 0
+    if user_data == NULL:
+        return 0
+    transport = <object>user_data
+    if transport._video_event_handler is not None:
+        if event.type == PJMEDIA_EVENT_FMT_CHANGED:
+            fmt = event.data.fmt_changed.new_fmt
+            size = (fmt.det.vid.size.w, fmt.det.vid.size.h)
+            fps = 1.0*fmt.det.vid.fps.num/fmt.det.vid.fps.denum
+            transport._video_event_handler('FORMAT_CHANGED', (size, fps))
+        elif event.type == PJMEDIA_EVENT_KEYFRAME_FOUND:
+            transport._video_event_handler('RECEIVED_KEYFRAME', None)
+        elif event.type == PJMEDIA_EVENT_KEYFRAME_MISSING:
+            transport._video_event_handler('MISSED_KEYFRAME', None)
+        elif event.type == PJMEDIA_EVENT_KEYFRAME_REQUESTED:
+            transport._video_event_handler('REQUESTED_KEYFRAME', None)
+        else:
+            # Pacify compiler
+            pass
+    return 0
+
+
 cdef class VideoTransport:
 
     def __cinit__(self, *args, **kwargs):
@@ -1739,6 +1769,7 @@ cdef class VideoTransport:
         cdef pjmedia_transport *transport
         cdef PJSIPUA ua
         cdef pjmedia_port * media_port
+        cdef void* ptr
 
         ua = _get_ua()
 
@@ -1779,7 +1810,7 @@ cdef class VideoTransport:
                 status = pjmedia_vid_stream_create(media_endpoint, pool, stream_info, transport, NULL, &stream)
             if status != 0:
                 raise PJSIPError("Could not initialize RTP for video session", status)
-            self._obj = stream
+
             with nogil:
                 status = pjmedia_vid_stream_start(stream)
             if status != 0:
@@ -1795,6 +1826,9 @@ cdef class VideoTransport:
                     pjmedia_vid_stream_destroy(stream)
                 self._obj = NULL
                 raise PJSIPError("Could not get encoding video stream port", status)
+            ptr = <void*>self
+            with nogil:
+                pjmedia_event_subscribe(NULL, &VideoStream_on_event, ptr, media_port);
             # add it to the video mixer
             self._consumer_slot = self._video_mixer._add_port(media_port)
 
@@ -2063,6 +2097,19 @@ cdef class VideoTransport:
             with nogil:
                 pj_mutex_unlock(lock)
 
+    def _video_event_handler(self, str name, object data):
+        if name == "FORMAT_CHANGED":
+            if self._producer_slot !== -1:
+                self._video_mixer.reconnect_slot(self._producer_slot)
+            size, framerate = data
+            _add_event("RTPVideoTransportRemoteFormatDidChange", dict(obj=self, size=size, framerate=framerate))
+        elif name == "RECEIVED_KEYFRAME":
+            _add_event("RTPVideoTransportReceivedKeyFrame", dict(obj=self))
+        elif name == "MISSED_KEYFRAME":
+            _add_event("RTPVideoTransportMissedKeyFrame", dict(obj=self))
+        elif name == "REQUESTED_KEYFRAME":
+            _add_event("RTPVideoTransportRequestedKeyFrame", dict(obj=self))
+    '''
     def _remote_video_event_handler(self, str name, object data):
         if name == "FORMAT_CHANGED":
             size, framerate = data
@@ -2073,6 +2120,8 @@ cdef class VideoTransport:
             _add_event("RTPVideoTransportMissedKeyFrame", dict(obj=self))
         elif name == "REQUESTED_KEYFRAME":
             _add_event("RTPVideoTransportRequestedKeyFrame", dict(obj=self))
+    '''
+
 
 '''
 work on this later
