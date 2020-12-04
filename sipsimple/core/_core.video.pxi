@@ -366,10 +366,12 @@ cdef class VideoMixer:
                 pj_mutex_unlock(lock)
 
     def reconnect_slot(self, int src_slot):
+        cdef int status
         cdef pjmedia_vid_conf *conf_bridge
         cdef int _connected_src_slot
         cdef int dst_slot
         cdef PJSIPUA ua
+        cdef pj_mutex_t *lock = self._lock
 
         ua = _get_ua()
 
