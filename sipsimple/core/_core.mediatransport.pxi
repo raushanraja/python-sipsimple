@@ -1826,9 +1826,9 @@ cdef class VideoTransport:
                     pjmedia_vid_stream_destroy(stream)
                 self._obj = NULL
                 raise PJSIPError("Could not get encoding video stream port", status)
-            #ptr = <void*>self
-            #with nogil:
-            #    pjmedia_event_subscribe(NULL, &VideoStream_on_event, ptr, media_port);
+            ptr = <void*>self
+            with nogil:
+                pjmedia_event_subscribe(NULL, &VideoStream_on_event, ptr, media_port);
             # add it to the video mixer
             self._consumer_slot = self._video_mixer._add_port(media_port)
 
