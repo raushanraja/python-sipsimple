@@ -2098,9 +2098,12 @@ cdef class VideoTransport:
                 pj_mutex_unlock(lock)
 
     def _video_event_handler(self, str name, object data):
+        write_log("_video_event_handler for event %s" % name)
         if name == "FORMAT_CHANGED":
-            #if self._producer_slot != -1:
-            #    self._video_mixer.reconnect_slot(self._producer_slot)
+            write_log("_video_event_handler for event FORMAT_CHANGED")
+            if self._producer_slot != -1:
+                write_log("_video_event_handler reconnect_slot")
+                self._video_mixer.reconnect_slot(self._producer_slot)
             size, framerate = data
             _add_event("RTPVideoTransportRemoteFormatDidChange", dict(obj=self, size=size, framerate=framerate))
         elif name == "RECEIVED_KEYFRAME":
