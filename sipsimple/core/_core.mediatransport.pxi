@@ -1481,6 +1481,7 @@ cdef int VideoStream_on_event(pjmedia_event *event, void *user_data) with gil:
     if user_data == NULL:
         return 0
     transport = <object>user_data
+    write_log("inside VideoStream_on_event")
     if transport._video_event_handler is not None:
         if event.type == PJMEDIA_EVENT_FMT_CHANGED:
             fmt = event.data.fmt_changed.new_fmt
@@ -1826,9 +1827,6 @@ cdef class VideoTransport:
                     pjmedia_vid_stream_destroy(stream)
                 self._obj = NULL
                 raise PJSIPError("Could not get encoding video stream port", status)
-            ptr = <void*>self
-            with nogil:
-                pjmedia_event_subscribe(NULL, &VideoStream_on_event, ptr, media_port);
             # add it to the video mixer
             self._consumer_slot = self._video_mixer._add_port(media_port)
 
@@ -1838,6 +1836,10 @@ cdef class VideoTransport:
                     pjmedia_vid_stream_destroy(stream)
                 self._obj = NULL
                 raise PJSIPError("Could not get decoding video stream port", status)
+            ptr = <void*>self
+            write_log("call pjmedia_event_subscribe")
+            with nogil:
+                pjmedia_event_subscribe(NULL, &VideoStream_on_event, ptr, media_port);
             # add it to the video mixer
             self._producer_slot = self._video_mixer._add_port(media_port)
 
