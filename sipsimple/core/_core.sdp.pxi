@@ -468,7 +468,8 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
         self.formats = formats if formats is not None else []
         self.connection = connection
         label = str(uuid.uuid4())[-12:]
-        self.attributes = attributes if attributes is not None else [SDPAttribute("label", label)]
+        self.attributes = attributes if attributes is not None else []
+        self.attributes.append(SDPAttribute("label", label))
         self.bandwidth_info = bandwidth_info if bandwidth_info is not None else []
 
     @classmethod
