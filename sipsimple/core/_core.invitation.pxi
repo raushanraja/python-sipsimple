@@ -526,65 +526,6 @@ cdef class Invitation:
             with nogil:
                 pj_mutex_unlock(lock)
 
-    '''
-    this was just temp code added for video passthrough, should not be used anymore
-    def send_response_sdp_passthru(self, int code, str reason=None, BaseContactHeader contact_header=None, BaseSDPSession sdp=None, list extra_headers not None=list()):
-        cdef int status
-        cdef int clean_tdata = 0
-        cdef pj_mutex_t *lock = self._lock
-        cdef pj_str_t reason_str
-        cdef pjmedia_sdp_session_ptr_const lsdp = NULL
-        cdef pjmedia_sdp_session *local_sdp
-        cdef pjsip_inv_session *invite_session
-        cdef pjsip_msg_body *body
-        cdef pjsip_tx_data *tdata
-        cdef PJSIPUA ua
-
-        ua = _get_ua()
-
-        with nogil:
-            status = pj_mutex_lock(lock)
-        if status != 0:
-            raise PJSIPError("failed to acquire lock", status)
-        try:
-            invite_session = self._invite_session
-
-            if reason is not None:
-                _str_to_pj_str(reason, &reason_str)
-
-            if self.state not in ("incoming", "early", "connected"):
-                raise SIPCoreInvalidStateError('Can only send response from the "incoming", "early" and "connected" states current in the "%s" state.' % self.state)
-            if self.state == "early" and self.direction != "incoming":
-                raise SIPCoreInvalidStateError('Cannot send response in the "early" state for an outgoing INVITE')
-            if self.state == "connected" and self.sub_state not in ("received_proposal", "received_proposal_request"):
-                raise SIPCoreInvalidStateError('Cannot send response in the "connected" state if a proposal has not been received')
-
-            if contact_header is not None:
-                self._update_contact_header(contact_header)
-
-            if 200 <= code < 300 and sdp is None:
-                raise SIPCoreError("Local SDP needs to be set for a positive response")
-            if code >= 300 and sdp is not None:
-                raise SIPCoreError("Local SDP cannot be specified for a negative response")
-            self.sdp.proposed_local = FrozenSDPSession.new(sdp) if sdp is not None else None
-            local_sdp = sdp.get_sdp_session()
-            with nogil:
-                status = pjsip_inv_answer(invite_session, code, &reason_str if reason is not None else NULL, local_sdp, &tdata)
-            if status != 0:
-                raise PJSIPError("Could not create %d reply to INVITE" % code, status)
-            _add_headers_to_tdata(tdata, extra_headers)
-            with nogil:
-                status = pjsip_inv_send_msg(invite_session, tdata)
-            if status != 0:
-                exc = PJSIPError("Could not send %d response" % code, status)
-                raise exc
-            self._failed_response = 0
-        finally:
-            with nogil:
-                pj_mutex_unlock(lock)
-    this was just temp code added for video passthrough, should not be used anymore
-    '''
-
     def send_response(self, int code, str reason=None, BaseContactHeader contact_header=None, BaseSDPSession sdp=None, list extra_headers not None=list()):
         cdef int status
         cdef int clean_tdata = 0

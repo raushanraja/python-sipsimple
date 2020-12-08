@@ -1,5 +1,6 @@
 
 import re
+import uuid
 
 from application.python.descriptor import WriteOnceAttribute
 
@@ -87,7 +88,8 @@ cdef class SDPSession(BaseSDPSession):
         self.connection = connection
         self.start_time = start_time
         self.stop_time = stop_time
-        self.attributes = attributes if attributes is not None else []
+        label = str(uuid.uuid4())[-12:]
+        self.attributes = attributes if attributes is not None else [SDPAttribute("label" : label)]
         self.bandwidth_info = bandwidth_info if bandwidth_info is not None else []
         self.media = media if media is not None else []
 
