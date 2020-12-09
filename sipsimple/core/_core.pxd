@@ -2560,6 +2560,7 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
     cdef list _formats
     cdef list _codec_list
     cdef str _info
+    cdef str _label
     cdef SDPConnection _connection
     cdef SDPAttributeList _attributes
     cdef SDPBandwidthInfoList _bandwidth_info
