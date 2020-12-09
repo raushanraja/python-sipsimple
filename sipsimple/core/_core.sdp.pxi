@@ -474,7 +474,7 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
         self.attributes = attributes if attributes is not None else []
         found_label = False
         for attribute in self.attributes:
-             if attribute.name() == "label":
+             if attribute.name == "label":
                 found_label = True
         if not found_label:
             self._label = str(uuid.uuid4())[-12:]
