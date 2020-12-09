@@ -453,8 +453,10 @@ cdef class BaseSDPMediaStream:
         self._sdp_media.attr_count = len(self.attributes)
         for index, attr in enumerate(self.attributes):
             self._sdp_media.attr[index] = (<BaseSDPAttribute>attr).get_sdp_attribute()
+        '''
         if hasattr(self, "_label_attr") and self._label_attr != None:
             self._sdp_media.attr[index+1] = (<BaseSDPAttribute>self._label_attr).get_sdp_attribute()
+        '''
         self._sdp_media.bandw_count = len(self.bandwidth_info)
         for index, info in enumerate(self.bandwidth_info):
             self._sdp_media.bandw[index] = (<BaseSDPBandwidthInfo>info).get_sdp_bandwidth_info()
@@ -470,7 +472,6 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
         self.formats = formats if formats is not None else []
         self.connection = connection
         self.attributes = attributes if attributes is not None else []
-        '''
         found_label = False
         for attribute in self.attributes:
              if attribute.name() == "label":
@@ -480,6 +481,7 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
         '''
         self._label = str(uuid.uuid4())[-12:]
         self._label_attr = SDPAttribute("label", self._label)
+        '''
         self.bandwidth_info = bandwidth_info if bandwidth_info is not None else []
 
     @classmethod
