@@ -453,7 +453,7 @@ cdef class BaseSDPMediaStream:
         self._sdp_media.attr_count = len(self.attributes)
         for index, attr in enumerate(self.attributes):
             self._sdp_media.attr[index] = (<BaseSDPAttribute>attr).get_sdp_attribute()
-        if (hasattr(self, "_label_attr") and self._label_attr != None:
+        if hasattr(self, "_label_attr") and self._label_attr != None:
             self._sdp_media.attr[index+1] = (<BaseSDPAttribute>self._label_attr).get_sdp_attribute()
         self._sdp_media.bandw_count = len(self.bandwidth_info)
         for index, info in enumerate(self.bandwidth_info):
