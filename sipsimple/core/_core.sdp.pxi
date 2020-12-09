@@ -477,7 +477,8 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
              if attribute.name() == "label":
                 found_label = True
         if not found_label:
-            self.attributes.append(SDPAttribute("label", label))
+            self._label = str(uuid.uuid4())[-12:]
+            self.attributes.append(SDPAttribute("label", self._label))
         '''
         self._label = str(uuid.uuid4())[-12:]
         self._label_attr = SDPAttribute("label", self._label)
