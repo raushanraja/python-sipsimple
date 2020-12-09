@@ -1182,6 +1182,15 @@ cdef class AudioTransport:
             else:
                 return self._slot
 
+    property local_media_label:
+
+        def __get__(self):
+            self._check_ua()
+            if self._sdp_info == None or self._sdp_info.local_media == None:
+                return None
+            else:
+                return self._sdp_info.local_media.label
+
     def get_local_media(self, BaseSDPSession remote_sdp=None, int index=0, direction="sendrecv"):
         global valid_sdp_directions
         cdef int status
@@ -1709,6 +1718,15 @@ cdef class VideoTransport:
                 return None
             else:
                 return self._producer_slot
+
+    property local_media_label:
+
+        def __get__(self):
+            self._check_ua()
+            if self._sdp_info == None or self._sdp_info.local_media == None:
+                return None
+            else:
+                return self._sdp_info.local_media.label
 
     def get_local_media(self, BaseSDPSession remote_sdp=None, int index=0, direction="sendrecv"):
         global valid_sdp_directions

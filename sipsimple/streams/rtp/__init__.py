@@ -356,6 +356,10 @@ class RTPStream(object):
         return self._rtp_transport.remote_rtp_candidate if self._rtp_transport else None
 
     @property
+    def local_media_label(self):
+        return self._transport.local_media_label if self._transport and self._transport.local_media_label else None
+
+    @property
     def ice_active(self):
         return self._ice_state == "IN_USE"
 
