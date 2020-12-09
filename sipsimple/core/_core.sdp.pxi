@@ -479,7 +479,7 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
             self.attributes.append(SDPAttribute("label", label))
         '''
         self._label = str(uuid.uuid4())[-12:]
-        self._label_attr = SDPAttribute("label", label)
+        self._label_attr = SDPAttribute("label", self._label)
         self.bandwidth_info = bandwidth_info if bandwidth_info is not None else []
 
     @classmethod
