@@ -16,7 +16,7 @@ class AudioStream(RTPStream):
     type = 'audio'
     priority = 1
 
-    def __init__(self):
+    def __init__(self, local_media_label):
         super(AudioStream, self).__init__()
 
         from sipsimple.application import SIPApplication
@@ -24,6 +24,7 @@ class AudioStream(RTPStream):
         self.bridge = AudioBridge(self.mixer)
         self.device = AudioDevice(self.mixer)
         self._audio_rec = None
+        self._local_media_label = local_media_label
 
         self.bridge.add(self.device)
 
@@ -181,7 +182,8 @@ class AudioStream(RTPStream):
     def _create_transport(self, rtp_transport, remote_sdp=None, stream_index=None):
         settings = SIPSimpleSettings()
         codecs = list(self.session.account.rtp.audio_codec_list or settings.rtp.audio_codec_list)
-        return AudioTransport(self.mixer, rtp_transport, remote_sdp=remote_sdp, sdp_index=stream_index or 0, codecs=codecs)
+        return AudioTransport(self.mixer, rtp_transport, remote_sdp=remote_sdp, sdp_index=stream_index or 0, codecs=codecs,
+                              local_media_label=self._local_media_label)
 
     def _check_hold(self, direction, is_initial):
         was_on_hold_by_local = self.on_hold_by_local

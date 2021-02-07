@@ -291,7 +291,7 @@ class RTPStream(object):
 
     hold_supported = True
 
-    def __init__(self):
+    def __init__(self, local_media_label=None):
         self.notification_center = NotificationCenter()
         self.on_hold_by_local = False
         self.on_hold_by_remote = False
@@ -314,6 +314,13 @@ class RTPStream(object):
         self._initialized = False
         self._done = False
         self._failure_reason = None
+        self._local_media_label = local_media_label
+        from uuid import uuid4
+        self._stream_id = str(uuid4())
+
+    @property
+    def stream_id(self):
+        return self._stream_id
 
     @property
     def codec(self):

@@ -464,7 +464,8 @@ cdef class BaseSDPMediaStream:
 
 cdef class SDPMediaStream(BaseSDPMediaStream):
     def __init__(self, str media not None, int port, str transport not None, int port_count=1, list formats=None,
-                 SDPConnection connection=None, list attributes=None, list bandwidth_info=None):
+                 SDPConnection connection=None, list attributes=None, list bandwidth_info=None,
+                 label=None):
         self.media = media
         self.port = port
         self.transport = transport
@@ -472,14 +473,15 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
         self.formats = formats if formats is not None else []
         self.connection = connection
         self.attributes = attributes if attributes is not None else []
-        found_label = False
-        for attribute in self.attributes:
-             if attribute.name == "label":
-                found_label = True
-                self._label = attribute.value
-        if not found_label:
-            self._label = str(uuid.uuid4())[-12:]
-            self.attributes.append(SDPAttribute("label", self._label))
+        if label != None:
+            found_label = False
+            for attribute in self.attributes:
+                 if attribute.name == "label":
+                    found_label = True
+                    self._label = attribute.value
+            if not found_label:
+                self._label = label
+                self.attributes.append(SDPAttribute("label", self._label))
         self.bandwidth_info = bandwidth_info if bandwidth_info is not None else []
 
     @classmethod
