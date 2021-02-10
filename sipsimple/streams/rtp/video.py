@@ -19,13 +19,14 @@ class VideoStream(RTPStream):
     type = 'video'
     priority = 1
 
-    def __init__(self):
+    def __init__(self, local_media_label=None):
         super(VideoStream, self).__init__()
 
         from sipsimple.application import SIPApplication
         self.device = SIPApplication.video_device
         self.video_mixer = SIPApplication.video_mixer
         self._keyframe_timer = None
+        self._local_media_label = local_media_label
 
     '''
     @property

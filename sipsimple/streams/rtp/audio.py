@@ -16,7 +16,7 @@ class AudioStream(RTPStream):
     type = 'audio'
     priority = 1
 
-    def __init__(self, local_media_label):
+    def __init__(self, local_media_label=None):
         super(AudioStream, self).__init__()
 
         from sipsimple.application import SIPApplication

@@ -16,7 +16,7 @@ class RttTextStream(RTPStream):
     type = 'audio'
     priority = 1
 
-    def __init__(self):
+    def __init__(self, local_media_label=None):
         super(RttTextStream, self).__init__()
 
         from sipsimple.application import SIPApplication
@@ -25,6 +25,7 @@ class RttTextStream(RTPStream):
         self.device = AudioDevice(self.mixer)
         self._audio_rec = None
 
+        self._local_media_label = local_media_label
         self.bridge.add(self.device)
 
     def _get_muted(self):
