@@ -2841,7 +2841,8 @@ cdef class VideoTransport(object):
     cdef PJSIPUA _check_ua(self)
     cdef int _cb_check_rtp(self, MediaCheckTimer timer) except -1 with gil
 
-
+'''
+comment RttTextTransport for the moment
 cdef class RttTextTransport(object):
     # attributes
     cdef object __weakref__
@@ -2860,6 +2861,7 @@ cdef class RttTextTransport(object):
     # private methods
     cdef PJSIPUA _check_ua(self)
     cdef int _cb_check_rtp(self, MediaCheckTimer timer) except -1 with gil
+'''
 
 
 cdef void _RTPTransport_cb_ice_complete(pjmedia_transport *tp, pj_ice_strans_op op, int status) with gil
