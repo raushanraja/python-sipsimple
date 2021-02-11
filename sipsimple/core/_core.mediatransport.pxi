@@ -971,7 +971,11 @@ cdef class AudioTransport:
         self._volume = 100
 
     def __init__(self, AudioMixer mixer, RTPTransport transport,
-                 BaseSDPSession remote_sdp=None, int sdp_index=0, enable_silence_detection=False, list codecs=None):
+                 BaseSDPSession remote_sdp=None, int sdp_index=0, enable_silence_detection=False,
+                 list codecs=None, local_media_label=None):
+        '''
+        local_media_label is used for SIPREC recording
+        '''
         cdef int status
         cdef pj_pool_t *pool
         cdef pjmedia_endpt *media_endpoint
@@ -1034,6 +1038,7 @@ cdef class AudioTransport:
                 local_sdp.media = [None] * (sdp_index+1)
                 local_sdp.media[sdp_index] = local_media
             self.transport.set_REMOTE(local_sdp, remote_sdp, sdp_index)
+        local_media.label = local_media_label
         self._sdp_info = SDPInfo(local_media, local_sdp, remote_sdp, sdp_index)
 
     def __dealloc__(self):
@@ -1533,7 +1538,8 @@ cdef class VideoTransport:
 
         self._timer = None
 
-    def __init__(self, RTPTransport transport, VideoMixer video_mixer, BaseSDPSession remote_sdp=None, int sdp_index=0, list codecs=None):
+    def __init__(self, RTPTransport transport, VideoMixer video_mixer, BaseSDPSession remote_sdp=None, int sdp_index=0,
+                list codecs=None, local_media_label=None):
         cdef int status
         cdef pj_pool_t *pool
         cdef pjmedia_endpt *media_endpoint
@@ -1600,6 +1606,7 @@ cdef class VideoTransport:
                 local_sdp.media = [None] * (sdp_index+1)
                 local_sdp.media[sdp_index] = local_media
             self.transport.set_REMOTE(local_sdp, remote_sdp, sdp_index)
+        local_media.label=local_media_label
         self._sdp_info = SDPInfo(local_media, local_sdp, remote_sdp, sdp_index)
 
         '''
@@ -2146,8 +2153,6 @@ cdef class VideoTransport:
     '''
 
 
-'''
-work on this later
 cdef class RttTextTransport:
     def __cinit__(self, *args, **kwargs):
         cdef int status
@@ -2181,7 +2186,6 @@ cdef class RttTextTransport:
         cdef pjmedia_sdp_session *local_sdp_c
         cdef pj_sockaddr *addr
         cdef pjmedia_transport_info info
-        cdef list global_codecs
         cdef SDPMediaStream local_media
         cdef SDPSession local_sdp
         cdef PJSIPUA ua
@@ -2208,15 +2212,16 @@ cdef class RttTextTransport:
             if status != 0:
                 raise PJSIPError("Could not generate base SDP", status)
             with nogil:
-                status = pjmedia_endpt_create_audio_sdp(media_endpoint, pool, &info.sock_info, 0, &local_media_c)
+                status = pjmedia_endpt_create_text_sdp(media_endpoint, pool, &info.sock_info, 0, &local_media_c)
             if status != 0:
                 raise PJSIPError("Could not generate SDP audio stream", status)
-            # Create a 'fake' SDP, which only contains the audio stream, then the m line is extracted because the full
+            # Create a 'fake' SDP, which only contains the text stream, then the m line is extracted because the full
             # SDP is built by the Session
             local_sdp_c.media_count = 1
             local_sdp_c.media[0] = local_media_c
         finally:
-            ua._pjmedia_endpoint._set_codecs(global_codecs)
+            pass
+            #ua._pjmedia_endpoint._set_codecs(global_codecs)
         local_sdp = SDPSession_create(local_sdp_c)
         local_media = local_sdp.media[0]
         if remote_sdp is None:
@@ -2273,20 +2278,28 @@ cdef class RttTextTransport:
     property codec:
 
         def __get__(self):
+            # we only support one text codec
+            return "t140"
+            '''
             self._check_ua()
             if self._obj == NULL:
                 return None
             else:
                 return _pj_str_to_str(self._stream_info.fmt.encoding_name)
+            '''
 
     property sample_rate:
 
         def __get__(self):
+            # we only support one text codec t140 with sample rate of 1000
+            return 1000
+            '''
             self._check_ua()
             if self._obj == NULL:
                 return None
             else:
                 return self._stream_info.fmt.clock_rate
+            '''
 
     property statistics:
 
@@ -2391,7 +2404,8 @@ cdef class RttTextTransport:
         cdef pjmedia_sdp_session *pj_local_sdp
         cdef pjmedia_sdp_session *pj_remote_sdp
         cdef pjmedia_stream **stream_address
-        cdef pjmedia_stream_info *stream_info_address
+        # not used for text codecs
+        # cdef pjmedia_stream_info *stream_info_address
         cdef pjmedia_transport *transport
         cdef PJSIPUA ua
 
@@ -2405,7 +2419,8 @@ cdef class RttTextTransport:
             pool = self._pool
             media_endpoint = ua._pjmedia_endpoint._obj
             stream_address = &self._obj
-            stream_info_address = &self._stream_info
+            # not used for text codecs
+            # stream_info_address = &self._stream_info
             transport = self.transport._obj
 
             if self._is_started:
@@ -2425,6 +2440,8 @@ cdef class RttTextTransport:
             if timeout < 0:
                 raise ValueError("timeout value cannot be negative")
             self.transport.set_ESTABLISHED(local_sdp, remote_sdp, sdp_index)
+            '''
+            stream_info not used for text codecs
             with nogil:
                 status = pjmedia_stream_info_from_sdp(stream_info_address, pool, media_endpoint,
                                                       pj_local_sdp, pj_remote_sdp, sdp_index)
@@ -2434,18 +2451,12 @@ cdef class RttTextTransport:
                 raise SIPCoreError("Could not parse SDP for audio session")
             self._stream_info.param.setting.vad = self._vad
             self._stream_info.use_ka = 1
+            '''
             with nogil:
                 status = pjmedia_stream_create(media_endpoint, pool, stream_info_address,
                                                transport, NULL, stream_address)
             if status != 0:
                 raise PJSIPError("Could not initialize RTP for audio session", status)
-            with nogil:
-                status = pjmedia_stream_set_dtmf_callback(stream_address[0], _AudioTransport_cb_dtmf, <void *> self.weakref)
-            if status != 0:
-                with nogil:
-                    pjmedia_stream_destroy(stream_address[0])
-                self._obj = NULL
-                raise PJSIPError("Could not set DTMF callback for audio session", status)
             with nogil:
                 status = pjmedia_stream_start(stream_address[0])
             if status != 0:
@@ -2587,7 +2598,7 @@ cdef class RttTextTransport:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
-'''
+
 
 cdef class ICECandidate:
     def __init__(self, component, cand_type, address, port, priority, rel_addr=''):
