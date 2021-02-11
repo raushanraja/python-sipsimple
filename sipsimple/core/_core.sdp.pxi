@@ -506,6 +506,9 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
         def __get__(self):
             return self._label
 
+        def __set__(self, label):
+            self._label = label
+
     property port:
 
         def __get__(self):
