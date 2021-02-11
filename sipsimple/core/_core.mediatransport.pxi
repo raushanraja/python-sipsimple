@@ -2152,7 +2152,8 @@ cdef class VideoTransport:
             _add_event("RTPVideoTransportRequestedKeyFrame", dict(obj=self))
     '''
 
-
+'''
+we will work on this later
 cdef class RttTextTransport:
     def __cinit__(self, *args, **kwargs):
         cdef int status
@@ -2280,26 +2281,17 @@ cdef class RttTextTransport:
         def __get__(self):
             # we only support one text codec
             return "t140"
-            '''
-            self._check_ua()
-            if self._obj == NULL:
-                return None
-            else:
-                return _pj_str_to_str(self._stream_info.fmt.encoding_name)
-            '''
+            #self._check_ua()
+            #if self._obj == NULL:
+            #    return None
+            #else:
+            #    return _pj_str_to_str(self._stream_info.fmt.encoding_name)
 
     property sample_rate:
 
         def __get__(self):
             # we only support one text codec t140 with sample rate of 1000
             return 1000
-            '''
-            self._check_ua()
-            if self._obj == NULL:
-                return None
-            else:
-                return self._stream_info.fmt.clock_rate
-            '''
 
     property statistics:
 
@@ -2440,18 +2432,18 @@ cdef class RttTextTransport:
             if timeout < 0:
                 raise ValueError("timeout value cannot be negative")
             self.transport.set_ESTABLISHED(local_sdp, remote_sdp, sdp_index)
-            '''
-            stream_info not used for text codecs
-            with nogil:
-                status = pjmedia_stream_info_from_sdp(stream_info_address, pool, media_endpoint,
+
+            # stream_info not used for text codecs
+            # with nogil:
+            #    status = pjmedia_stream_info_from_sdp(stream_info_address, pool, media_endpoint,
                                                       pj_local_sdp, pj_remote_sdp, sdp_index)
-            if status != 0:
-                raise PJSIPError("Could not parse SDP for audio session", status)
-            if self._stream_info.param == NULL:
-                raise SIPCoreError("Could not parse SDP for audio session")
-            self._stream_info.param.setting.vad = self._vad
-            self._stream_info.use_ka = 1
-            '''
+            # if status != 0:
+            #    raise PJSIPError("Could not parse SDP for audio session", status)
+            # if self._stream_info.param == NULL:
+            #     raise SIPCoreError("Could not parse SDP for audio session")
+            # self._stream_info.param.setting.vad = self._vad
+            # self._stream_info.use_ka = 1
+
             with nogil:
                 status = pjmedia_stream_create(media_endpoint, pool, stream_info_address,
                                                transport, NULL, stream_address)
@@ -2598,7 +2590,7 @@ cdef class RttTextTransport:
         finally:
             with nogil:
                 pj_mutex_unlock(lock)
-
+'''
 
 cdef class ICECandidate:
     def __init__(self, component, cand_type, address, port, priority, rel_addr=''):
