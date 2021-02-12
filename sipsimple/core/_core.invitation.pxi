@@ -376,9 +376,11 @@ cdef class Invitation:
 
         return bodies
 
-
-    def send_invite(self, SIPURI request_uri not None, FromHeader from_header not None, ToHeader to_header not None, RouteHeader route_header not None, ContactHeader contact_header not None,
-                    SDPSession sdp not None, Credentials credentials=None, list extra_headers not None=list(), timeout=None, multipart_content=None):
+    def send_invite(self, SIPURI request_uri not None, FromHeader from_header not None,
+                    ToHeader to_header not None, RouteHeader route_header not None,
+                    ContactHeader contact_header not None, SDPSession sdp not None,
+                    Credentials credentials=None, list extra_headers not None=list(),
+                    timeout=None, multipart_content=None):
         '''
             multipart_content should be an array of dict like the following values
             [{
