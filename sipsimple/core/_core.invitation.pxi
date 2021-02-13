@@ -106,6 +106,7 @@ cdef class Invitation:
         self.direction = None
         self.call_id = None
         self.peer_address = None
+        self.raw_message = None
 
     cdef int init_incoming(self, PJSIPUA ua, pjsip_rx_data *rdata, unsigned int inv_options) except -1:
         cdef int status
@@ -133,6 +134,7 @@ cdef class Invitation:
             if status != 0:
                 return 0
 
+            self.raw_message = PyString_FromStringAndSize(rdata.msg_info.msg_buf, rdata.msg_info.len)
             self.direction = "incoming"
             self.transport = rdata.tp_info.transport.type_name.lower()
             self.request_uri = FrozenSIPURI_create(<pjsip_sip_uri *> pjsip_uri_get_uri(rdata.msg_info.msg.line.req.uri))
@@ -170,6 +172,10 @@ cdef class Invitation:
                 if pjmedia_sdp_neg_get_state(self._invite_session.neg) == PJMEDIA_SDP_NEG_STATE_REMOTE_OFFER:
                     pjmedia_sdp_neg_get_neg_remote(self._invite_session.neg, &sdp)
                     self.sdp.proposed_remote = FrozenSDPSession_create(sdp)
+
+            # parse the body here
+            # see if the content type is multi part
+
             self._invite_session.sdp_neg_flags = PJMEDIA_SDP_NEG_ALLOW_MEDIA_CHANGE
             self._invite_session.mod_data[ua._module.id] = <void *> self.weakref
             self.call_id = _pj_str_to_str(self._dialog.call_id.id)

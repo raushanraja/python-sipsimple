@@ -2700,6 +2700,7 @@ cdef class Invitation(object):
     cdef readonly FrozenSIPURI request_uri
     cdef readonly FrozenRouteHeader route_header
     cdef readonly SDPPayloads sdp
+    cdef readonly str raw_message
 
     # private methods
     cdef int init_incoming(self, PJSIPUA ua, pjsip_rx_data *rdata, unsigned int inv_options) except -1
