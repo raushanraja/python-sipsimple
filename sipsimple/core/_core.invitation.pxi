@@ -118,7 +118,8 @@ cdef class Invitation:
         cdef pjsip_tx_data *tdata = NULL
         cdef PJSTR contact_str
         cdef char *error_message
-        cdef pjsip_msg_body *body = NULL
+        cdef pjsip_msg_body *msg_body = NULL
+        cdef pjsip_msg_body *multipart_body = NULL
         cdef char *buf
         cdef int buf_len, i
         cdef pjsip_multipart_part* multipart_part = NULL
@@ -140,30 +141,30 @@ cdef class Invitation:
                 return 0
 
             self.raw_message = PyString_FromStringAndSize(rdata.msg_info.msg_buf, rdata.msg_info.len)
-            body = rdata.msg_info.msg.body
-            if body != NULL:
-                if _pj_str_to_str(body.content_type.type).lower() == "multipart":
+            msg_body = rdata.msg_info.msg.body
+            if msg_body != NULL:
+                if _pj_str_to_str(msg_body.content_type.type).lower() == "multipart":
                     self.body_parts = list()
-                    multipart_part = pjsip_multipart_get_first_part(body)
+                    multipart_part = pjsip_multipart_get_first_part(msg_body)
                     while multipart_part != NULL:
-                        body = multipart_part.body
-                        status = pjsip_print_body(body, &buf, &buf_len)
+                        multipart_body = multipart_part.body
+                        status = pjsip_print_body(multipart_body, &buf, &buf_len)
                         if status != 0:
                             self.body_parts.append("error pjsip_print_body")
                         else:
-                            content_data_dict = dict(type = _pj_str_to_str(body.content_type.type).lower(), \
-                                                    subtype = _pj_str_to_str(body.content_type.subtype).lower(), \
+                            content_data_dict = dict(type = _pj_str_to_str(multipart_body.content_type.type).lower(), \
+                                                    subtype = _pj_str_to_str(multipart_body.content_type.subtype).lower(), \
                                                     data = PyString_FromStringAndSize(buf, buf_len))
                             _pjsip_content_headers_to_dict(<pjsip_hdr *> &multipart_part.hdr, content_data_dict)
                             self.body_parts.append(content_data_dict)
-                        multipart_part = pjsip_multipart_get_next_part(body, multipart_part)
+                        multipart_part = pjsip_multipart_get_next_part(msg_body, multipart_part)
                 else:
-                    status = pjsip_print_body(body, &buf, &buf_len)
+                    status = pjsip_print_body(msg_body, &buf, &buf_len)
                     if status != 0:
                         self.body_parts = ["pjsip_print_body error"]
                     else:
-                        content_data_dict = dict(type = _pj_str_to_str(body.content_type.type).lower(), \
-                                                subtype = _pj_str_to_str(body.content_type.subtype).lower(), \
+                        content_data_dict = dict(type = _pj_str_to_str(msg_body.content_type.type).lower(), \
+                                                subtype = _pj_str_to_str(msg_body.content_type.subtype).lower(), \
                                                 data = PyString_FromStringAndSize(buf, buf_len) )
                         self.body_parts = [content_data_dict]
             else:
