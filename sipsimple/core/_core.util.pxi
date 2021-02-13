@@ -196,6 +196,27 @@ cdef int _dict_to_pjsip_param(object params, pjsip_param *param_list, pj_pool_t 
         pj_list_insert_after(<pj_list *> param_list, <pj_list *> param)
     return 0
 
+cdef int _pjsip_content_headers_to_dict(pjsip_hdr *hdr, dict info_dict) except -1:
+    cdef pjsip_hdr *header
+    headers = {}
+    header = <pjsip_hdr *> (<pj_list *> &hdr).next
+    while header != &hdr:
+        header_name = _pj_str_to_str(header.name)
+        header_data = None
+        if header_name == "Content-Length":
+            header_data = (<pjsip_clen_hdr *> header).len
+        elif header_name == "Content-Type":
+            header_data = FrozenContentTypeHeader_create(<pjsip_ctype_hdr *> header)
+        elif header_name not in ("Authorization", "Proxy-Authenticate", "Proxy-Authorization", "WWW-Authenticate"):
+            header_data = FrozenHeader(header_name, _pj_str_to_str((<pjsip_generic_string_hdr *> header).hvalue))
+
+        if header_data is not None:
+            if header_name not in headers:
+                headers[header_name] = header_data
+        header = <pjsip_hdr *> (<pj_list *> header).next
+    info_dict["headers"] = headers
+    return 0
+
 cdef int _pjsip_msg_to_dict(pjsip_msg *msg, dict info_dict) except -1:
     cdef pjsip_msg_body *body
     cdef pjsip_hdr *header

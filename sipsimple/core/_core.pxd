@@ -1931,6 +1931,7 @@ cdef object _pj_status_to_str(int status)
 cdef object _pj_status_to_def(int status)
 cdef dict _pjsip_param_to_dict(pjsip_param *param_list)
 cdef int _dict_to_pjsip_param(object params, pjsip_param *param_list, pj_pool_t *pool)
+cdef int _pjsip_content_headers_to_dict(pjsip_hdr *msg, dict info_dict) except -1:
 cdef int _pjsip_msg_to_dict(pjsip_msg *msg, dict info_dict) except -1
 cdef int _is_valid_ip(int af, object ip) except -1
 cdef int _get_ip_version(object ip) except -1
@@ -2703,6 +2704,7 @@ cdef class Invitation(object):
     cdef readonly FrozenRouteHeader route_header
     cdef readonly SDPPayloads sdp
     cdef readonly str raw_message
+    cdef readonly list body_parts
 
     # private methods
     cdef int init_incoming(self, PJSIPUA ua, pjsip_rx_data *rdata, unsigned int inv_options) except -1

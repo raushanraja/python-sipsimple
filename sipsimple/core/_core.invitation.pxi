@@ -107,6 +107,7 @@ cdef class Invitation:
         self.call_id = None
         self.peer_address = None
         self.raw_message = None
+        self.body_parts = None
 
     cdef int init_incoming(self, PJSIPUA ua, pjsip_rx_data *rdata, unsigned int inv_options) except -1:
         cdef int status
@@ -117,6 +118,10 @@ cdef class Invitation:
         cdef pjsip_tx_data *tdata = NULL
         cdef PJSTR contact_str
         cdef char *error_message
+        cdef pjsip_msg_body *body = NULL
+        cdef char *buf
+        cdef int buf_len, i, status
+        cdef pjsip_multipart_part* multipart_part = NULL
 
         with nogil:
             status = pj_mutex_lock(lock)
@@ -135,6 +140,28 @@ cdef class Invitation:
                 return 0
 
             self.raw_message = PyString_FromStringAndSize(rdata.msg_info.msg_buf, rdata.msg_info.len)
+            body = rdata.msg_info.msg.body
+            if body != NULL:
+                if _pj_str_to_str(body.content_type.type).lower() == "multipart":
+                    self.body_parts = list()
+                    multipart_part = pjsip_multipart_get_first_part(body)
+                    while multipart_part != NULL:
+                        body = multipart_part.body
+                        status = pjsip_print_body(body, &buf, &buf_len)
+                        if status != 0:
+                            content_data_dict = dict(type = _pj_str_to_str(body.content_type.type).lower(), \
+                                                    subtype = _pj_str_to_str(body.content_type.subtype).lower(), \
+                                                    data = PyString_FromStringAndSize(buf, buf_len))
+                            _pjsip_content_headers_to_dict(multipart_part.hdr, content_data_dict)
+                            self.body_parts.append(content_data_dict)
+                        multipart_part = pjsip_multipart_get_next_part(body, multipart_part)
+                else:
+                    status = pjsip_print_body(body, &buf, &buf_len)
+                    if status != 0:
+                        content_data_dict = dict(type = _pj_str_to_str(body.content_type.type).lower(), \
+                                                subtype = _pj_str_to_str(body.content_type.subtype).lower(), \
+                                                data = PyString_FromStringAndSize(buf, buf_len) )
+                        self.body_parts = [content_data]
             self.direction = "incoming"
             self.transport = rdata.tp_info.transport.type_name.lower()
             self.request_uri = FrozenSIPURI_create(<pjsip_sip_uri *> pjsip_uri_get_uri(rdata.msg_info.msg.line.req.uri))
