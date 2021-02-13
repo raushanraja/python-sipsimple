@@ -149,6 +149,8 @@ cdef class Invitation:
                         body = multipart_part.body
                         status = pjsip_print_body(body, &buf, &buf_len)
                         if status != 0:
+                            self.body_parts.append("error pjsip_print_body")
+                        else:
                             content_data_dict = dict(type = _pj_str_to_str(body.content_type.type).lower(), \
                                                     subtype = _pj_str_to_str(body.content_type.subtype).lower(), \
                                                     data = PyString_FromStringAndSize(buf, buf_len))
@@ -158,10 +160,15 @@ cdef class Invitation:
                 else:
                     status = pjsip_print_body(body, &buf, &buf_len)
                     if status != 0:
+                        self.body_parts = ["pjsip_print_body error"]
+                    else:
                         content_data_dict = dict(type = _pj_str_to_str(body.content_type.type).lower(), \
                                                 subtype = _pj_str_to_str(body.content_type.subtype).lower(), \
                                                 data = PyString_FromStringAndSize(buf, buf_len) )
                         self.body_parts = [content_data_dict]
+            else:
+                self.body_parts = ["no body found"]
+
             self.direction = "incoming"
             self.transport = rdata.tp_info.transport.type_name.lower()
             self.request_uri = FrozenSIPURI_create(<pjsip_sip_uri *> pjsip_uri_get_uri(rdata.msg_info.msg.line.req.uri))
