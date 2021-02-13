@@ -1195,6 +1195,8 @@ cdef extern from "pjsip.h":
         char *src_name
         int src_port
     struct pjsip_rx_data_msg_info:
+        char * msg_buf
+        int len
         pjsip_msg *msg
         pjsip_fromto_hdr *from_hdr "from"
         pjsip_fromto_hdr *to_hdr "to"
