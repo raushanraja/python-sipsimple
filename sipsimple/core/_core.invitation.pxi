@@ -120,7 +120,7 @@ cdef class Invitation:
         cdef char *error_message
         cdef pjsip_msg_body *body = NULL
         cdef char *buf
-        cdef int buf_len, i, status
+        cdef int buf_len, i
         cdef pjsip_multipart_part* multipart_part = NULL
 
         with nogil:
