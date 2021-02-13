@@ -199,8 +199,8 @@ cdef int _dict_to_pjsip_param(object params, pjsip_param *param_list, pj_pool_t 
 cdef int _pjsip_content_headers_to_dict(pjsip_hdr *hdr, dict info_dict) except -1:
     cdef pjsip_hdr *header
     headers = {}
-    header = <pjsip_hdr *> (<pj_list *> &hdr).next
-    while header != &hdr:
+    header = <pjsip_hdr *> (<pj_list *> hdr).next
+    while header != hdr:
         header_name = _pj_str_to_str(header.name)
         header_data = None
         if header_name == "Content-Length":

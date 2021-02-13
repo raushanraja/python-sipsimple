@@ -152,7 +152,7 @@ cdef class Invitation:
                             content_data_dict = dict(type = _pj_str_to_str(body.content_type.type).lower(), \
                                                     subtype = _pj_str_to_str(body.content_type.subtype).lower(), \
                                                     data = PyString_FromStringAndSize(buf, buf_len))
-                            _pjsip_content_headers_to_dict(multipart_part.hdr, content_data_dict)
+                            _pjsip_content_headers_to_dict(<pjsip_hdr *> &multipart_part.hdr, content_data_dict)
                             self.body_parts.append(content_data_dict)
                         multipart_part = pjsip_multipart_get_next_part(body, multipart_part)
                 else:
