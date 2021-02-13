@@ -1427,6 +1427,8 @@ cdef extern from "pjsip.h":
                               pjsip_multipart_part *part);
     pjsip_multipart_part* pjsip_multipart_create_part(pj_pool_t *pool) nogil
     pjsip_multipart_part* pjsip_multipart_get_first_part(pjsip_msg_body *mp) nogil
+    pjsip_multipart_part* pjsip_multipart_get_next_part(pjsip_msg_body *mp, pjsip_multipart_part *part) nogil
+
 
 
 cdef extern from "pjsip-simple/evsub_msg.h":
