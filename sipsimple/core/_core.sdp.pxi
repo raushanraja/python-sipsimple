@@ -4,6 +4,12 @@ import uuid
 
 from application.python.descriptor import WriteOnceAttribute
 
+def write_log(log_data):
+    f = open("/root/sipsimple.log", "a+")
+    f.write(log_data)
+    f.write("\n")
+    f.close()
+
 
 cdef object BaseSDPSession_richcmp(object self, object other, int op) with gil:
     cdef int eq = 1
@@ -473,13 +479,16 @@ cdef class SDPMediaStream(BaseSDPMediaStream):
         self.formats = formats if formats is not None else []
         self.connection = connection
         self.attributes = attributes if attributes is not None else []
+        write_log("inside SDPMediaStream label is %r" % label)
         if label != None:
+            write_log("inside SDPMediaStream label")
             found_label = False
             for attribute in self.attributes:
                  if attribute.name == "label":
                     found_label = True
                     self._label = attribute.value
             if not found_label:
+                write_log("inside SDPMediaStream not found_label add")
                 self._label = label
                 self.attributes.append(SDPAttribute("label", self._label))
         self.bandwidth_info = bandwidth_info if bandwidth_info is not None else []

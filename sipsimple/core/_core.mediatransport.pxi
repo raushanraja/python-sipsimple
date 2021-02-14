@@ -992,6 +992,8 @@ cdef class AudioTransport:
         media_endpoint = ua._pjmedia_endpoint._obj
         pool = self._pool
 
+        write_log("local media label is %s" % local_media_label)
+
         if self.transport is not None:
             raise SIPCoreError("AudioTransport.__init__() was already called")
         if mixer is None:
