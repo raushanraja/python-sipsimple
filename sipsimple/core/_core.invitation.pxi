@@ -374,9 +374,16 @@ cdef class Invitation:
             raise SIPCoreError('error in pjsip_multipart_create in create_message_body')
 
         for content_val in content_vals:
+            write_log("found multipart body %r" % content_val)
+            if 'content-type' not in content_val or 'content' not in content_val:
+                write_log("invalid content")
+                continue
             content_type = content_val['content-type']
             content = content_val['content']
             content_type = content_type.split('/')
+            if len(content_type) != 2:
+                write_log("invalid content_type %r", content_type)
+                continue
             type = content_type[0]
             subtype = content_type[1]
 
@@ -399,6 +406,7 @@ cdef class Invitation:
                 raise PJSIPError("failed in pjsip_multipart_add_part in create_message_body", status)
 
         if sdp_body != NULL:
+            write_log("create_multipart_message_body adding sdp_body")
             part = pjsip_multipart_create_part(self._dialog.pool)
             if part == NULL:
                 raise SIPCoreError('error in pjsip_multipart_create_part in create_message_body')
@@ -409,6 +417,7 @@ cdef class Invitation:
             if status != 0:
                 raise PJSIPError("failed in pjsip_multipart_add_part in create_message_body", status)
 
+        write_log("create_multipart_message_body all good")
         return bodies
 
     def send_invite(self, SIPURI request_uri not None, FromHeader from_header not None,
